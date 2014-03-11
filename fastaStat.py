@@ -33,7 +33,7 @@ concatLen=0
 for seq_record in SeqIO.parse(handle, "fasta"):
         #print seq_record
         if options.contigs:
-                print len(seq_record.seq)
+            print seq_record.id +"\t"+str( len(seq_record.seq))
         concatLen+=len(seq_record.seq)
         if options.percent or  options.concat:
                 concatSeq+=seq_record.seq
