@@ -1,20 +1,27 @@
-# README #
+<div id="table-of-contents">
+<h2>Table of Contents</h2>
+<div id="text-table-of-contents">
+<ul>
+<li><a href="#sec-1">1. test org 2 markdown</a>
+<ul>
+<li><a href="#sec-1-1">1.1. tata</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
 
-Utilitaires
+# test org 2 markdown<a id="sec-1" name="sec-1"></a>
 
-## GC.py  ##
+## tata<a id="sec-1-1" name="sec-1-1"></a>
 
-
-    usage: GC.py [-h] [-f FASTA] [-i] [-p] [-l] [-d] [-c] [-o OUTNAME] [-x XLIM] [-z]
- 
-    optional arguments:
-      -h, --help                      show this help message and exit
-      -f FASTA, --fasta FASTA         input fasta file
-	  -i, --ind                       get individual sequence GC percent
-	  -p, --plot_gc                   plot GC content
-	  -l, --len                       plot sequence length versus GC
-	  -d, --len_dist                  plot length distribution
-	  -c, --conc_gc                   concatenated sequences GC
-	  -o OUTNAME, --outname OUTNAME   output pdf file name (for plots only)
-	  -x XLIM, --xlim XLIM            xlim for sequence size (optional)
-	  -z, --circos                    circos output
+    # Block de code
+    
+    #Bleu?!
+    
+    for i in `ls *faa`; do
+       echo $i
+    done
+1.  one
+2.  two
+3.  threem
