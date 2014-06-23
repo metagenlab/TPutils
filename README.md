@@ -1,29 +1,23 @@
 # README #
 
-This README would normally document whatever steps are necessary to get your application up and running.
+Utilitaires
 
-### What is this repository for? ###
+## GC.py  ##
 
-* Quick summary
-* Version
-* [Learn Markdown](https://bitbucket.org/tutorials/markdowndemo)
 
-### How do I get set up? ###
-
-* Summary of set up
-* Configuration
-* Dependencies
-* Database configuration
-* How to run tests
-* Deployment instructions
-
-### Contribution guidelines ###
-
-* Writing tests
-* Code review
-* Other guidelines
-
-### Who do I talk to? ###
-
-* Repo owner or admin
-* Other community or team contact
+    usage: GC.py [-h] [-f FASTA] [-i] [-p] [-l] [-d] [-c] [-o OUTNAME] [-x XLIM]
+             [-z]
+ 
+    optional arguments:
+      -h, --help            show this help message and exit
+      -f FASTA, --fasta FASTA
+	   input fasta file
+	  -i, --ind             get individual sequence GC percent
+	  -p, --plot_gc         plot GC content
+	  -l, --len             plot sequence length versus GC
+	  -d, --len_dist        plot length distribution
+	  -c, --conc_gc         concatenated sequences GC
+	  -o OUTNAME, --outname OUTNAME
+	   output pdf file name (for plots only)
+	  -x XLIM, --xlim XLIM  xlim for sequence size (optional)
+	  -z, --circos          circos output
