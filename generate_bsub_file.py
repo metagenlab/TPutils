@@ -125,7 +125,7 @@ def wait_multi_jobs(job_id_list):
 
 
 class BSUB_script(object):
-    def __init__(self, command, name=None, mem_in_GB=16, queue='normal', module_list=None, log_file="log.txt",error_file="error.txt",array_start=None,array_stop=None,array_step=None):
+    def __init__(self, command, name=None, mem_in_GB=2, queue='normal', module_list=None, log_file="log.txt",error_file="error.txt",array_start=None,array_stop=None,array_step=None):
         self.command = command
         if queue in ['normal', 'long']:
             self.queue = queue
