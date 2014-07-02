@@ -6,7 +6,7 @@ This README would normally document whatever steps are necessary to get your app
 
 * Quick summary
 
-This repository contains script for generic function such as for file format changes as well as functions used in scripts from various repositories.
+This repository contains script for generic function such as for file format changes as well as functions used in scripts from various folders.
 
 * Version
 V1.0
@@ -16,6 +16,10 @@ V1.0
 ### How do I get set up? ###
 
 * Summary of set up
+
+Once you've cloned the repository into your /home/username/bin/, modify your .bashrc to automatically add the folder to your python path: 
+export PYTHONPATH=/home/username/bin/utilitaires/:$PYTHONPATH
+
 * Configuration
 * Dependencies
 * Database configuration
@@ -31,4 +35,8 @@ V1.0
 ### Who do I talk to? ###
 
 * Repo owner or admin
+
+claire.bertelli@chuv.ch
+trestan.pillonel@chuv.ch
+
 * Other community or team contact
