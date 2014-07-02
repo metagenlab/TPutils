@@ -37,6 +37,7 @@ export PYTHONPATH=/home/username/bin/utilitaires/:$PYTHONPATH
 * Repo owner or admin
 
 claire.bertelli@chuv.ch
+
 trestan.pillonel@chuv.ch
 
 * Other community or team contact
