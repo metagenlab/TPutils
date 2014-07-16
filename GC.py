@@ -29,6 +29,20 @@ def GC_skew(seq, window=100):
     return values
 
 
+def circos_gc_skew(handle):
+    f = open("circos.gc.skew.txt", "w")
+    parsed_handle = [record for record in SeqIO.parse(handle, "fasta")]
+    for record in parsed_handle:
+        start = 0
+        stop = 1000
+        if stop > len(record.seq):
+            stop = len(record.seq)
+        values = GC_skew(record.seq, window=1000)
+        for gc in values:
+            f.write("%s %s %s %s\n" % (record.id, start, stop, gc))
+            start+=1000
+            stop+=1000
+       
 
 def plot_contig_len(handle, out_name):
     pp = PdfPages(out_name)
@@ -129,6 +143,7 @@ if __name__ == '__main__':
     parser.add_argument("-c",'--conc_gc',action='store_true',help="concatenated sequences GC")
     parser.add_argument("-o",'--outname',type=str,help="output pdf file name (for plots only)")
     parser.add_argument("-x",'--xlim',type=str,help="xlim for sequence size (optional)")
+    parser.add_argument("-z",'--circos', action='store_true', help="circos output")
 
 
     args = parser.parse_args()
@@ -145,3 +160,6 @@ if __name__ == '__main__':
 
     if args.conc_gc:
         print whole_gc(handle)
+    
+    if args.circos:
+       circos_gc_skew(handle)

@@ -39,15 +39,18 @@ class Feature:
 class Record:
     def __init__(self, record):
         self.seq = record.seq
-        self.contig =  record.name  
+        #print "length", len(self.seq)
+        self.contig =  record.name
+        #print "name", self.contig
         self.features = self.get_one_record_features(record)
 
     def get_one_record_features(self, one_record):
             
         feature_list = [None] * len(one_record.features)
         for i in range(0,len(one_record.features)):
-            #if one_record.features[i].type == "source":
-            #    continue
+            #print one_record.features[i]
+            if one_record.features[i].type == "misc_feature":
+                continue
             feature_list[i] = Feature() 
             #print  one_record.features[i]
             feature_list[i].type = one_record.features[i].type
@@ -85,7 +88,7 @@ class Record:
             except:
               pass
             try:
-                feature_list[i].translation = one_record.features[i].qualifiers['translation']
+                feature_list[i].translation = one_record.features[i].qualifiers['translation'][0]
             except:
                 pass
             feature_list[i].seq = one_record.features[i].extract(self.seq)
@@ -100,6 +103,7 @@ class Record:
 
 if __name__ == '__main__':
     
+    
     parser = OptionParser()
 
     parser.add_option("-i", "--input",dest="input_file",action="store", type="string", help="genbank file", metavar="FILE")
@@ -111,7 +115,9 @@ if __name__ == '__main__':
     gb_file = options.input_file
     # get list of all records present in the gbk file
     record_list=[]
+   
     for gb_record in SeqIO.parse(open(gb_file,"r"), "genbank") :
+        #print gb_record
         record_list.append(Record(gb_record))
     
 
@@ -119,6 +125,8 @@ if __name__ == '__main__':
     print "contig\ttype\tstart\tstop\tlength\tGC\tstrand\tgene\tfunction\tinference\tgi\tlocus\ttranslation\tsequence"
     for record in record_list:
       for feature in record.features:
+        if feature is None:
+          continue
         if feature.type == "source":
           pass
           #print "%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t \t " % (feature.contig, feature.type, feature.start, feature.stop, feature.length, feature.GC, feature.strand, feature.gene, feature.product, feature.inference, feature.gi, feature.locus)
