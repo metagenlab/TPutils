@@ -63,6 +63,9 @@ def plot_GC_length(handle, out_name, xlim = False):
     #pylab.show()
     pylab.plot(len_values,gc_values, 'ro')
     pylab.ylim(20.0,80.0)
+    pylab.xlabel("Sequence length (bp)")
+    pylab.ylabel("GC (%)")
+
     if xlim:
         pylab.xlim(0, int(xlim))
     pylab.savefig(pp, format='pdf')
