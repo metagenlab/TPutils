@@ -17,9 +17,13 @@ import re
 from Bio.Seq import Seq
 import sys
 import math
+from Bio import AlignIO
+import StringIO
+from shell_command import shell_command
+from tempfile import NamedTemporaryFile
+from Bio.Emboss.Applications import StretcherCommandline
 
-
-
+    
 """
 Produce identity matrix from fasta with multiple (non aligned) sequences
 Alignment using the global algorithme from Bio.pairwise2 module.
@@ -131,7 +135,8 @@ def pairewise_identity(seq1, seq2):
     else:
         return 100*(identical_sites/float(aligned_sites))
 
-def global_align(seq1, seq2):
+    
+def global_align(seq_record1, seq_record2):
     """Global alignment using the Bio.pairwise2 package. 
     Check if sequences are nucleotide or amino acids using the _verify_alphabet function from the Bio.Alphabet module.
     """
@@ -140,27 +145,76 @@ def global_align(seq1, seq2):
     from Bio.Seq import Seq
     from Bio.Alphabet import _verify_alphabet
     
-    gap_open = -10
-    gap_extend = -0.5
+    #gap_open = -10
+    #gap_extend = -0.5
 
+    seq1_file = NamedTemporaryFile()
+    SeqIO.write(seq_record1, seq1_file, "fasta")
+    seq1_file.flush()        
+    seq2_file = NamedTemporaryFile()
+    SeqIO.write(seq_record2, seq2_file, "fasta")
+    seq2_file.flush()
+
+
+    
+    seq1 = seq_record1.seq.upper()
+    seq2 = seq_record2.seq.upper()
+
+    
     seq1.alphabet = IUPAC.ambiguous_dna
     seq2.alphabet = IUPAC.ambiguous_dna
 
+    
     if _verify_alphabet(seq1) and _verify_alphabet(seq2):
         #print "DNA!"
-        alns = pairwise2.align.globalds(seq1, seq2, DNA_matrix, gap_open, gap_extend)
-        return  alns[0]
+    #    alns = pairwise2.align.globalds(seq1, seq2, DNA_matrix, gap_open, gap_extend)
+    #    print ">"+noms[id_seq1]
+    #    print alns[0][0]
+    #    print ">"+noms[id_seq2]
+    #    print alns[0][1]
+    #    return  alns[0]
+        stretcher_cline=StretcherCommandline(asequence=seq1_file.name, bsequence=seq2_file.name, stdout=True, gapopen=16, gapextend=4, auto=True, aformat="srspair")
+        stdout,stderr=stretcher_cline()
+        align = AlignIO.read(StringIO.StringIO(stdout), "emboss")
+        return align
+
+ 
+ 
+        
 
     seq1.alphabet = IUPAC.protein                                                                                                                            
     seq2.alphabet = IUPAC.protein
+    #print seq1
+    #print _verify_alphabet(seq1)
+
     if _verify_alphabet(seq1) and _verify_alphabet(seq2):
         #print "AA!"
-        alns = pairwise2.align.globalds(seq1, seq2, matlist.blosum62, gap_open, gap_extend)
-        return  alns[0]
+    #    alns = pairwise2.align.globalds(seq1, seq2, matlist.blosum62, gap_open, gap_extend)
+    #    return  alns[0]
+
+        stretcher_cline=StretcherCommandline(asequence=seq1_file.name, bsequence=seq2_file.name, stdout=True, gapopen=12, gapextend=2, auto=True, aformat="srspair")
+        stdout,stderr=stretcher_cline()
+        align = AlignIO.read(StringIO.StringIO(stdout), "emboss")
+        return align
+
     else:
         raise "unkown alphabet!"
 
 
+
+
+    
+
+
+
+
+
+
+    
+
+
+
+        
 
 def get_identity_from_2_seqrecord(record, seq1, seq2):
     """
@@ -168,10 +222,8 @@ def get_identity_from_2_seqrecord(record, seq1, seq2):
     seq1 and seq2: indexes of the to sequences to align and get identity
 
     """
-    align = global_align(record[seq1].seq, record[seq2].seq)
-
-    aln_1, aln_2, score, begin, end = align
-    identity = pairewise_identity(aln_1, aln_2)
+    align = global_align(record[seq1], record[seq2])
+    identity = pairewise_identity(align[0].seq, align[1].seq)
     return identity
 
 
@@ -203,7 +255,7 @@ def get_identity_matrix_from_multifasta(record):
     #print combinations
 
     out_q = Queue()
-    n_cpu = 8
+    n_cpu = 1
     
     n_poc_per_list = math.ceil(len(combinations)/float(n_cpu))
     #print "n_poc_per_list", n_poc_per_list
@@ -214,12 +266,11 @@ def get_identity_matrix_from_multifasta(record):
     procs = []
     for one_list in query_lists:
         comb_list = [combinations[i] for i in one_list]
+        #print len(comb_list)
         proc = Process(target=get_identity_from_combination_list, args=(record, comb_list, out_q))
         procs.append(proc)
         proc.start()
 
-    
-    # format: list of tuples: (seq1, seq2, identity)
     complete_result = []
     for i in range(len(procs)):
         complete_result += out_q.get()
@@ -259,12 +310,20 @@ if __name__ == '__main__':
 
     import argparse
     parser = argparse.ArgumentParser()
+    parser.add_argument("-a", '--seq1',type=str,help="seq1")
+    parser.add_argument("-b", '--seq2',type=str,help="seq2")
     parser.add_argument("-m", '--multifasta',type=str,help="input multi fasta, align all against all")
     parser.add_argument("-o", '--out_name',type=str,help="output name, default = input_name_identity.tab")
 
-
     args = parser.parse_args()
 
+    if args.seq1 and args.seq2:
+
+        sys.exit()
+        #alns = pairwise2.align.globalds(args.seq1, args.seq2, DNA_matrix, -10, -0.5)
+        #print format_alignment(*alns[0])
+
+    
     if not args.out_name:
         out_name = re.sub("\..*", "_identity.tab", args.multifasta)
     else:
