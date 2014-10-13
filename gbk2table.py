@@ -40,7 +40,10 @@ class Record:
     def __init__(self, record):
         self.seq = record.seq
         #print "length", len(self.seq)
-        self.contig =  record.name
+        try:
+          self.contig =  record.name
+        except:
+          self.contig = "-"
         #print "name", self.contig
         self.features = self.get_one_record_features(record)
 

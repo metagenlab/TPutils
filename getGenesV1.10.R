@@ -105,8 +105,7 @@ CAI
 # Codon usage differences between gene classes (Karlin et al, 1998).
 # By default, the ref set (vect2 or crit2) is the whole set in the df.
 #
-Bcal<-function(df,crit1="each",crit2="all",vect1=FALSE,vect2=FALSE)
-{
+Bcal<-function(df,crit1="each",crit2="all",vect1=FALSE,vect2=FALSE){
 nwin<-length(df$seq)
 ###
 # Choice of groups

@@ -5,6 +5,16 @@ job submission on vital-it using python
 - possibility to execute job arrays
 - possibility to wait for the completion of one or several jobs: functions waitForJobCompletion, waitForMultipleJobCompletion
 
+Example of submission script:
+#!/bin/bash
+#BSUB -q normal
+#BSUB -J velvet
+#BSUB -R rusage[mem=4000]
+#BSUB -M 4000000
+#BSUB -J array[41-96:4]
+#BSUB -o %I_output.txt
+#BSUB -e %I_error.txt
+
 """
 
 from shell_command import shell_command
@@ -14,26 +24,12 @@ from tempfile import NamedTemporaryFile
 import re
 
 
-#def is_job_completed(job_id):
-#    job_info=shell_command("bjobs %d" % job_id )[0].split('\n')[1]
-#    job_status=re.findall("EXIT|DONE|PEND|RUN",job_info)[0]
-#    if job_status == "RUN" or job_status== "PEND":
-#        return False
-#    elif job_status == "DONE":
-#        return True
-#    else:
-
-#        raise(Exception('bsub command failed with status: ' + str(job_status)))
-
-
-def unique(seq):                                                                                           
+def unique(seq):
    # not order preserving                                                                                  
    set = {}                                                                                                
    map(set.__setitem__, seq, [])                                                                           
    return set.keys()                                                                                       
 
-
-                                                                                                           
 def is_job_completed(job_id):
     try:
        #job_info=shell_command("bjobs %d" % job_id )[0].split('\n')[1]
@@ -50,6 +46,7 @@ def is_job_completed(job_id):
        return False                                                                                       
     else:                                                                                                  
        return True                                                                                         
+
 
 def is_job_running(job_id):
     try:
@@ -82,16 +79,11 @@ def check_pending_jobs(job_id_list):
         print "wait!"
 
 
-
-
-
-
-
-
 def wait_for_job_completion(job_id):
     while(not is_job_completed(job_id)):
         print "wait!"
         sleep(10)
+
 
 def run_job_and_wait(script):
     #print jobScript
@@ -99,18 +91,10 @@ def run_job_and_wait(script):
     #print jobID
     wait_for_job_completion(job_id)
 
+
 def run_job(script):
     job_id = script.launch()
     return(job_id)
-
-#def waitForMultipleJobCompletion(jobIDlist):
-#    t=0
-#    for jobID in jobIDlist:
-#        print t/60, "minutes"
-#        while(not isJobCompleted(jobID)):                                                          
-#            print "wait!"                                                                         
-#            sleep(10)
-#            t=t+10
 
 
 def wait_multi_jobs(job_id_list):
@@ -173,7 +157,6 @@ class BSUB_script(object):
         return '\n'.join(script) + '\n'
 
 
-
     def launch(self):
         # generate temporary file
         file = NamedTemporaryFile()
@@ -195,4 +178,3 @@ class BSUB_script(object):
             return int(job_id)
         else:
             raise(Exception('bsub command failed with exit status: ' + str(return_code)))
-
