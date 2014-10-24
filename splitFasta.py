@@ -31,7 +31,6 @@ def batch_iterator(iterator, batch_size) :
             yield batch
 
 
-
 def split_fasta(fasta_file, number_per_file=1000):
     from Bio import SeqIO
     record_iter = SeqIO.parse(open(fasta_file), "fasta")

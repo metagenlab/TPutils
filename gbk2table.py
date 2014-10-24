@@ -49,55 +49,55 @@ class Record:
 
     def get_one_record_features(self, one_record):
             
-        feature_list = [None] * len(one_record.features)
+        feature_list = []
         for i in range(0,len(one_record.features)):
             #print one_record.features[i]
             if one_record.features[i].type == "misc_feature":
                 continue
-            feature_list[i] = Feature() 
+            new_feature = Feature() 
             #print  one_record.features[i]
-            feature_list[i].type = one_record.features[i].type
-            feature_list[i].contig = one_record.name
-            feature_list[i].start = one_record.features[i].location.start
-            feature_list[i].stop = one_record.features[i].location.end
-            feature_list[i].length = len(one_record.features[i].location)
-            feature_list[i].strand = one_record.features[i].strand
+            new_feature.type = one_record.features[i].type
+            new_feature.contig = one_record.name
+            new_feature.start = one_record.features[i].location.start
+            new_feature.stop = one_record.features[i].location.end
+            new_feature.length = len(one_record.features[i].location)
+            new_feature.strand = one_record.features[i].strand
             try:
-                feature_list[i].gene = one_record.features[i].qualifiers['gene'][0]
+                new_feature.gene = one_record.features[i].qualifiers['gene'][0]
             except:
                 pass
             try:
                 gi_position=find_index("GO*",one_record.features[i].qualifiers['db_xref'])
-                feature_list[i].gi = one_record.features[i].qualifiers['db_xref'][gi_position][3:]
+                new_feature.gi = one_record.features[i].qualifiers['db_xref'][gi_position][3:]
             except:
                 pass
          
             #geneID= one_record.features[i].qualifiers['db_xref'][1][7:]
             try:
-                feature_list[i].locus = one_record.features[i].qualifiers['locus_tag'][0]
+                new_feature.locus = one_record.features[i].qualifiers['locus_tag'][0]
             except:
                 pass
             try:
-                feature_list[i].protein_id = one_record.features[i].qualifiers['protein_id'][0]
+                new_feature.protein_id = one_record.features[i].qualifiers['protein_id'][0]
             except:
                 pass
             try:
-                feature_list[i].product = one_record.features[i].qualifiers['product'][0]
+                new_feature.product = one_record.features[i].qualifiers['product'][0]
             except:
                 pass
             try:
               
-              feature_list[i].inference = one_record.features[i].qualifiers['inference']
+              new_feature.inference = one_record.features[i].qualifiers['inference']
             except:
               pass
             try:
-                feature_list[i].translation = one_record.features[i].qualifiers['translation'][0]
+                new_feature.translation = one_record.features[i].qualifiers['translation'][0]
             except:
                 pass
-            feature_list[i].seq = one_record.features[i].extract(self.seq)
+            new_feature.seq = one_record.features[i].extract(self.seq)
           
-            feature_list[i].GC = SeqUtils.GC(feature_list[i].seq)
-            
+            new_feature.GC = SeqUtils.GC(new_feature.seq)
+            feature_list.append(new_feature)
 
         return feature_list
 

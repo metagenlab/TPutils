@@ -6,7 +6,7 @@ convert (not too big) csv tables into pdf using csv2latex and xelatex
 
 
 
-csv2latex --separator t --colorrows 0.75 --reduce 2 $1 > ${1/.*/.temp}
+csv2latex --separator t --colorrows 0.75 --reduce 5 $1 > ${1/.*/.temp}
 
 sed -i 's/\\begin{document}/\\usepackage{pdflscape}\n&/' ${1/.*/.temp}
 sed -i 's/\\begin{document}/\\pagenumbering{gobble}\n&/' ${1/.*/.temp}

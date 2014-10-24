@@ -6,6 +6,7 @@ job submission on vital-it using python
 - possibility to wait for the completion of one or several jobs: functions waitForJobCompletion, waitForMultipleJobCompletion
 
 Example of submission script:
+
 #!/bin/bash
 #BSUB -q normal
 #BSUB -J velvet
@@ -14,6 +15,8 @@ Example of submission script:
 #BSUB -J array[41-96:4]
 #BSUB -o %I_output.txt
 #BSUB -e %I_error.txt
+
+./my_script.py
 
 """
 
@@ -64,7 +67,6 @@ def is_job_running(job_id):
        return False
     else:
        return True
-
 
 def check_pending_jobs(job_id_list):
     job_list=list(job_id_list)
@@ -124,7 +126,6 @@ class BSUB_script(object):
         self.array_stop = array_stop
         self.array_step = array_step
 
-
     # lsf file for job submission 
     def __str__(self):
         script = ['#!/bin/bash']
@@ -155,7 +156,6 @@ class BSUB_script(object):
         script.append(self.command)
 
         return '\n'.join(script) + '\n'
-
 
     def launch(self):
         # generate temporary file
