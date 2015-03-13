@@ -1,16 +1,15 @@
 #!/usr/bin/env python
 # -*- coding: iso-8859-15 -*-
 
-    
-"""
-Produce identity matrix from fasta with multiple (non aligned) sequences
-Alignment using the global algorithme from Bio.pairwise2 module.
-DNA matrix: EDNA (see below)
-AA matrix: Blosum62
+#Produce identity matrix from fasta with multiple (non aligned) sequences
+#Alignment using the global aligment software needle from the EMBOSS package.
+#DEPENDANCY: needle (EMBOSS) http://emboss.sourceforge.net/apps/release/6.6/emboss/apps/needle.html
+#Build all pairwise alignments (which can be long). The multiprocessing module if configured to run 8 alignments in parallel.
 
-Build all pairwise alignments (which can be long). The multiprocessing module if configured to run 8 alignments in parallel.
+#TODO refactoring code, multiple useless parts inherited from previous parwiseid.py
+# Author: Trestan Pillonel (trestan.pillonel[]gmail.com)
+# Date: 20014
 
-"""
 
 
 from Bio import pairwise2
