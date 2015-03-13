@@ -1,6 +1,11 @@
 #! /usr/bin/env python
 
+# create tabulated data based on genbank file
 # produce one ptt / record present in the genbank file
+# TODO: unnecessarily convert BioSeq Records into Record and Feature objects, could be skipped
+# Author: Trestan Pillonel (trestan.pillonel[]gmail.com)
+# Date: 2014
+# ---------------------------------------------------------------------------
 
 from Bio import SeqIO
 from optparse import OptionParser
@@ -122,7 +127,7 @@ if __name__ == '__main__':
     for gb_record in SeqIO.parse(open(gb_file,"r"), "genbank") :
         #print gb_record
         record_list.append(Record(gb_record))
-    
+
 
     # format output tab delimited table
     print "contig\ttype\tstart\tstop\tlength\tGC\tstrand\tgene\tfunction\tinference\tgi\tlocus\ttranslation\tsequence"
@@ -135,4 +140,4 @@ if __name__ == '__main__':
           #print "%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t \t " % (feature.contig, feature.type, feature.start, feature.stop, feature.length, feature.GC, feature.strand, feature.gene, feature.product, feature.inference, feature.gi, feature.locus)
         else:
           print "%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s" % (feature.contig, feature.type, feature.start, feature.stop, feature.length, feature.GC, feature.strand, feature.gene, feature.product, feature.inference, feature.gi, feature.locus, feature.translation, feature.seq)
-        
+
