@@ -1,8 +1,9 @@
 #!/bin/bash
 
-"""
-convert (not too big) csv tables into pdf using csv2latex and xelatex
-"""
+# convert (not too big) csv tables into pdf using csv2latex and xelatex
+# Author: Trestan Pillonel (trestan.pillonel[]gmail.com)
+# Date: 02.2015
+# ---------------------------------------------------------------------------
 
 
 
