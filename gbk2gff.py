@@ -1,8 +1,10 @@
 #! /usr/bin/env python
 
-"""
-Genbank to gff conversion using the GFF python module
-"""
+
+# Genbank to gff conversion using the GFF python module
+# Author: Trestan Pillonel (trestan.pillonel[]gmail.com)
+# Date: 2014
+# ---------------------------------------------------------------------------
 
 
 from Bio import SeqIO
