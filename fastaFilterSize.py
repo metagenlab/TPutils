@@ -1,9 +1,8 @@
 #!/usr/bin/env python
-"""
-Input: fasta, minimal length, maximal length
-Output: fasta
-Return sequences whose lengths are within the range.
-"""
+
+#Input: fasta, minimal length, maximal length
+#Output: fasta
+#Return sequences whose lengths are within the range.
 
 import sys, os
 
