@@ -1,9 +1,21 @@
 #!/usr/bin/env python
 # -*- coding: iso-8859-15 -*-
 
+# input: fasta
+# input: sequence id(s)
+# return seq record matching sequence id(s) in fasta
+# Author: Trestan Pillonel (trestan.pillonel[]gmail.com)
+# Date: 02.2015
+# ---------------------------------------------------------------------------
 
 
-
+def locate_sequence(fasta_handle, id):
+    import sys
+    for record in SeqIO.parse(handle, "fasta"):
+        #print record.id
+        if record.id in args.sequence_ids:
+            sys.stdout.write(">" + record.description + "\n")
+            sys.stdout.write(record.seq + "\n")
 
 
 if __name__ == '__main__':
@@ -18,9 +30,4 @@ if __name__ == '__main__':
 
     #seq = SeqIO.read(file(ars.input_fasta), "fasta").seq
     handle = open(args.input_fasta, "rU")
-    for record in SeqIO.parse(handle, "fasta"):
-        #print record.id
-        if record.id in args.sequence_ids:
-            print ">", record.description
-            print record.seq
 
