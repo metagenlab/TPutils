@@ -2,15 +2,22 @@
 # -*- coding: iso-8859-15 -*-  
 
 
+# convert gbk file to faa
+# manual writing with headers of the form
+# gi|83716028|ref|YP_443839.1| matrix protein [Avian metapneumovirus]
+# Author: Trestan Pillonel (trestan.pillonel[]gmail.com)
+# Date: 2014
+# ---------------------------------------------------------------------------
+
 def gbk2fna(seq_records, outname):
     output_handle = open(outname, "w")
 
     for record in seq_records:
+        # if missing data, only write sequence and sequence id
         try:
             gi = record.annotations["gi"]
             source = record.annotations["source"]
             output_handle.write(">%s gi|%s|%s\n%s\n" % (record.name, gi, source, record.seq))
-
         except:
             output_handle.write(">%s\n%s\n" % (record.id, record.seq))
  
@@ -26,7 +33,7 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     if not args.outname:
-        outname = args.input_gbk.split(".")[0]+".faa"
+        outname = args.input_gbk.split(".")[0]+".fna"
     else:
         outname = args.outname
 

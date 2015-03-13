@@ -11,17 +11,19 @@
 
 
 def gbk2faa(seq_records, outname):
+    import sys
     output_handle = open(outname, "w")
 
     for record in seq_records:
         for seq_feature in record.features:
             if seq_feature.type == "CDS":
-                #print seq_feature
+                # check presence of a protein sequence
                 try:
                     len(seq_feature.qualifiers['translation'])
                 except:
                     print seq_feature
-                    print "pseudogene?"
+                    #sys.stderr.write(seq_feature.location.start)
+                    #sys.stderr.write("pseudogene?")
                     continue
                 #assert len(seq_feature.qualifiers['translation'])==1
                 # gi|83716028|ref|YP_443839.1| matrix protein [Avian metapneumovirus]
