@@ -1,4 +1,9 @@
 #!/usr/bin/env perl
+
+# get basic assembly statistics based on fasta files
+# -t: min contig size
+
+
 use strict;
 use Getopt::Std qw'getopts';
 
