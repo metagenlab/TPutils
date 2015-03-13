@@ -2,6 +2,12 @@
 
 # produce one ptt / record present in the genbank file
 
+# produce basic ppt file from genbank files
+# TODO not all ptt fields supported, should be rewritten
+# Author: Trestan Pillonel (trestan.pillonel[]gmail.com)
+# Date: 02.2015
+# ---------------------------------------------------------------------------
+
 from Bio import SeqIO
 from optparse import OptionParser
 import re
