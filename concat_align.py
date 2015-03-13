@@ -40,9 +40,7 @@ def multiple_alignments2concatenated_alignments(fasta_files, out_name):
                 concat_data[taxon] += all_seq_data[one_fasta][taxon]
 
     # concatenating the alignments, writing to fasta file
-    for i in concat_data:
     MSA = MultipleSeqAlignment([concat_data[i] for i in concat_data])
-
     AlignIO.write(MSA, out_name, "fasta")
 
 
