@@ -1,5 +1,12 @@
 #!/bin/bash
 
+
+# basic script to grep gi from gi_taxid_prot.dmp db
+# TODO should be replaced by conversion tool using eutils
+# Author: Trestan Pillonel (trestan.pillonel[]gmail.com)
+# Date: 2014
+# ---------------------------------------------------------------------------
+
 while getopts ":g:h" opt; do
   case $opt in
     g)

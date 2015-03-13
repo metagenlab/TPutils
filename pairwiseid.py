@@ -25,13 +25,15 @@ from Bio.Emboss.Applications import StretcherCommandline
 
     
 """
+NOTE: old script, parwise_id_need.py sould be used instead
+
 Produce identity matrix from fasta with multiple (non aligned) sequences
 Alignment using the global algorithme from Bio.pairwise2 module.
 DNA matrix: EDNA (see below)
 AA matrix: Blosum62
-
 Build all pairwise alignments (which can be long). The multiprocessing module if configured to run 8 alignments in parallel.
-
+# Author: Trestan Pillonel (trestan.pillonel[]gmail.com)
+# Date: 2014
 """
 
 
@@ -199,19 +201,6 @@ def global_align(seq_record1, seq_record2):
 
     else:
         raise "unkown alphabet!"
-
-
-
-
-    
-
-
-
-
-
-
-    
-
 
 
         
