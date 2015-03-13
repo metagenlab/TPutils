@@ -9,13 +9,12 @@
 # ---------------------------------------------------------------------------
 
 
-def locate_sequence(fasta_handle, id):
+def locate_sequence(fasta_handle, seq_ids):
     import sys
-    for record in SeqIO.parse(handle, "fasta"):
-        #print record.id
-        if record.id in args.sequence_ids:
-            sys.stdout.write(">" + record.description + "\n")
-            sys.stdout.write(record.seq + "\n")
+    for record in SeqIO.parse(fasta_handle, "fasta"):
+        if record.id in seq_ids:
+            SeqIO.write(record, sys.stdout, "fasta")
+            #sys.stdout.write(record.seq)
 
 
 if __name__ == '__main__':
@@ -27,7 +26,6 @@ if __name__ == '__main__':
     parser.add_argument("-i",'--sequence_ids',type=str,help="sequence id(s)", nargs='+')
     args = parser.parse_args()
 
-
-    #seq = SeqIO.read(file(ars.input_fasta), "fasta").seq
     handle = open(args.input_fasta, "rU")
 
+    locate_sequence(handle, args.sequence_ids)
