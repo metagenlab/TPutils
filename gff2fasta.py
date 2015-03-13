@@ -1,4 +1,11 @@
 #! /usr/bin/env python
+
+
+# TODO utile?
+# Author: Trestan Pillonel (trestan.pillonel[]gmail.com)
+# Date: 2014
+# ---------------------------------------------------------------------------
+
 import pprint
 from BCBio.GFF import GFFExaminer
 from BCBio import GFF

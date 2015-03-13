@@ -18,6 +18,9 @@ Example of submission script:
 
 ./my_script.py
 
+Author: Trestan Pillonel (trestan.pillonel[]gmail.com)
+Date: 2014
+# ---------------------------------------------------------------------------
 """
 
 from shell_command import shell_command
