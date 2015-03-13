@@ -14,14 +14,6 @@ parser.add_option("-i", "--input",dest="input_file",action="store", type="string
 (options, args) = parser.parse_args()
 
 
-
-
-
-
-
-
-
-
 for seq_record in SeqIO.parse(options.input_file, "fasta"):
     locus_split= seq_record.id.split("|")
     if len(locus_split)>1:

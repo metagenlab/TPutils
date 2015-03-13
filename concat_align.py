@@ -5,7 +5,7 @@
 # missing taxons replaced by gaps
 # Author: Trestan Pillonel (trestan.pillonel[]gmail.com)
 # Date: 02.2015
-# ---------------------------------------------------------------------------
+# -----------------------------------------------------
 
 
 def multiple_alignments2concatenated_alignments(fasta_files, out_name):
