@@ -1,5 +1,11 @@
 #!/usr/bin/env python
 
+# Perform various GC calculations: GC skew, gc variations from the average, plots of length vs gc, circos input files,...
+# TODO separate circos stuff from the rest
+# Author: Trestan Pillonel (trestan.pillonel[]gmail.com)
+# Date: 2014
+# ---------------------------------------------------------------------------
+
 from Bio import SeqIO
 from Bio.SeqUtils import GC, GC_skew
 import pylab
