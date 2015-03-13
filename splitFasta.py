@@ -31,7 +31,7 @@ def batch_iterator(iterator, batch_size) :
                 #End of file
                 break
             batch.append(entry)
-        if batch :
+        if batch:
             yield batch
 
 
