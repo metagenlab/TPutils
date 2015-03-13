@@ -1,11 +1,22 @@
 #! /usr/bin/env python
 
+# calculate identity matrix based on multiple sequence alignment
+# input: fasta MSA
+# identity calculation: identical_sites/aligned_sites (gaps are not taken into account)
+# Author: Trestan Pillonel (trestan.pillonel[]gmail.com)
+# Date: 02.2015
+# ---------------------------------------------------------------------------
+
 from Bio import AlignIO
 import numpy as np
-import scipy
-import numpy.ma as ma
+
 
 def pairewise_identity(seq1, seq2):
+    '''
+    :param seq1:
+    :param seq2:
+    :return: sequences identity (%)
+    '''
     A=list(seq1)
     B=list(seq2)
     identical_sites = 0
@@ -25,11 +36,11 @@ def pairewise_identity(seq1, seq2):
         return 100*(identical_sites/float(aligned_sites))
 
 
-
 def get_identity_matrix_from_multiple_alignment(alignment): 
     identity_matrix = np.empty([len(alignment), len(alignment)])
     for x in range(0,len(alignment)):
         for y in range(0, len(alignment)):
+            print type(alignment[x])
             identity_matrix[x,y] = pairewise_identity(alignment[x], alignment[y])
     return identity_matrix
 
