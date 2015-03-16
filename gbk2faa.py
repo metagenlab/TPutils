@@ -41,9 +41,9 @@ def gbk2faa(seq_records, outname, format = False):
                     # output only locus tag and species name
                     try:
                         output_handle.write(">%s %s\n%s\n" % (
-                                seq_feature.qualifiers["protein_id"][0],
+                                seq_feature.qualifiers["locus_tag"][0],
                                                 description,
-                                                seq_feature.qualifiers['translation'][0])
+                                                seq_feature.qualifiers['translation'][0]))
                     except:
                         print seq_feature
                 else:
