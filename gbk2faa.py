@@ -45,7 +45,14 @@ def gbk2faa(seq_records, outname, format = False):
                                                 description,
                                                 seq_feature.qualifiers['translation'][0]))
                     except:
-                        print seq_feature
+                        try:
+
+                            output_handle.write(">%s %s\n%s\n" % (
+                                seq_feature.qualifiers["protein_id"][0],
+                                                description,
+                                                seq_feature.qualifiers['translation'][0]))
+                        except:
+                            print seq_feature
                 else:
 
                     try:
@@ -83,11 +90,19 @@ if __name__ == '__main__':
 
     args = parser.parse_args()
 
-    if not args.outname:
-        outname = args.input_gbk.split(".")[0]+".faa"
-    else:
-        outname = args.outname
+
 
     input_handle = open(args.input_gbk, "rU")
     seq_records = list(SeqIO.parse(input_handle, "genbank"))
+
+    if not args.outname:
+        # use input file to rename the file
+        #outname = args.input_gbk.split(".")[0]+".faa"
+
+        # use record id to rename the file, remove version number using split
+        outname = seq_records[0].id.split('.')[0] + ".faa"
+    else:
+        outname = args.outname
+
+
     gbk2faa(seq_records, outname, args.format)
