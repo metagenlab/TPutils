@@ -2,11 +2,11 @@
 # -*- coding: iso-8859-15 -*-
 
 
-# convert gbk file to faa
-# manual writing with headers of the form
-# gi|83716028|ref|YP_443839.1| matrix protein [Avian metapneumovirus]
+# create html table from genome tabulated file
+# headers: accession	size	gi	n proteins	n contigs	gc 	description
+# add 4 columns with links of the form /assets/chlamdb/ffn/ for gbk/faa/ffm/fna
 # Author: Trestan Pillonel (trestan.pillonel[]gmail.com)
-# Date: 2014
+# Date: 2015
 # ---------------------------------------------------------------------------
 
 
@@ -25,7 +25,7 @@ def tab2htm(input_file):
                 print '    <th>%s</th>' % header[4]
                 print '    <th>%s</th>' % header[5]
                 print '    <th>%s</th>' % header[6]
-                print '    <th colspan="4">Download</th>'
+                print '    <th colspan="5">Download</th>'
                 print '    </tr>'
 
                 i+=1
@@ -43,28 +43,35 @@ def tab2htm(input_file):
 
             gbk = '<td style="vertical-align:top" nowrap>' \
             '<a  style="text-decoration:none;" href="/assets/chlamdb/gbk/%s.gbk">' \
-            '<span style="background-color:#64FE2E;color:black;padding:1px;">GBK</span></a>' \
+            '<span style="background-color:#DCFFF0;color:black;padding:1px;">GBK</span></a>' \
             '</td>' % (data[0].split(".")[0])
 
             faa = '<td snowrap>' \
             '<a  style="text-decoration:none;" href="/assets/chlamdb/faa/%s.faa">' \
-            '<span style="background-color:#64FE2E;color:black;padding:1px;">FAA</span></a>' \
+            '<span style="background-color:#DCFFF0;color:black;padding:1px;">FAA</span></a>' \
             '</td>' % (data[0].split(".")[0])
 
             fna = '<td nowrap>' \
             '<a  style="text-decoration:none;" href="/assets/chlamdb/fna/%s.fna">' \
-            '<span style="background-color:#64FE2E;color:black;padding:1px;">FNA</span></a>' \
+            '<span style="background-color:#DCFFF0;color:black;padding:1px;">FNA</span></a>' \
             '</td>' % (data[0].split(".")[0])
 
             ffn = '<td nowrap>' \
             '<a  style="text-decoration:none;" href="/assets/chlamdb/ffn/%s.ffn">' \
-            '<span style="background-color:#64FE2E;color:black;padding:1px;">FFN</span></a>' \
+            '<span style="background-color:#DCFFF0;color:black;padding:1px;">FFN</span></a>' \
             '</td>' % (data[0].split(".")[0])
+
+            tab = '<td nowrap>' \
+            '<a  style="text-decoration:none;" href="/assets/chlamdb/tab/%s.tab">' \
+            '<span style="background-color:#DCFFF0;color:black;padding:1px;">TAB</span></a>' \
+            '</td>' % (data[0].split(".")[0])
+
             #print '<tr>'
             print gbk
             print faa
             print fna
             print ffn
+            print tab
             #print '</tr>'
             #print '</table></td>'
             #print '</tr>'
