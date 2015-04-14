@@ -60,7 +60,7 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     if not args.outname:
-        outname = args.input_gbk.split(".")[0]+".faa"
+        outname = args.input_gbk.split(".")[0]+".ffn"
     else:
         outname = args.outname
 
