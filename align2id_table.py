@@ -33,7 +33,7 @@ def pairewise_identity(seq1, seq2):
         # return false if align length = 0
         return False
     else:
-        return 100*(identical_sites/float(aligned_sites))
+        return 100*(identical_sites/float(len(A)))
 
 
 def get_identity_matrix_from_multiple_alignment(alignment):

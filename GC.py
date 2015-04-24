@@ -39,8 +39,10 @@ def circos_gc_var(record):
     for i in range(0, len(gap_locations)):
         if i == 0:
             seq = record.seq[0:gap_locations[i].start]
+            chr_start = 0
         else:
             seq = record.seq[gap_locations[i-1].end:gap_locations[i].start]
+            chr_start = gap_locations[i-1].end
         contig_name = record.name + "_%s" % (i +1)
         for i in range(0, len(seq), 1000):
             start = i
@@ -51,7 +53,9 @@ def circos_gc_var(record):
                 stop = len(seq)
                 if stop - start < 200:
                     break
-            circos_string += "%s %s %s %s\n" % (contig_name, start, stop, gc)
+            section_start = chr_start + start
+            section_end = chr_start + stop
+            circos_string += "%s %s %s %s\n" % (contig_name, section_start, section_end, gc)
 
     return circos_string
 
@@ -76,15 +80,19 @@ def circos_gc_skew(record):
             gap_locations.append(feature.location)
     if len(gap_locations) == 0:
         gap_locations.append(FeatureLocation(0, len(record.seq)))
+
     else:
         #gap_locations.append(FeatureLocation(gap_locations[-1].end + 1, len(record.seq)))
         gap_locations.append(FeatureLocation(len(record.seq), len(record.seq)))
 
+
     for i in range(0, len(gap_locations)):
         if i == 0:
             seq = record.seq[0:gap_locations[i].start]
+            chr_start = 0
         else:
             seq = record.seq[gap_locations[i-1].end:gap_locations[i].start]
+            chr_start = gap_locations[i-1].end
         print i, "seq", gap_locations[i-1].end, gap_locations[i].start, gap_locations[i].start - gap_locations[i-1].end
         values = GC_skew(seq, 1000)
 
@@ -94,10 +102,11 @@ def circos_gc_skew(record):
             start = i *1000
             stop = start + 1000
             #gc = ((GC(record.seq[start:stop])/average_gc) - 1)*100
-            circos_string += "%s %s %s %s\n" % (contig_name, start, stop, values[i])
+            section_start = chr_start + start
+            section_end = chr_start + stop
+            circos_string += "%s %s %s %s\n" % (contig_name, section_start, section_end, values[i])
 
     return circos_string
-
 
 def plot_contig_len(handle, out_name):
     pp = PdfPages(out_name)
