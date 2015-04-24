@@ -25,7 +25,7 @@ def blast_tab2htm(input_file):
         complete_file += '<table cellspacing="0" border="0">\n'
         complete_file += '<tr>\n'
         complete_file += '    <th>Subject</th>\n'
-        complete_file += '    <th>Taxonomy</th>\n'
+
         complete_file += '    <th>Kingdom</th>\n'
         complete_file += '    <th>e-value</th>\n'
         complete_file += '    <th>n identical</th>\n'
@@ -39,6 +39,7 @@ def blast_tab2htm(input_file):
         complete_file += '    <th>subject start</th>\n'
         complete_file += '    <th>subject end</th>\n'
         complete_file += '    <th>subject title</th>\n'
+        complete_file += '    <th>Taxonomy</th>\n'
         complete_file += '    </tr>\n'
 
         for blast_hit in f:
@@ -71,7 +72,7 @@ def blast_tab2htm(input_file):
             all_taxonomy = ''
             for taxon, name in zip(subject_taxids, subject_scientific_names):
                 all_taxonomy += '<a href="http://www.ncbi.nlm.nih.gov/Taxonomy/Browser/wwwtax.cgi?id=%s">%s<a>,' % (taxon, name)
-            complete_file += '    <td>%s</td>\n' % all_taxonomy
+
             complete_file += '    <td>%s</td>\n' % subject_kingdom
             complete_file += '    <td>%s</td>\n' % evalue
             complete_file += '    <td>%s</td>\n' % n_identical
@@ -84,8 +85,8 @@ def blast_tab2htm(input_file):
             complete_file += '    <td>%s</td>\n' % query_cov
             complete_file += '    <td>%s</td>\n' % subject_start
             complete_file += '    <td>%s</td>\n' % subject_end
-            complete_file += '    <td>%s</td>\n' % query_end
-            complete_file += '    <td>%s</td>\n' % subject_title
+            complete_file += '    <td>%s</td>\n' % subject_title.split('[')[0]
+            complete_file += '    <td>%s</td>\n' % all_taxonomy
             complete_file += '</tr>\n'
         complete_file += '</table>\n'
 
