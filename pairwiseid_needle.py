@@ -1,6 +1,17 @@
 #!/usr/bin/env python
 # -*- coding: iso-8859-15 -*-
 
+#Produce identity matrix from fasta with multiple (non aligned) sequences
+#Alignment using the global aligment software needle from the EMBOSS package.
+#DEPENDANCY: needle (EMBOSS) http://emboss.sourceforge.net/apps/release/6.6/emboss/apps/needle.html
+#Build all pairwise alignments (which can be long). The multiprocessing module if configured to run 8 alignments in parallel.
+
+#TODO refactoring code, multiple useless parts inherited from previous parwiseid.py
+# Author: Trestan Pillonel (trestan.pillonel[]gmail.com)
+# Date: 20014
+
+
+
 from Bio import pairwise2
 from Bio.SubsMat import MatrixInfo as matlist
 import re
@@ -21,22 +32,7 @@ from Bio import AlignIO
 import StringIO
 from shell_command import shell_command
 from tempfile import NamedTemporaryFile
-from Bio.Emboss.Applications import StretcherCommandline
-
-    
-"""
-NOTE: old script, parwise_id_need.py sould be used instead
-
-Produce identity matrix from fasta with multiple (non aligned) sequences
-Alignment using the global algorithme from Bio.pairwise2 module.
-DNA matrix: EDNA (see below)
-AA matrix: Blosum62
-Build all pairwise alignments (which can be long). The multiprocessing module if configured to run 8 alignments in parallel.
-# Author: Trestan Pillonel (trestan.pillonel[]gmail.com)
-# Date: 2014
-"""
-
-
+from Bio.Emboss.Applications import NeedleCommandline
 
 
 #
@@ -65,6 +61,14 @@ Build all pairwise alignments (which can be long). The multiprocessing module if
 #N  -2  -2  -2  -2  -1  -1  -1  -1  -1  -1  -1  -1  -1  -1  -1
 
 
+def check_alphabet(seq):
+    for base in seq:
+        if base not in ["A", "T", "G", "C", "a", "t", "g", "c"]:
+            print "strange base:", base 
+
+
+
+            
 
 DNA_matrix = {('B', 'N'): -1.0, ('S', 'W'): -4.0, ('G', 'G'): 5.0, ('S', 'N'): -1.0, ('K', 'G'): 1.0, ('H', 'W'): -1.0, ('W', 'R'): -2.0, ('C', 'M'): 1.0, ('V', 'M'): -1.0, ('Y', 'W'): -2.0, ('W', 'C'): -4.0, ('A', 'N'): -2.0, ('N', 'S'): -1.0, ('A', 'Y'): -4.0, ('Y', 'D'): -3.0, ('M', 'Y'): -2.0, ('D', 'G'): -1.0, ('V', 'N'): -1.0, ('Y', 'V'): -3.0, ('G', 'W'): -4.0, ('D', 'W'): -1.0, ('M', 'K'): -4.0, ('R', 'K'): -2.0, ('K', 'W'): -2.0, ('M', 'B'): -3.0, ('W', 'B'): -3.0, ('D', 'A'): -1.0, ('S', 'C'): 1.0, ('Y', 'G'): -4.0, ('H', 'B'): -2.0, ('C', 'K'): -4.0, ('H', 'K'): -3.0, ('Y', 'Y'): -1.0, ('G', 'V'): -1.0, ('K', 'V'): -3.0, ('C', 'Y'): 1.0, ('V', 'Y'): -3.0, ('W', 'A'): 1.0, ('G', 'D'): -1.0, ('K', 'D'): -1.0, ('T', 'N'): -2.0, ('N', 'C'): -2.0, ('W', 'W'): -1.0, ('T', 'W'): 1.0, ('A', 'R'): 1.0, ('M', 'R'): -2.0, ('V', 'H'): -2.0, ('R', 'M'): -2.0, ('S', 'S'): -1.0, ('D', 'H'): -2.0, ('H', 'R'): -3.0, ('D', 'C'): -4.0, ('K', 'C'): -4.0, ('S', 'A'): -4.0, ('W', 'V'): -3.0, ('B', 'A'): -4.0, ('N', 'W'): -1.0, ('G', 'T'): -4.0, ('R', 'N'): -1.0, ('K', 'T'): 1.0, ('C', 'W'): -4.0, ('A', 'K'): -4.0, ('W', 'G'): -4.0, ('T', 'G'): -4.0, ('D', 'K'): -1.0, ('A', 'B'): -4.0, ('K', 'B'): -1.0, ('Y', 'H'): -1.0, ('N', 'N'): -1.0, ('A', 'T'): -4.0, ('B', 'B'): -1.0, ('C', 'H'): -1.0, ('G', 'K'): 1.0, ('D', 'S'): -3.0, ('M', 'G'): -4.0, ('K', 'S'): -2.0, ('C', 'V'): -1.0, ('V', 'T'): -4.0, ('S', 'H'): -3.0, ('K', 'A'): -4.0, ('H', 'Y'): -1.0, ('Y', 'K'): -2.0, ('W', 'T'): 1.0, ('B', 'C'): -1.0, ('C', 'G'): -4.0, ('V', 'K'): -3.0, ('K', 'R'): -2.0, ('A', 'M'): 1.0, ('A', 'D'): -1.0, ('B', 'R'): -3.0, ('T', 'S'): -4.0, ('M', 'W'): -2.0, ('A', 'V'): -1.0, ('B', 'D'): -2.0, ('M', 'N'): -1.0, ('V', 'D'): -2.0, ('N', 'Y'): -1.0, ('M', 'A'): 1.0, ('N', 'K'): -1.0, ('C', 'T'): -4.0, ('V', 'V'): -1.0, ('W', 'D'): -1.0, ('H', 'V'): -2.0, ('B', 'S'): -1.0, ('D', 'N'): -1.0, ('Y', 'M'): -2.0, ('H', 'D'): -2.0, ('D', 'M'): -3.0, ('H', 'M'): -1.0, ('G', 'H'): -4.0, ('R', 'R'): -1.0, ('C', 'S'): 1.0, ('N', 'A'): -2.0, ('V', 'W'): -3.0, ('T', 'C'): -4.0, ('B', 'T'): -1.0, ('K', 'N'): -1.0, ('T', 'H'): -1.0, ('G', 'Y'): -4.0, ('R', 'A'): 1.0, ('C', 'D'): -4.0, ('D', 'V'): -2.0, ('M', 'H'): -1.0, ('S', 'V'): -1.0, ('M', 'C'): 1.0, ('R', 'S'): -2.0, ('C', 'R'): -4.0, ('S', 'M'): -2.0, ('H', 'T'): -1.0, ('S', 'D'): -3.0, ('K', 'M'): -4.0, ('D', 'D'): -1.0, ('R', 'B'): -3.0, ('B', 'G'): -1.0, ('C', 'C'): 5.0, ('V', 'G'): -1.0, ('W', 'K'): -2.0, ('G', 'N'): -2.0, ('R', 'T'): -4.0, ('A', 'A'): 5.0, ('W', 'Y'): -2.0, ('T', 'A'): -4.0, ('B', 'V'): -2.0, ('T', 'V'): -4.0, ('A', 'S'): -4.0, ('Y', 'N'): -1.0, ('M', 'S'): -2.0, ('R', 'C'): -4.0, ('B', 'H'): -2.0, ('C', 'B'): -1.0, ('D', 'T'): -1.0, ('G', 'M'): -4.0, ('S', 'T'): -4.0, ('D', 'B'): -2.0, ('S', 'K'): -2.0, ('V', 'R'): -1.0, ('S', 'B'): -1.0, ('B', 'W'): -3.0, ('K', 'K'): -1.0, ('H', 'C'): -1.0, ('N', 'T'): -2.0, ('H', 'H'): -1.0, ('R', 'D'): -1.0, ('C', 'A'): -4.0, ('V', 'A'): -1.0, ('A', 'H'): -1.0, ('R', 'V'): -1.0, ('A', 'C'): -4.0, ('V', 'S'): -1.0, ('T', 'T'): 5.0, ('M', 'M'): -1.0, ('D', 'R'): -1.0, ('M', 'D'): -3.0, ('V', 'B'): -2.0, ('W', 'H'): -1.0, ('G', 'C'): -4.0, ('S', 'R'): -2.0, ('R', 'W'): -2.0, ('H', 'S'): -3.0, ('Y', 'A'): -4.0, ('B', 'Y'): -1.0, ('H', 'A'): -1.0, ('N', 'D'): -1.0, ('Y', 'S'): -2.0, ('H', 'N'): -1.0, ('B', 'K'): -1.0, ('N', 'G'): -2.0, ('V', 'C'): -1.0, ('G', 'B'): -1.0, ('T', 'D'): -1.0, ('N', 'B'): -1.0, ('T', 'M'): -4.0, ('K', 'H'): -3.0, ('T', 'R'): -4.0, ('M', 'T'): -4.0, ('A', 'W'): 1.0, ('Y', 'R'): -4.0, ('G', 'S'): 1.0, ('R', 'G'): 1.0, ('S', 'Y'): -2.0, ('N', 'H'): -1.0, ('W', 'N'): -1.0, ('G', 'A'): -4.0, ('D', 'Y'): -3.0, ('R', 'Y'): -4.0, ('K', 'Y'): -2.0, ('S', 'G'): 1.0, ('N', 'R'): -1.0, ('Y', 'C'): 1.0, ('H', 'G'): -4.0, ('N', 'V'): -1.0, ('G', 'R'): 1.0, ('R', 'H'): -3.0, ('B', 'M'): -3.0, ('W', 'M'): -2.0, ('T', 'B'): -1.0, ('A', 'G'): -4.0, ('Y', 'B'): -1.0, ('W', 'S'): -4.0, ('T', 'K'): 1.0, ('C', 'N'): -2.0, ('M', 'V'): -1.0, ('N', 'M'): -1.0, ('Y', 'T'): 1.0, ('T', 'Y'): 1.0}
 
@@ -131,6 +135,8 @@ def pairewise_identity(seq1, seq2):
             identical_sites+=1
 
     identity = 100*(identical_sites/float(aligned_sites))
+    #print "aligned", float(aligned_sites)
+    #print "identical", identical_sites
     if aligned_sites == 0:
         # return false if align length = 0
         return False
@@ -150,6 +156,10 @@ def global_align(seq_record1, seq_record2):
     #gap_open = -10
     #gap_extend = -0.5
 
+    
+    seq_record1.seq = seq_record1.seq.upper()
+    seq_record2.seq = seq_record2.seq.upper()
+   
     seq1_file = NamedTemporaryFile()
     SeqIO.write(seq_record1, seq1_file, "fasta")
     seq1_file.flush()        
@@ -157,17 +167,18 @@ def global_align(seq_record1, seq_record2):
     SeqIO.write(seq_record2, seq2_file, "fasta")
     seq2_file.flush()
 
-
+    #print seq_record1.seq.alphabet
+    #print seq_record1.seq.alphabet
     
-    seq1 = seq_record1.seq.upper()
-    seq2 = seq_record2.seq.upper()
-
     
-    seq1.alphabet = IUPAC.ambiguous_dna
-    seq2.alphabet = IUPAC.ambiguous_dna
+    seq_record1.seq.alphabet = IUPAC.ambiguous_dna
+    seq_record2.seq.alphabet = IUPAC.ambiguous_dna
 
+
+    #print "1", _verify_alphabet(seq_record1.seq)
+    #print "2",_verify_alphabet(seq_record2.seq)
     
-    if _verify_alphabet(seq1) and _verify_alphabet(seq2):
+    if _verify_alphabet(seq_record1.seq) and _verify_alphabet(seq_record2.seq):
         #print "DNA!"
     #    alns = pairwise2.align.globalds(seq1, seq2, DNA_matrix, gap_open, gap_extend)
     #    print ">"+noms[id_seq1]
@@ -175,8 +186,9 @@ def global_align(seq_record1, seq_record2):
     #    print ">"+noms[id_seq2]
     #    print alns[0][1]
     #    return  alns[0]
-        stretcher_cline=StretcherCommandline(asequence=seq1_file.name, bsequence=seq2_file.name, stdout=True, gapopen=16, gapextend=4, auto=True, aformat="srspair")
-        stdout,stderr=stretcher_cline()
+        needle_cline=NeedleCommandline(asequence=seq1_file.name, bsequence=seq2_file.name, stdout=True, gapopen=10, gapextend=0.5, auto=True, aformat="srspair")
+        stdout,stderr=needle_cline()
+        #print stdout
         align = AlignIO.read(StringIO.StringIO(stdout), "emboss")
         return align
 
@@ -184,23 +196,40 @@ def global_align(seq_record1, seq_record2):
  
         
 
-    seq1.alphabet = IUPAC.protein                                                                                                                            
-    seq2.alphabet = IUPAC.protein
+    seq_record1.seq.alphabet = IUPAC.extended_protein
+    seq_record2.seq.alphabet = IUPAC.extended_protein
     #print seq1
     #print _verify_alphabet(seq1)
 
-    if _verify_alphabet(seq1) and _verify_alphabet(seq2):
+    if _verify_alphabet(seq_record1.seq) and _verify_alphabet(seq_record2.seq):
         #print "AA!"
     #    alns = pairwise2.align.globalds(seq1, seq2, matlist.blosum62, gap_open, gap_extend)
     #    return  alns[0]
 
-        stretcher_cline=StretcherCommandline(asequence=seq1_file.name, bsequence=seq2_file.name, stdout=True, gapopen=12, gapextend=2, auto=True, aformat="srspair")
-        stdout,stderr=stretcher_cline()
+        needle_cline=NeedleCommandline(asequence=seq1_file.name, bsequence=seq2_file.name, stdout=True, gapopen=10, gapextend=0.5, auto=True, aformat="srspair")
+        stdout,stderr=needle_cline()
         align = AlignIO.read(StringIO.StringIO(stdout), "emboss")
         return align
 
     else:
+        print seq_record1.seq
+        check_alphabet(seq_record1.seq)
+        print seq_record2.seq
+        check_alphabet(seq_record2.seq)
         raise "unkown alphabet!"
+
+
+
+
+    
+
+
+
+
+
+
+    
+
 
 
         

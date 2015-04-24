@@ -1,48 +1,103 @@
 #!/usr/bin/env python
 
+# Perform various GC calculations: GC skew, gc variations from the average, plots of length vs gc, circos input files,...
+# TODO separate circos stuff from the rest
+# Author: Trestan Pillonel (trestan.pillonel[]gmail.com)
+# Date: 2014
+# ---------------------------------------------------------------------------
+
 from Bio import SeqIO
-from Bio.SeqUtils import GC
+from Bio.SeqUtils import GC, GC_skew
 import pylab
 import numpy as np
 from matplotlib.backends.backend_pdf import PdfPages
 
 
-def GC_skew(seq, window=100):
-    """Calculates GC skew (G-C)/(G+C) for multiple windows along the sequence.
-    Returns a list of ratios (floats), controlled by the length of the sequence 
-    and the size of the window.
-    Does NOT look at any ambiguous nucleotides.
-    """
-    values = []
-    for i in range(0, len(seq), window):
-        s = seq[i: i + window] 
-        g = s.count('G') + s.count('g') 
-        c = s.count('C') + s.count('c')
-        #print g-c
-        #print g+c
-        #print s
-        try:
-            skew = (g-c)/float(g+c)
-        except:
-            skew = 0
-        values.append(skew) 
-    return values
+
+def circos_gc_var(record):
+    '''
+    :param record:
+    :return: circos string with difference as compared to the average GC
+    ex: average = 32
+        GC(seq[3000:4000]) = 44
+        diff = 44 - 32 = 12%
+
+    '''
+    circos_string = ''
+    from Bio.SeqFeature import FeatureLocation
+    average_gc = GC(record.seq)
+    gap_locations = []
+    for feature in record.features:
+        if feature.type == "assembly_gap":
+            gap_locations.append(feature.location)
+    if len(gap_locations) == 0:
+        gap_locations.append(FeatureLocation(0, len(record.seq)))
+    else:
+        gap_locations.append(FeatureLocation(gap_locations[-1].end + 1, len(record.seq)))
+    gap_locations.append(FeatureLocation(gap_locations[-1].end + 1, len(record.seq)))
+
+    for i in range(0, len(gap_locations)):
+        if i == 0:
+            seq = record.seq[0:gap_locations[i].start]
+        else:
+            seq = record.seq[gap_locations[i-1].end:gap_locations[i].start]
+        contig_name = record.name + "_%s" % (i +1)
+        for i in range(0, len(seq), 1000):
+            start = i
+            stop = i + 1000
+            #gc = ((GC(record.seq[start:stop])/average_gc) - 1)*100
+            gc = GC(record.seq[start:stop]) - average_gc
+            if stop > len(seq):
+                stop = len(seq)
+                if stop - start < 200:
+                    break
+            circos_string += "%s %s %s %s\n" % (contig_name, start, stop, gc)
+
+    return circos_string
 
 
-def circos_gc_skew(handle):
-    f = open("circos.gc.skew.txt", "w")
-    parsed_handle = [record for record in SeqIO.parse(handle, "fasta")]
-    for record in parsed_handle:
-        start = 0
-        stop = 1000
-        if stop > len(record.seq):
-            stop = len(record.seq)
-        values = GC_skew(record.seq, window=1000)
-        for gc in values:
-            f.write("%s %s %s %s\n" % (record.id, start, stop, gc))
-            start+=1000
-            stop+=1000
-       
+def circos_gc_skew(record):
+    '''
+    :param record:
+    :return: circos string with difference as compared to the average GC
+    ex: average = 32
+        GC(seq[3000:4000]) = 44
+        diff = 44 - 32 = 12%
+
+    '''
+    from Bio.SeqFeature import FeatureLocation
+    circos_string = ''
+    print "GENOME SIZE:", len(record.seq)
+
+    gap_locations = []
+    for feature in record.features:
+
+        if feature.type == "assembly_gap":
+            gap_locations.append(feature.location)
+    if len(gap_locations) == 0:
+        gap_locations.append(FeatureLocation(0, len(record.seq)))
+    else:
+        #gap_locations.append(FeatureLocation(gap_locations[-1].end + 1, len(record.seq)))
+        gap_locations.append(FeatureLocation(len(record.seq), len(record.seq)))
+
+    for i in range(0, len(gap_locations)):
+        if i == 0:
+            seq = record.seq[0:gap_locations[i].start]
+        else:
+            seq = record.seq[gap_locations[i-1].end:gap_locations[i].start]
+        print i, "seq", gap_locations[i-1].end, gap_locations[i].start, gap_locations[i].start - gap_locations[i-1].end
+        values = GC_skew(seq, 1000)
+
+        contig_name = record.name + "_%s" % (i + 1)
+
+        for i in range(0, len(values)):
+            start = i *1000
+            stop = start + 1000
+            #gc = ((GC(record.seq[start:stop])/average_gc) - 1)*100
+            circos_string += "%s %s %s %s\n" % (contig_name, start, stop, values[i])
+
+    return circos_string
+
 
 def plot_contig_len(handle, out_name):
     pp = PdfPages(out_name)
@@ -94,10 +149,9 @@ def gc_values(handle):
     for i in range(0, len(seq_ids)):
         print seq_ids[i] +"\t"+ str(gc_values[i])
 
-def whole_gc(handle):
+def whole_gc(records):
     seq = ""
-    parsed_handle = [record for record in SeqIO.parse(handle, "fasta")]
-    for record in parsed_handle:
+    for record in records:
         seq+= record.seq
     return GC(seq)
 
@@ -159,7 +213,9 @@ if __name__ == '__main__':
         gc_values(handle)
 
     if args.conc_gc:
-        print whole_gc(handle)
+        records = [record for record in SeqIO.parse(handle, "fasta")]
+        print whole_gc(records)
     
     if args.circos:
-       circos_gc_skew(handle)
+        records = [record for record in SeqIO.parse(handle, "fasta")]
+        print circos_gc_skew(records)

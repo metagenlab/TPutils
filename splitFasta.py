@@ -1,6 +1,10 @@
 #!/usr/bin/env python
 # -*- coding: iso-8859-15 -*-
 
+# split big multi fasta in multiple files with definied number of sequences (default 1000)
+# Author: Trestan Pillonel (trestan.pillonel[]gmail.com)
+# Date: 2014
+# -----------------------------------------------------
 
 
 def batch_iterator(iterator, batch_size) :
@@ -27,9 +31,8 @@ def batch_iterator(iterator, batch_size) :
                 #End of file
                 break
             batch.append(entry)
-        if batch :
+        if batch:
             yield batch
-
 
 
 def split_fasta(fasta_file, number_per_file=1000):
@@ -53,4 +56,4 @@ if __name__ == '__main__':
                               
     args = parser.parse_args()
     split_fasta(args.input_fasta, args.number)
-           
+
