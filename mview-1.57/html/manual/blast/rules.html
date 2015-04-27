@@ -1,0 +1,211 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>BLAST HSP processing rules &mdash; MView</title>
+    
+    <link rel="stylesheet" href="../../_static/sphinxdoc.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="top" title="MView" href="../../index.html" />
+    <link rel="up" title="Contents" href="../../contents.html" />
+    <link rel="next" title="NCBI BLAST series 1 and WU-BLAST series 2" href="blast1.html" />
+    <link rel="prev" title="Input formats" href="../formats.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="blast1.html" title="NCBI BLAST series 1 and WU-BLAST series 2"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="../formats.html" title="Input formats"
+             accesskey="P">previous</a> |</li>
+        <li><a href="../../index.html">MView</a> &raquo;</li>
+          <li><a href="../../contents.html" accesskey="U">Contents</a> &raquo;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="../../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">BLAST HSP processing rules</a><ul>
+<li><a class="reference internal" href="#differences-between-ncbi-blast-1-and-ncbi-blast-2">Differences between NCBI BLAST 1 and NCBI BLAST 2</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="../formats.html"
+                        title="previous chapter">Input formats</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="blast1.html"
+                        title="next chapter">NCBI BLAST series 1 and WU-BLAST series 2</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="../../_sources/manual/blast/rules.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="blast-hsp-processing-rules">
+<span id="ref-blast-rules"></span><h1>BLAST HSP processing rules<a class="headerlink" href="#blast-hsp-processing-rules" title="Permalink to this headline">¶</a></h1>
+<p>A BLAST run comprises, among other sections, a &#8216;ranking&#8217; of hits with one-line
+summaries including scoring information, followed by the search database
+&#8216;hits&#8217; themselves. Each hit may contain one or more HSPs (ungapped BLAST) or
+gapped alignments (gapped BLAST), not all of which may be reported in the
+ranking.</p>
+<p>Some control over which HSPs are to be processed by MView is provided by the
+command line option <tt class="docutils literal"><span class="pre">-hsp</span></tt>. There are three choices:</p>
+<blockquote>
+<div><table border="1" class="docutils">
+<colgroup>
+<col width="22%" />
+<col width="78%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">MView option</th>
+<th class="head">Description</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td><tt class="docutils literal"><span class="pre">-hsp</span> <span class="pre">ranked</span></tt></td>
+<td>Only those HSPs or alignments that contributed to the
+ranked hit are selected. These are tiled into a single
+alignment row per hit. This is the default behaviour.</td>
+</tr>
+<tr class="row-odd"><td><tt class="docutils literal"><span class="pre">-hsp</span> <span class="pre">all</span></tt></td>
+<td>All HSPs or alignments are selected and tiled into a single
+alignment row per hit.</td>
+</tr>
+<tr class="row-even"><td><tt class="docutils literal"><span class="pre">-hsp</span> <span class="pre">discrete</span></tt></td>
+<td>All HSPs or alignments are selected but each is assigned
+its own row in the resulting stacked alignment.</td>
+</tr>
+</tbody>
+</table>
+</div></blockquote>
+<p>Precise application of these processing modes varies slightly with each BLAST
+program because properties such as query and/or hit nucleotide strand
+orientation or reading frame must be taken into consideration</p>
+<p>A more detailed description of the selection rules is given for each BLAST
+family and program, as follows:</p>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="blast1.html">NCBI BLAST series 1 and WU-BLAST series 2</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="blast1.html#blastp">BLASTP</a></li>
+<li class="toctree-l2"><a class="reference internal" href="blast1.html#blastn">BLASTN</a></li>
+<li class="toctree-l2"><a class="reference internal" href="blast1.html#blastx">BLASTX</a></li>
+<li class="toctree-l2"><a class="reference internal" href="blast1.html#tblastn">TBLASTN</a></li>
+<li class="toctree-l2"><a class="reference internal" href="blast1.html#tblastx">TBLASTX</a></li>
+<li class="toctree-l2"><a class="reference internal" href="blast1.html#column-headings">Column headings</a></li>
+<li class="toctree-l2"><a class="reference internal" href="blast1.html#key">Key</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="blast2.html">NCBI BLAST series 2 and NCBI BLAST+</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="blast2.html#blastp">BLASTP</a></li>
+<li class="toctree-l2"><a class="reference internal" href="blast2.html#blastn">BLASTN</a></li>
+<li class="toctree-l2"><a class="reference internal" href="blast2.html#blastx">BLASTX</a></li>
+<li class="toctree-l2"><a class="reference internal" href="blast2.html#tblastn">TBLASTN</a></li>
+<li class="toctree-l2"><a class="reference internal" href="blast2.html#tblastx">TBLASTX</a></li>
+<li class="toctree-l2"><a class="reference internal" href="blast2.html#psi-blast">PSI-BLAST</a></li>
+<li class="toctree-l2"><a class="reference internal" href="blast2.html#column-headings">Column headings</a></li>
+<li class="toctree-l2"><a class="reference internal" href="blast2.html#key">Key</a></li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="section" id="differences-between-ncbi-blast-1-and-ncbi-blast-2">
+<h2>Differences between NCBI BLAST 1 and NCBI BLAST 2<a class="headerlink" href="#differences-between-ncbi-blast-1-and-ncbi-blast-2" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li>In the default gapped mode, the BLAST 2 programs produce no <em>N</em> fragment
+counts. Fragment counts are switched on in BLAST when it is run in ungapped
+mode using the <tt class="docutils literal"><span class="pre">blastall...</span> <span class="pre">-g</span> <span class="pre">F</span></tt> command line option.</li>
+<li>Significances are reported only as Expectation (e-values), <em>E</em> rather than
+p-values, <em>P</em>.</li>
+<li>BLASTN: negative orientation query strands are not reported because the
+query and hit can always be reverse complemented to revert the query back to
+the positive strand orientation.</li>
+<li>BLASTX: query strands don&#8217;t carry frame information (early versions only).</li>
+<li>TBLASTN: hit strands don&#8217;t carry frame information (early versions only).</li>
+<li>TBLASTX: query and hit strands don&#8217;t carry frame information (early versions
+only).</li>
+</ul>
+<p>With BLAST 2 series output, MView assumes that only one fragment (a gapped
+alignment) is required in &#8216;ranked&#8217; mode and accepts the FIRST alignment with
+score and expectation matching those in the hit ranking. If you wish to see
+the effect of any other HSPs use the <tt class="docutils literal"><span class="pre">-hsp</span> <span class="pre">all</span></tt> or <tt class="docutils literal"><span class="pre">-hsp</span> <span class="pre">discrete</span></tt> options
+to MView. This is particularly important if you use BLAST in ungapped mode.</p>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="blast1.html" title="NCBI BLAST series 1 and WU-BLAST series 2"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="../formats.html" title="Input formats"
+             >previous</a> |</li>
+        <li><a href="../../index.html">MView</a> &raquo;</li>
+          <li><a href="../../contents.html" >Contents</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, Nigel P. Brown.
+      Last updated on 18 Sep 2013.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>

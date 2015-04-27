@@ -1,0 +1,12 @@
+Contents
+========
+
+.. toctree::
+   :maxdepth: 2
+
+   manual/intro
+   manual/manual
+   manual/formats
+   manual/blast/rules
+   manual/faq
+   etc/Licence

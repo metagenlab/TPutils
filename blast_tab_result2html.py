@@ -12,40 +12,63 @@
 
 def blast_tab2htm(input_file):
 
-    complete_file = ''
+
 
     with open(input_file, "r") as f:
-        i = 0
-        complete_file += '<html>\n'
-        complete_file +='<body>\n'
-        complete_file +='{%% include "chlamdb/user.html" %%}\n'
 
-        complete_file +='<h2>Blast nr hit of <a href="/chlamdb/locusx/chlamydia_03_15/%s">%s<a></h2>\n'
+        header_file = ''
+        header_file += '<html>\n'
+        header_file +='<body>\n'
+        header_file +='{%% include "chlamdb/user.html" %%}\n'
 
-        complete_file += '<table cellspacing="0" border="0">\n'
-        complete_file += '<tr>\n'
-        complete_file += '    <th>Subject</th>\n'
+        header_file +='<h2>Blast nr hit of <a href="/chlamdb/locusx/chlamydia_03_15/%s">%s<a></h2>\n'
 
-        complete_file += '    <th>Kingdom</th>\n'
-        complete_file += '    <th>e-value</th>\n'
-        complete_file += '    <th>n identical</th>\n'
-        complete_file += '    <th>percent identity</th>\n'
-        complete_file += '    <th>n positive</th>\n'
-        complete_file += '    <th>n gaps</th>\n'
-        complete_file += '    <th>length</th>\n'
-        complete_file += '    <th>query start</th>\n'
-        complete_file += '    <th>query end</th>\n'
-        complete_file += '    <th>query cov.</th>\n'
-        complete_file += '    <th>subject start</th>\n'
-        complete_file += '    <th>subject end</th>\n'
-        complete_file += '    <th>subject title</th>\n'
-        complete_file += '    <th>Taxonomy</th>\n'
-        complete_file += '    </tr>\n'
+        header_file += '<table cellspacing="0" border="0">\n'
+        header_file += '<tr>\n'
+        header_file += '    <th>Subject</th>\n'
 
-        for blast_hit in f:
-            line = blast_hit.rstrip().split('\t')
+        header_file += '    <th>Kingdom</th>\n'
+        header_file += '    <th>e-value</th>\n'
+        header_file += '    <th>n identical</th>\n'
+        header_file += '    <th>percent identity</th>\n'
+        header_file += '    <th>n positive</th>\n'
+        header_file += '    <th>n gaps</th>\n'
+        header_file += '    <th>length</th>\n'
+        header_file += '    <th>query start</th>\n'
+        header_file += '    <th>query end</th>\n'
+        header_file += '    <th>query cov.</th>\n'
+        header_file += '    <th>subject start</th>\n'
+        header_file += '    <th>subject end</th>\n'
+        header_file += '    <th>subject title</th>\n'
+        header_file += '    <th>Taxonomy</th>\n'
+        header_file += '    </tr>\n'
+
+
+        input_file = [i.rstrip().split('\t') for i in f]
+
+        complete_file = ''
+
+        for n, line in enumerate(input_file):
             # #qgi qacc sgi sacc sscinames sskingdoms staxids evalue nident pident positive gaps length qstart qend qcovs sstart send sstrand stitle
+
             query_accession = line[1].split("|")[1]
+
+            if n == 0:
+                pass
+            elif line[1] != input_file[n-1][1]:
+                out_accession = input_file[n-1][1].split("|")[1]
+                f = open(out_accession + '.html', 'w')
+                out_file = header_file + complete_file + '</table>\n'
+
+                f.write(out_file % (out_accession, out_accession))
+                f.close()
+                complete_file = ''
+            else:
+                pass
+
+
+
+
             subject_accession = line[3]
             query_gi = line[0]
             subject_gi = line[2]
@@ -88,11 +111,14 @@ def blast_tab2htm(input_file):
             complete_file += '    <td>%s</td>\n' % subject_title.split('[')[0]
             complete_file += '    <td>%s</td>\n' % all_taxonomy
             complete_file += '</tr>\n'
-        complete_file += '</table>\n'
 
+            print "n", n
 
-        with open(query_accession  + '.html', 'w') as f:
-            f.write(complete_file % (query_accession, query_accession))
+        f = open(query_accession + '.html', 'w')
+        complete_file = header_file + complete_file + '</table>\n'
+        f.write(complete_file % (query_accession, query_accession))
+        f.close()
+
 
 
 
