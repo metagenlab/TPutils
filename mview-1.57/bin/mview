@@ -40,6 +40,8 @@
 
 # $Id: mview,v 1.73 2013/12/01 18:56:16 npb Exp $
 
+
+
 my $VERSION  = '1.57';
 my $PATCH    = 0;
 
@@ -56,7 +58,7 @@ require 5.004;
 $^W=1;
 BEGIN {$::COMPILE_ERROR=0}  #catch compile time method call failure
 
-use lib 'mview-1.57/lib';
+use lib $dirname . "/home/trestan/Dropbox/dev/utilitaires/mview-1.57/lib/";
 use Getopt;
 use Bio::MView::Manager;
 use strict;
