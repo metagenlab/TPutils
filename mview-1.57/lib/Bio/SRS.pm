@@ -141,7 +141,7 @@ sub srsLink {
     #if ($tag =~ /^[a-zA-Z0-9_]*\|/) {
 	
 	
-    $link = "/chlamdb/locusx/chlamydia_03_15/$tag";
+    $link = "/chlamdb/locusx/chlamydia_03_15/$tag/TRUE";
 	
         #warn "Split NCBI (long) $tag => ($db, $ac, $id) => $link\n";
     return $link;
