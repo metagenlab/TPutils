@@ -14,9 +14,9 @@ from StringIO import StringIO
 def get_sequence(file_name, file_format, start=False, stop=False, contig=False, protein_id=False, flanking_region_size_bp=0, locus_tag = False, revcomp=False):
 
 
-    print "File:", file_name
-    print "Format:", file_format
-    print "Protein ID:", protein_id
+    #print "File:", file_name
+    #print "Format:", file_format
+    #print "Protein ID:", protein_id
 
     contig_name2record =  SeqIO.to_dict(SeqIO.parse(file_name, file_format))
 

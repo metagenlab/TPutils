@@ -150,6 +150,7 @@ def run_job(script):
 
 
 def wait_multi_jobs(job_id_list):
+    print 'job list:', job_id_list
     job_list=list(job_id_list)
     job_exited = []
     while len(job_list) != 0:
