@@ -1,0 +1,25 @@
+Simple letters
+==============
+
+A hand finished CLUSTAL alignment using built-in colour palettes and consensus
+pattern residue equivalence classes: member residues of the 80% consensus
+class for each column are coloured according to their own property.
+
+
+Command line
+^^^^^^^^^^^^
+
+``mview -in plain -width 130 -ruler on -coloring consensus -threshold 80 -consensus on -con_coloring any -html head PP2C.txt``
+
+Output
+^^^^^^
+
+.. raw::  html
+   :file: PP2C.simple.html
+
+This particular alignment was published in Bork, P., Brown, N.P., Hegyi, H.,
+Schultz, J. (1996) The protein phosphatase 2C (PP2C) superfamily: Detection of
+bacterial homologues. *Protein Science*. **5**\ :1421-1425. `PubMed
+<http://www.ncbi.nlm.nih.gov/pubmed/8819174?dopt=Abstract>`_
+
+.. END

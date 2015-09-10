@@ -1,0 +1,14 @@
+.. toctree::
+   :hidden:
+
+   PP2C.css
+   PP2C.simple
+
+
+Examples
+========
+
+* CLUSTAL alignment `blocked letters <PP2C.css.html>`_
+* CLUSTAL alignment `plain letters   <PP2C.simple.html>`_
+
+.. END

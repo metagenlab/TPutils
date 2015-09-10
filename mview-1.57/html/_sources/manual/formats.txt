@@ -1,0 +1,314 @@
+.. _ref_input_formats:
+
+===============
+ Input formats
+===============
+
+The code has been tested for the following formats and versions for protein
+and nucleotide sequences:
+
+
+NCBI BLAST family
+=================
+
+Sequence database search programs.
+
+
+BLAST+
+------
+
+MView option: ``-in blast``
+
+ =========   ====================================== ============
+ Program     Tested                                 Status      
+ =========   ====================================== ============
+ blastp      2.2.25+, 2.2.28+                       ok          
+ blastn      2.2.25+, 2.2.28+                       ok          
+ blastx      2.2.28+                                ok          
+ tblastn     2.2.28+                                ok          
+ tblastx     2.2.28+                                ok          
+ =========   ====================================== ============
+
+
+BLAST series 2.2
+----------------
+
+MView option: ``-in blast``
+
+ =========   ====================================== ============
+ Program     Tested                                 Status      
+ =========   ====================================== ============
+ blastp      2.2.5, 2.2.6                           ok          
+ blastn      2.2.6                                  ok          
+ blastx      2.2.6                                  ok          
+ tblastn     2.2.6                                  ok          
+ tblastx     2.2.6                                  ok          
+ psi-blast   2.2.6                                  ok          
+ phi-blast   2.2.6                                  ok          
+ =========   ====================================== ============
+
+
+BLAST series 2.0
+----------------
+
+MView option: ``-in blast``
+
+ =========   ====================================== ============
+ Program     Tested                                 Status      
+ =========   ====================================== ============
+ blastp      2.0.4, 2.0.5, 2.0.9, 2.0.10            ok          
+ blastn      2.0.4, 2.0.5, 2.0.9, 2.0.14            ok          
+ blastx      2.0.5, 2.0.9                           ok          
+ tblastn     2.0.5, 2.0.10                          ok          
+ tblastx     2.0.5                                  ok          
+ psi-blast   2.0.2, 2.0.4, 2.0.5, 2.0.6, 2.0.10     ok          
+ phi-blast   2.0.9                                  ok          
+ =========   ====================================== ============
+
+
+BLAST series 1.4
+----------------
+
+MView option: ``-in blast``
+
+ =========   ====================================== ============
+ Program     Tested                                 Status      
+ =========   ====================================== ============
+ blastp      1.4.7, 1.4.9                           ok          
+ blastn      1.4.9                                  ok          
+ blastx      1.4.9                                  ok          
+ tblastn     1.4.9                                  ok          
+ tblastx     1.4.9                                  ok          
+ =========   ====================================== ============
+
+
+--------------------------------------------------------------------------------
+
+WashU-BLAST family
+==================
+
+Sequence database search programs.
+
+
+WU-BLAST series 2.0
+-------------------
+
+MView option: ``-in blast``
+
+ =========   ====================================== ============
+ Program     Tested                                 Status      
+ =========   ====================================== ============
+ blastp      2.0a13, 2.0a19, 2.0                    ok          
+ blastn      2.0a19, 2.0                            ok          
+ blastx      2.0a19, 2.0                            ok          
+ tblastn     2.0a19, 2.0                            ok          
+ tblastx     2.0a19, 2.0                            ok          
+ =========   ====================================== ============
+
+
+--------------------------------------------------------------------------------
+
+FASTA program family
+====================
+
+Sequence database search programs:
+
+
+FASTA series 36
+---------------
+
+MView option: ``-in uvfasta``
+
+ =========   ====================================== ============
+ Program     Tested                                 Status      
+ =========   ====================================== ============
+ fasta       36.07, 36.3.3, 36.3.6                  ok          
+ fastx       36.3.3, 36.3.6                         ok          
+ fasty       36.3.6                                 ok          
+ tfastx      36.3.3, 36.3.6                         ok          
+ tfasty      36.3.3, 36.3.6                         ok          
+ ssearch     36.3.3, 36.3.6                         ok          
+ ggsearch    36.3.3, 36.3.6                         ok          
+ glsearch    36.3.3, 36.3.6                         ok          
+ fastm       35.3.5a, 36.3.6                        experimental
+ fasts       36.3.6                                 experimental
+ fastf       36.3.6                                 experimental
+ =========   ====================================== ============
+
+
+FASTA series 35
+---------------
+
+MView option: ``-in uvfasta``
+
+ =========   ====================================== ============
+ Program     Tested                                 Status      
+ =========   ====================================== ============
+ fasta       35.04                                  ok          
+ tfastx      35.04                                  ok          
+ ssearch     35.04                                  ok          
+ ggsearch    35.04                                  ok          
+ glsearch    35.04                                  ok          
+ =========   ====================================== ============
+
+
+FASTA series 34
+---------------
+
+MView option: ``-in uvfasta``
+
+ =========   ====================================== ============
+ Program     Tested                                 Status      
+ =========   ====================================== ============
+ fasta34     34.26.5                                ok          
+ =========   ====================================== ============
+
+
+FASTA series 3.0 - 3.4
+----------------------
+
+MView option: ``-in uvfasta``
+
+ =========   ====================================== ============
+ Program     Tested                                 Status      
+ =========   ====================================== ============
+ fasta       3.0t76, 3.1t07, 3.2t01, 3.2t05, 3.2t07      
+ \           3.2t05, 3.2t07, 3.3t01, 3.3t07, 3.4t23 ok          
+ fastx       3.4t23                                 ok          
+ fasty       3.4t23                                 ok          
+ tfasta      3.4t23                                 ok          
+ tfastx      3.0t82, 3.4t23                         ok          
+ tfasty      3.4t23                                 ok          
+ tfastxy     3.1t07                                 ok          
+ =========   ====================================== ============
+
+
+FASTA series 2
+--------------
+
+MView option: ``-in uvfasta``
+
+ =========   ====================================== ============
+ Program     Tested                                 Status      
+ =========   ====================================== ============
+ fasta       2.0u                                   ok          
+ tfastx      2.0u63                                 ok          
+ =========   ====================================== ============
+
+
+FASTA series 1
+--------------
+
+MView option: ``-in uvfasta``
+
+ =========   ====================================== ============
+ Program     Tested                                 Status      
+ =========   ====================================== ============
+ fasta       1.6c24                                 ok          
+ =========   ====================================== ============
+
+
+--------------------------------------------------------------------------------
+
+CLUSTAL
+=======
+
+The CLUSTAL family of multiple sequence alignment programs.
+
+MView option: ``-in clustal``
+
+ =========   ====================================== ============
+ Program     Tested                                 Status      
+ =========   ====================================== ============
+ CLUSTAL     1.60, 1.70, 1.83, 2.1                  ok          
+ =========   ====================================== ============
+
+
+--------------------------------------------------------------------------------
+
+HSSP
+====
+
+The HSSP format is produced by the MaxHom protein sequence and structure
+homology alignment program.
+
+MView option: ``-in hssp``
+
+ =========   ====================================== ============
+ Program     Tested                                 Status      
+ =========   ====================================== ============
+ HSSP        1.0 1991                               ok          
+ =========   ====================================== ============
+
+
+--------------------------------------------------------------------------------
+
+MSF
+===
+
+The Wisconsin Package GCG multiple sequence file format.
+
+MView option: ``-in msf``
+
+
+--------------------------------------------------------------------------------
+
+.. _ref_fasta_format:
+
+FASTA format
+============
+
+The FASTA sequence file format.
+
+MView option: ``-in fasta``
+
+
+--------------------------------------------------------------------------------
+
+PIR
+===
+
+The Protein Information Resource sequence file format.
+
+MView option: ``-in pir``
+
+
+--------------------------------------------------------------------------------
+
+.. _ref_plain_format:
+
+plain
+=====
+
+A simple multiple sequence alignment format.
+
+MView option: ``-in plain``
+
+This is composed of rows of identifier and sequence in two columns like:
+
+.. raw:: html
+
+  <PRE>
+  identifier1   sequence1
+  identifier2   sequence2
+  identifier3   sequence3
+  </pre>
+
+and can contain comment lines starting with '#'.
+
+
+--------------------------------------------------------------------------------
+
+Miscellaneous
+=============
+
+ =============  ============ ===============
+ Format         Status       MView option
+ =============  ============ ===============
+ UCSC MAF       experimental ``-in maf``
+ MIPS-ALN       experimental ``-in mips``
+ MULTAS/MULTAL  experimental ``-in multas``
+ jnet -z        experimental ``-in jnet``
+ =============  ============ ===============
+
+.. END

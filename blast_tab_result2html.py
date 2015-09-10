@@ -12,39 +12,63 @@
 
 def blast_tab2htm(input_file):
 
-    complete_file = ''
+
 
     with open(input_file, "r") as f:
+
+        header_file = ''
+        header_file += '<html>\n'
+        header_file +='<body>\n'
+        header_file +='<h2>Blast nr hit of <a href="{%% url \'locusx\' chlamydia_03_15 %s True %%}">%s<a></h2>\n'
+
+        header_file += '<table id=blast_nr_table class="sortable">\n'
+        header_file += '<tr>\n'
+        header_file += '    <th id=blast_rank></th>\n'
+        header_file += '    <th id=blast_subject>Subject</th>\n'
+
+        header_file += '    <th id=blast_kingdom>Kingdom</th>\n'
+        header_file += '    <th id=blast_evalue>eval.</th>\n'
+        header_file += '    <th id=blast_percent_id>ID(%%)</th>\n'
+        header_file += '    <th id=blast_n_id>N id</th>\n'
+        header_file += '    <th id=blast_n_positive>N pos.</th>\n'
+        header_file += '    <th id=blast_gaps>N gaps</th>\n'
+        header_file += '    <th id=blast_length>Len.</th>\n'
+        header_file += '    <th id=blast_query_start>Q. start</th>\n'
+        header_file += '    <th id=blast_query_end>Q. end</th>\n'
+        header_file += '    <th id=blast_query_cov>Q. cov.</th>\n'
+        header_file += '    <th id=blast_subject_start>S. start</th>\n'
+        header_file += '    <th id=blast_subject_end>S. end</th>\n'
+        header_file += '    <th id=blast_subject_title>S. title</th>\n'
+        header_file += '    <th id=blast_taxonomy>Taxonomy</th>\n'
+        header_file += '    </tr>\n'
+
+
+        input_file = [i.rstrip().split('\t') for i in f]
+
+        complete_file = ''
         i = 0
-        complete_file += '<html>\n'
-        complete_file +='<body>\n'
-        complete_file +='{%% include "chlamdb/user.html" %%}\n'
-
-        complete_file +='<h2>Blast nr hit of <a href="/chlamdb/locusx/chlamydia_03_15/%s">%s<a></h2>\n'
-
-        complete_file += '<table cellspacing="0" border="0">\n'
-        complete_file += '<tr>\n'
-        complete_file += '    <th>Subject</th>\n'
-        complete_file += '    <th>Taxonomy</th>\n'
-        complete_file += '    <th>Kingdom</th>\n'
-        complete_file += '    <th>e-value</th>\n'
-        complete_file += '    <th>n identical</th>\n'
-        complete_file += '    <th>percent identity</th>\n'
-        complete_file += '    <th>n positive</th>\n'
-        complete_file += '    <th>n gaps</th>\n'
-        complete_file += '    <th>length</th>\n'
-        complete_file += '    <th>query start</th>\n'
-        complete_file += '    <th>query end</th>\n'
-        complete_file += '    <th>query cov.</th>\n'
-        complete_file += '    <th>subject start</th>\n'
-        complete_file += '    <th>subject end</th>\n'
-        complete_file += '    <th>subject title</th>\n'
-        complete_file += '    </tr>\n'
-
-        for blast_hit in f:
-            line = blast_hit.rstrip().split('\t')
+        for n, line in enumerate(input_file):
             # #qgi qacc sgi sacc sscinames sskingdoms staxids evalue nident pident positive gaps length qstart qend qcovs sstart send sstrand stitle
-            query_accession = line[1].split("|")[1]
+
+            query_accession = line[1].split("|")[3]
+
+            if n == 0:
+                i+=1
+                pass
+            elif line[1] != input_file[n-1][1]:
+                out_accession = input_file[n-1][1].split("|")[3]
+                f = open(out_accession + '.html', 'w')
+                out_file = header_file + complete_file + '</table>\n'
+
+                f.write(out_file % (out_accession, out_accession))
+                f.close()
+                complete_file = ''
+                i = 1
+            else:
+                if line[3] != input_file[n-1][3]:
+                    i+=1
+                pass
+
             subject_accession = line[3]
             query_gi = line[0]
             subject_gi = line[2]
@@ -66,16 +90,17 @@ def blast_tab2htm(input_file):
             subject_title = line[19]
 
             complete_file += '<tr>\n'
+            complete_file += '    <td>%s</td>\n' % i
             complete_file += '    <td><a href="http://www.ncbi.nlm.nih.gov/protein/%s">%s<a></td>\n' % (subject_accession, subject_accession)
 
             all_taxonomy = ''
             for taxon, name in zip(subject_taxids, subject_scientific_names):
                 all_taxonomy += '<a href="http://www.ncbi.nlm.nih.gov/Taxonomy/Browser/wwwtax.cgi?id=%s">%s<a>,' % (taxon, name)
-            complete_file += '    <td>%s</td>\n' % all_taxonomy
+
             complete_file += '    <td>%s</td>\n' % subject_kingdom
             complete_file += '    <td>%s</td>\n' % evalue
-            complete_file += '    <td>%s</td>\n' % n_identical
             complete_file += '    <td>%s</td>\n' % percent_identity
+            complete_file += '    <td>%s</td>\n' % n_identical
             complete_file += '    <td>%s</td>\n' % positive
             complete_file += '    <td>%s</td>\n' % gaps
             complete_file += '    <td>%s</td>\n' % length
@@ -84,14 +109,16 @@ def blast_tab2htm(input_file):
             complete_file += '    <td>%s</td>\n' % query_cov
             complete_file += '    <td>%s</td>\n' % subject_start
             complete_file += '    <td>%s</td>\n' % subject_end
-            complete_file += '    <td>%s</td>\n' % query_end
-            complete_file += '    <td>%s</td>\n' % subject_title
+            complete_file += '    <td>%s</td>\n' % subject_title.split('[')[0]
+            complete_file += '    <td>%s</td>\n' % all_taxonomy
             complete_file += '</tr>\n'
-        complete_file += '</table>\n'
 
 
-        with open(query_accession  + '.html', 'w') as f:
-            f.write(complete_file % (query_accession, query_accession))
+        f = open(query_accession + '.html', 'w')
+        complete_file = header_file + complete_file + '</table>\n'
+        f.write(complete_file % (query_accession, query_accession))
+        f.close()
+
 
 
 

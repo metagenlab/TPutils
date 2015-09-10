@@ -1,0 +1,71 @@
+
+.. _ref_blast_rules:
+
+BLAST HSP processing rules
+==========================
+
+A BLAST run comprises, among other sections, a 'ranking' of hits with one-line
+summaries including scoring information, followed by the search database
+'hits' themselves. Each hit may contain one or more HSPs (ungapped BLAST) or
+gapped alignments (gapped BLAST), not all of which may be reported in the
+ranking.
+
+Some control over which HSPs are to be processed by MView is provided by the
+command line option ``-hsp``. There are three choices: 
+
+ ================= ============================================================
+ MView option      Description
+ ================= ============================================================
+ ``-hsp ranked``   Only those HSPs or alignments that contributed to the
+                   ranked hit are selected. These are tiled into a single
+		   alignment row per hit. This is the default behaviour.
+
+ ``-hsp all``      All HSPs or alignments are selected and tiled into a single
+                   alignment row per hit.
+
+ ``-hsp discrete`` All HSPs or alignments are selected but each is assigned
+                   its own row in the resulting stacked alignment.
+ ================= ============================================================
+
+Precise application of these processing modes varies slightly with each BLAST
+program because properties such as query and/or hit nucleotide strand
+orientation or reading frame must be taken into consideration
+
+A more detailed description of the selection rules is given for each BLAST
+family and program, as follows:
+
+.. toctree::
+
+   blast1
+   blast2
+
+
+Differences between NCBI BLAST 1 and NCBI BLAST 2
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+* In the default gapped mode, the BLAST 2 programs produce no *N* fragment
+  counts. Fragment counts are switched on in BLAST when it is run in ungapped
+  mode using the ``blastall... -g F`` command line option.
+
+* Significances are reported only as Expectation (e-values), *E* rather than
+  p-values, *P*.
+
+* BLASTN: negative orientation query strands are not reported because the
+  query and hit can always be reverse complemented to revert the query back to
+  the positive strand orientation.
+
+* BLASTX: query strands don't carry frame information (early versions only).
+
+* TBLASTN: hit strands don't carry frame information (early versions only).
+
+* TBLASTX: query and hit strands don't carry frame information (early versions
+  only).
+
+With BLAST 2 series output, MView assumes that only one fragment (a gapped
+alignment) is required in 'ranked' mode and accepts the FIRST alignment with
+score and expectation matching those in the hit ranking. If you wish to see
+the effect of any other HSPs use the ``-hsp all`` or ``-hsp discrete`` options
+to MView. This is particularly important if you use BLAST in ungapped mode.
+
+
+.. END

@@ -11,43 +11,50 @@
 
 
 
-def gbk2ffn(seq_records, outname):
+def gbk2ffn(seq_records, outname, locus_tag=False):
     output_handle = open(outname, "w")
 
     for record in seq_records:
         for seq_feature in record.features:
             if seq_feature.type == "CDS":
-                #print seq_feature
-                try:
-                    len(seq_feature.qualifiers['translation'])
-                except:
-                    print seq_feature
-                    print "pseudogene?"
-                    continue
-                #assert len(seq_feature.qualifiers['translation'])==1
-                # gi|83716028|ref|YP_443839.1| matrix protein [Avian metapneumovirus]
-                try:
-                    output_handle.write(">gi|%s|ref|%s| %s [%s]\n%s\n" % (
-                            seq_feature.qualifiers["db_xref"][0].split(":")[1],
-                            seq_feature.qualifiers["protein_id"][0],
-                            seq_feature.qualifiers["product"][0],
-                            record.description,
-                            seq_feature.extract(record.seq)))
-                except:
-                    try:
 
-                        output_handle.write(">gi|%s|ref|%s| [%s]\n%s\n" % (
-                            seq_feature.qualifiers["db_xref"][0].split(":")[1],
-                            seq_feature.qualifiers["protein_id"][0],
-                            #seq_feature.qualifiers["note"][0],
+                if locus_tag:
+                    output_handle.write(">%s %s\n%s\n" % (
+                            seq_feature.qualifiers["locus_tag"][0],
                             record.description,
                             seq_feature.extract(record.seq)))
+                else:
+                    #print seq_feature
+                    try:
+                        len(seq_feature.qualifiers['translation'])
                     except:
-                        output_handle.write(">gi|%s|ref|%s| [%s]\n%s\n" % (
-                            seq_feature.qualifiers["locus_tag"][0],
-                            seq_feature.qualifiers["locus_tag"][0],
-                            record.description,
-                            seq_feature.extract(record.seq)))
+                        print seq_feature
+                        print "pseudogene?"
+                        continue
+                    #assert len(seq_feature.qualifiers['translation'])==1
+                    # gi|83716028|ref|YP_443839.1| matrix protein [Avian metapneumovirus]
+                    try:
+                        output_handle.write(">gi|%s|ref|%s| %s [%s]\n%s\n" % (
+                                seq_feature.qualifiers["db_xref"][0].split(":")[1],
+                                seq_feature.qualifiers["protein_id"][0],
+                                seq_feature.qualifiers["product"][0],
+                                record.description,
+                                seq_feature.extract(record.seq)))
+                    except:
+                        try:
+
+                            output_handle.write(">gi|%s|ref|%s| [%s]\n%s\n" % (
+                                seq_feature.qualifiers["db_xref"][0].split(":")[1],
+                                seq_feature.qualifiers["protein_id"][0],
+                                #seq_feature.qualifiers["note"][0],
+                                record.description,
+                                seq_feature.extract(record.seq)))
+                        except:
+                            output_handle.write(">gi|%s|ref|%s| [%s]\n%s\n" % (
+                                seq_feature.qualifiers["locus_tag"][0],
+                                seq_feature.qualifiers["locus_tag"][0],
+                                record.description,
+                                seq_feature.extract(record.seq)))
 
 if __name__ == '__main__':
     import argparse
@@ -55,15 +62,20 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument("-i", '--input_gbk', type=str, help="input gbk file")
     parser.add_argument("-o", '--outname', type=str, help="putput_name", default=False)
-
+    parser.add_argument("-l", '--locus_tag', action='store_true', help="add locus_tag to header (optional)", default=False)
 
     args = parser.parse_args()
 
-    if not args.outname:
-        outname = args.input_gbk.split(".")[0]+".ffn"
-    else:
-        outname = args.outname
+
 
     input_handle = open(args.input_gbk, "rU")
     seq_records = list(SeqIO.parse(input_handle, "genbank"))
-    gbk2ffn(seq_records, outname)
+
+    if not args.outname:
+        #print dir(seq_records[0])
+        outname = seq_records[0].annotations['accessions'][0].split(".")[0]+".ffn"
+        #print 'outname', outname
+    else:
+        outname = args.outname
+
+    gbk2ffn(seq_records, outname, args.locus_tag)
