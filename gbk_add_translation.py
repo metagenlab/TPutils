@@ -19,11 +19,18 @@ if __name__ == '__main__':
             locus2seq[record.name] = record.seq
         #print locus2seq
 
+        
         for record in genbank:
+            i = 1
             for feature in record.features:
+                i+=1
                 if feature.type == 'CDS':
-                               
-                    feature.qualifiers['translation'] = [str(locus2seq[feature.qualifiers['locus_tag'][0]])]
+                    print i
+                    try:
+                        feature.qualifiers['translation'] = [str(locus2seq[feature.qualifiers['protein_id'][0]])]
+                    except:
+                        print feature
+                        
         output_handle = open("test.gbk", 'w')            
         SeqIO.write(genbank,output_handle, "genbank")
     elif args.faa is None and args.gbk is not None and args.fna is not None:
