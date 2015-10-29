@@ -13,7 +13,7 @@ if __name__ == '__main__':
     if args.faa is not None and args.gbk is not None:
         
         faa = SeqIO.parse(args.faa, "fasta")
-        print faa
+        
         locus2seq = {}
         for record in faa:
             locus2seq[record.name] = record.seq
@@ -29,7 +29,11 @@ if __name__ == '__main__':
                     try:
                         feature.qualifiers['translation'] = [str(locus2seq[feature.qualifiers['protein_id'][0]])]
                     except:
-                        print feature
+                        try:
+                            feature.qualifiers['translation'] = [str(locus2seq[feature.qualifiers['locus_tag'][0]])]
+                        except:
+                            
+                            print feature
                         
         output_handle = open("test.gbk", 'w')            
         SeqIO.write(genbank,output_handle, "genbank")

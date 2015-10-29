@@ -79,7 +79,6 @@ def prokka_reannotation(seq_record_list, compare=False):
                     all_locus.append(locus_tag)
         else:
             all_locus.append(locus_tag)
-
         # wite fasta and annotate it using prokka
         with open('temp_genome.fna', 'w') as f:
             f.write('>temp_seq\n%s' % record.seq)
