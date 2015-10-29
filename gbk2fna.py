@@ -31,12 +31,13 @@ if __name__ == '__main__':
 
 
     args = parser.parse_args()
-
+    input_handle = open(args.input_gbk, "rU")
+    seq_records = list(SeqIO.parse(input_handle, "genbank"))
     if not args.outname:
-        outname = args.input_gbk.split(".")[0]+".fna"
+        #outname = args.input_gbk.split(".")[0]+".fna"
+        outname = seq_records[0].id.split('.')[0] + ".fna"
     else:
         outname = args.outname
 
-    input_handle = open(args.input_gbk, "rU")
-    seq_records = list(SeqIO.parse(input_handle, "genbank"))
+
     gbk2fna(seq_records, outname)

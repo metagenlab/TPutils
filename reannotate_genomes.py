@@ -13,29 +13,45 @@
 
 
 
-def prokka_reannotation(*genbank_files):
+def prokka_reannotation(seq_record_list, compare=False):
+    '''
+    Reannotate seq record using prokka
+    INPUT: list of seqrecord objects (one/sequence to reannotate)
+
+    '''
+
     import re
     import datetime
+    from Bio.SeqRecord import SeqRecord
+    from Bio import SeqIO
+    import gbk_check
     all_locus = []
     l = open('reannotation_prokka_log.txt', 'w')
     l.write('reference_name\tnew_name\taccession\tref_locus_tag\tnew_locus_tag\tref_n_CDS\tnew_n_CDS\tn_CDS_identical\n')
-    print 'reference_name\tnew_name\taccession\tref_locus_tag\tnew_locus_tag\tref_n_CDS\tnew_n_CDS\tn_CDS_identical'
+    #print 'reference_name\tnew_name\taccession\tref_locus_tag\tnew_locus_tag\tref_n_CDS\tnew_n_CDS\tn_CDS_identical'
 
-    for genbank_file in genbank_files:
-        from Bio import SeqIO
+    reanotated_gbk_list = []
+
+    for record in seq_record_list:
+        print '####### one record #########'
+        print record
+        print
+        print '####### features ###########'
+        print record.features
+        print '########## length ##########', len(record)
         import shell_command
-        seq_records = list(SeqIO.parse(genbank_file, "genbank"))
-        if len(seq_records) > 1:
-            raise IOError('Wrong input, only scaffolded genomes should be reannotated with this script')
-        else:
-            record = seq_records[0]
-        #print dir(record)
-        #print record.annotations
+        assert type(record) == SeqRecord
+        #    raise IOError('Wrong input, only scaffolded genomes should be reannotated with this script')
+
         record_annotations = record.annotations
-        record_annotations['comment'] = 'Genome reannotated using PROKKA version 1.1'
+        try:
+            record_annotations['comment'] += '\nGenome reannotated using PROKKA version 1.1'
+        except KeyError:
+            record_annotations['comment'] = 'Genome reannotated using PROKKA version 1.1'
         record_name = record.name
+
         record_id = record.id
-        record_description = record.description
+        record_description = gbk_check.clean_description(record.description)
         record_dbxrefs = record.dbxrefs
 
         # create locus tag based on genus and species name
@@ -68,7 +84,7 @@ def prokka_reannotation(*genbank_files):
         with open('temp_genome.fna', 'w') as f:
             f.write('>temp_seq\n%s' % record.seq)
 
-        cmd = 'prokka --kingdom Bacteria --compliant --centre CHUV --locustag %s --outdir %s -genus temp_genus -strain temp_strain temp_genome.fna' % (locus_tag, locus_tag)
+        cmd = 'prokka --force --kingdom Bacteria --compliant --centre CHUV --locustag %s --outdir %s -genus temp_genus -strain temp_strain temp_genome.fna' % (locus_tag, locus_tag)
 
 
         today = datetime.date.today()
@@ -81,46 +97,47 @@ def prokka_reannotation(*genbank_files):
 
 
         out, err, n = shell_command.shell_command(cmd)
-        reanotated_gbk = list(SeqIO.parse(prokka_genbank, "genbank"))
+        print out
 
-        reanotated_gbk[0].id = record_id
-        reanotated_gbk[0].name = record_name
-        reanotated_gbk[0].annotations = record_annotations
-        reanotated_gbk[0].description = record_description
-        reanotated_gbk[0].dbxrefs = record_dbxrefs
-        reanotated_gbk[0].features[0] = record.features[0]
+        reanotated_gbk = SeqIO.read(prokka_genbank, "genbank")
+
+        reanotated_gbk.id = record_id
+        reanotated_gbk.name = record_name
+        reanotated_gbk.annotations = record_annotations
+        reanotated_gbk.description = record_description
+        reanotated_gbk.dbxrefs = record_dbxrefs
+        reanotated_gbk.features[0] = record.features[0]
 
         #count number of identical ORF
-        ref_CDS = 0
-        for feature in record.features:
-            if feature.type=='CDS':
-                if ref_CDS == 0:
-                    ref_locus_tag = feature.qualifiers['locus_tag'][0].split('_')[0]
-                ref_CDS+=1
+        if compare:
+            ref_CDS = 0
+            for feature in record.features:
+                if feature.type=='CDS':
+                    if ref_CDS == 0:
+                        ref_locus_tag = feature.qualifiers['locus_tag'][0].split('_')[0]
+                    ref_CDS+=1
 
-        new_CDS = 0
-        identical_CDS = 0
-        # count number of identical features (exact same location)
-        for new_feature in reanotated_gbk[0].features:
-            if new_feature.type == 'CDS':
-                new_CDS+=1
-                for ref_feature in record.features:
-                    if ref_feature.type == 'CDS':
-                        if ref_feature.location.start == new_feature.location.start and ref_feature.location.end == new_feature.location.end:
-                            identical_CDS +=1
-                            break
-
-        accession = reanotated_gbk[0].annotations["accessions"][0]
-
-        out_name = '%s_prokka_reannot.gbk' % accession
-        with open(out_name, 'w') as f:
-            SeqIO.write(reanotated_gbk[0], f, 'genbank')
-
-        #print 'Ref CDS', ref_CDS, 'New CDS', new_CDS, 'Identical CDS', identical_CDS
-        #'reference_file_name\tnew_file_name\taccession\tref_locus_tag\tnew_locus_tag\tref_n_CDS\tnew_n_CDS\tn_CDS_identical'
-        l.write('%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n' % (genbank_file, out_name, accession, ref_locus_tag, locus_tag, ref_CDS, new_CDS, identical_CDS))
-        print '%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s' % (genbank_file, out_name, accession, ref_locus_tag, locus_tag, ref_CDS, new_CDS, identical_CDS)
-
+            new_CDS = 0
+            identical_CDS = 0
+            # count number of identical features (exact same location)
+            for new_feature in reanotated_gbk.features:
+                if new_feature.type == 'CDS':
+                    new_CDS+=1
+                    for ref_feature in record.features:
+                        if ref_feature.type == 'CDS':
+                            if ref_feature.location.start == new_feature.location.start and ref_feature.location.end == new_feature.location.end:
+                                identical_CDS +=1
+                                break
+            #accession = reanotated_gbk[0].annotations["accessions"][0]
+            #print 'Ref CDS', ref_CDS, 'New CDS', new_CDS, 'Identical CDS', identical_CDS
+            #'reference_file_name\tnew_file_name\taccession\tref_locus_tag\tnew_locus_tag\tref_n_CDS\tnew_n_CDS\tn_CDS_identical'
+            try:
+                l.write('%s\t%s\t%s\t%s\t%s\t%s\n' % (accession, ref_locus_tag, locus_tag, ref_CDS, new_CDS, identical_CDS))
+            except:
+                pass
+            #print '%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s' % (genbank_file, out_name, accession, ref_locus_tag, locus_tag, ref_CDS, new_CDS, identical_CDS)
+        reanotated_gbk_list.append(reanotated_gbk)
+    return reanotated_gbk_list
 
 def prokka_annotation_transfer(genbank_file, new_fna_file):
     import re
@@ -155,7 +172,7 @@ def prokka_annotation_transfer(genbank_file, new_fna_file):
         print record
 
     '''
-    cmd = 'prokka --kingdom Bacteria --compliant --locustag %s --centre CHU --outdir %s -genus temp_genus -strain temp_strain %s' % (locus_tag, locus_tag, new_fna_file)
+    cmd = 'prokka --cpus 8 --kingdom Bacteria --compliant --locustag %s --centre CHU --outdir %s -genus temp_genus -strain temp_strain %s' % (locus_tag, locus_tag, new_fna_file)
     '''
     import datetime
     today = datetime.date.today()
@@ -266,6 +283,18 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     if not args.anotation_transfer:
-        prokka_reannotation(*args.input_gbk)
+        from Bio import SeqIO
+        seq_record_list = []
+        for genbank_file in args.input_gbk:
+            seq_record_list.append(list(SeqIO.parse(genbank_file, "genbank")))
+        reanotated_record = prokka_reannotation(seq_record_list)
+
+        accession = reanotated_record[0].annotations["accessions"][0]
+
+        out_name = '%s_prokka_reannot.gbk' % accession
+        with open(out_name, 'w') as f:
+            SeqIO.write(reanotated_record[0], f, 'genbank')
+
+
     else:
         prokka_annotation_transfer(args.input_gbk[0], args.input_fna)

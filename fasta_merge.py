@@ -20,7 +20,7 @@ if __name__ == '__main__':
     from Bio import SeqIO
     parser = argparse.ArgumentParser()
     parser.add_argument("-f", '--input_fna', type=str, help="input fna file")
-    parser.add_argument("-n", '--header', type=str, help="Header", default="'concatenated contigs")
+    parser.add_argument("-n", '--header', type=str, help="Header")
 
 
 
@@ -29,6 +29,8 @@ if __name__ == '__main__':
     merged_seq = merge_fasta(fasta_records)
 
     output_name = args.input_fna.split('.')[0] + '_concat.fna'
-
+    if not args.header:
+        args.header = args.input_fna.split('.')[0]
+    
     with open(output_name, 'w') as f:
         f.write('>%s\n%s' % (args.header, merged_seq))
