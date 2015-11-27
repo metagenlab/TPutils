@@ -155,8 +155,8 @@ def global_align(seq_record1, seq_record2):
     
     #gap_open = -10
     #gap_extend = -0.5
-    print type(seq_record1)
-    print type(seq_record2)
+    #print type(seq_record1)
+    #print type(seq_record2)
     
     seq_record1.seq = seq_record1.seq.upper()
     seq_record2.seq = seq_record2.seq.upper()

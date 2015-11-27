@@ -14,6 +14,7 @@ def gbk2faa(seq_records, outname, format = False):
     import re
     output_handle = open(outname, "w")
 
+
     for record in seq_records:
         description = record.description
         description = re.sub(", complete genome\.", "", description)
@@ -25,18 +26,31 @@ def gbk2faa(seq_records, outname, format = False):
         description = re.sub(" chromosome", "", description)
         description = re.sub(" DNA", "S.", description)
 
+
+        all_prot_ids = []
+        
         for seq_feature in record.features:
             if seq_feature.type == "CDS":
+                try:
+                    if seq_feature.qualifiers["protein_id"][0] in all_prot_ids:
+                        print 'duplicated protein id:', seq_feature.qualifiers["protein_id"][0]
+                        continue
+                    else:
+                        all_prot_ids.append(seq_feature.qualifiers["protein_id"][0])
+                except KeyError:
+                    pass
                 # check presence of a protein sequence
                 try:
                     len(seq_feature.qualifiers['translation'])
                 except:
-                    print seq_feature
+                    #print seq_feature
+                    pass
                     #sys.stderr.write(seq_feature.location.start)
                     #sys.stderr.write("pseudogene?")
                     continue
                 #assert len(seq_feature.qualifiers['translation'])==1
                 # gi|83716028|ref|YP_443839.1| matrix protein [Avian metapneumovirus]
+
                 if format:
                     # output only locus tag and species name
                     try:
@@ -52,7 +66,8 @@ def gbk2faa(seq_records, outname, format = False):
                                                 description,
                                                 seq_feature.qualifiers['translation'][0]))
                         except:
-                            print seq_feature
+                            #print seq_feature
+                            pass
                 else:
 
                     try:
@@ -80,6 +95,7 @@ def gbk2faa(seq_records, outname, format = False):
                                 seq_feature.qualifiers['translation'][0]))
 
 
+
 if __name__ == '__main__':
     import argparse
     from Bio import SeqIO
@@ -94,7 +110,6 @@ if __name__ == '__main__':
 
     input_handle = open(args.input_gbk, "rU")
     seq_records = list(SeqIO.parse(input_handle, "genbank"))
-
     if not args.outname:
         # use input file to rename the file
         #outname = args.input_gbk.split(".")[0]+".faa"

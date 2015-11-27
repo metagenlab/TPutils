@@ -75,7 +75,11 @@ if __name__ == '__main__':
 
     stdout_str, stderr_str, runcode = shell_command.shell_command("barrnap %s" % args.input)
 
-    #print stdout_str
+    if 'not found' in stderr_str:
+        raise(Exception('Barrnap was not found on path, please install it'))
+        import sys
+        sys.exit()
+
 
     rrna_16S, rrna_23S, rrna_5S  = search_16S_rrna(parse_barrnap_output(stdout_str))
 

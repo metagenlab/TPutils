@@ -108,8 +108,11 @@ def circos_gc_skew(record):
             seq = record.seq[gap_locations[i-1].end:gap_locations[i].start]
             chr_start = gap_locations[i-1].end
         print i, "seq", gap_locations[i-1].end, gap_locations[i].start, gap_locations[i].start - gap_locations[i-1].end
-        values = GC_skew(seq, 1000)
 
+        try:
+            values = GC_skew(seq, 1000)
+        except:
+            print len(seq), seq
         contig_name = record.name + "_%s" % (i + 1)
 
         for i in range(0, len(values)):

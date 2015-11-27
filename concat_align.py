@@ -31,6 +31,7 @@ def multiple_alignments2concatenated_alignments(fasta_files, out_name):
         for taxon in taxons:
             # check if the considered taxon is present in the record
             if taxon not in all_seq_data[one_fasta]:
+                print taxon
                 # if taxon absent, create SeqRecord object "-"*len(alignments): gap of the size of the alignment
                 seq = Seq("-"*len(all_seq_data[one_fasta][all_seq_data[one_fasta].keys()[0]]))
                 all_seq_data[one_fasta][taxon] = SeqRecord(seq, id=taxon)
