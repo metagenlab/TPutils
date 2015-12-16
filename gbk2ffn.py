@@ -25,12 +25,12 @@ def gbk2ffn(seq_records, outname, locus_tag=False):
                             seq_feature.extract(record.seq)))
                 else:
                     #print seq_feature
-                    try:
-                        len(seq_feature.qualifiers['translation'])
-                    except:
-                        print seq_feature
-                        print "pseudogene?"
-                        continue
+                    #try:
+                    #    len(seq_feature.qualifiers['translation'])
+                    #except:
+                    #    print seq_feature
+                    #    print "pseudogene?"
+                    #    continue
                     #assert len(seq_feature.qualifiers['translation'])==1
                     # gi|83716028|ref|YP_443839.1| matrix protein [Avian metapneumovirus]
                     try:
@@ -73,7 +73,12 @@ if __name__ == '__main__':
 
     if not args.outname:
         #print dir(seq_records[0])
-        outname = seq_records[0].annotations['accessions'][0].split(".")[0]+".ffn"
+        try:
+            outname = seq_records[0].annotations['accessions'][0].split(".")[0]+".ffn"
+        except:
+            print seq_records[0]
+            import sys
+            sys.exit()
         #print 'outname', outname
     else:
         outname = args.outname

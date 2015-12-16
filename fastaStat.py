@@ -58,4 +58,4 @@ if __name__ == '__main__':
     if options.percent:
             basecount=baseCount(concatSeq)
             for base in basecount.keys():
-                    sys.stdout.write(base + "\t" + basecount[base] + "\n")
+                    sys.stdout.write(base + "\t" + str(basecount[base]) + "\n")

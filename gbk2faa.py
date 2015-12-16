@@ -34,7 +34,6 @@ def gbk2faa(seq_records, outname, format = False):
                 try:
                     if seq_feature.qualifiers["protein_id"][0] in all_prot_ids:
                         print 'duplicated protein id:', seq_feature.qualifiers["protein_id"][0]
-                        continue
                     else:
                         all_prot_ids.append(seq_feature.qualifiers["protein_id"][0])
                 except KeyError:
