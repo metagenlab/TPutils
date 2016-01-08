@@ -28,6 +28,33 @@ def is_annotated(gbk_record):
     else:
         return True
 
+def remove_record_taxon_id(record):
+    if record.features[0].type == 'source':
+        # delete evendual taxon_id (taxon id will be reattributed in the db based on the organism name)
+        #try:
+        if 'db_xref' in record.features[0].qualifiers:
+            for item in record.features[0].qualifiers['db_xref']:
+                if 'taxon' in item:
+                    index = record.features[0].qualifiers['db_xref'].index(item)
+                    record.features[0].qualifiers['db_xref'].pop(index)
+                    if 'strain' in record.features[0].qualifiers:
+                        if ';' in record.features[0].qualifiers['strain'][0]:
+                            print 'ACHRTUNG: record %s has 2 strain names! check and edit source manually' % record.name
+                            # put everythink lower size
+                            strain = record.features[0].qualifiers['strain'][0].split(';')[1]
+                        else:
+                            strain = record.features[0].qualifiers['strain'][0]
+                        if strain.lower() not in record.annotations['source'].lower():
+                             
+                            record.annotations['source'] += ' %s' % strain
+                            record.annotations['organism'] = record.annotations['source']
+                            print record.annotations['source']
+                    else:
+                        print 'ACHTUNG: no strain for %s, source uniqueness should be checked' % record.name
+    else:
+        print 'ACHRTUNG: no source for record %s' % record.name
+    return record
+    
 def clean_description(description):
     import re
     description = re.sub(", complete genome\.", "", description)
@@ -63,6 +90,7 @@ def check_gbk(gbff_files):
                 if is_annotated(plasmid):
                     out_name = plasmid.name + '.gbk'
                     plasmid.description = clean_description(plasmid.description)
+                    plasmid = remove_record_taxon_id(plasmid)
                     with open(out_name, 'w') as f:
                         SeqIO.write(plasmid, f, 'genbank')
                 else:
@@ -91,7 +119,7 @@ def check_gbk(gbff_files):
 
 
                 merged_record.description = clean_description(merged_record.description)
-
+                merged_record = remove_record_taxon_id(merged_record)
 
                 out_name = chromosome[0].name + '.gbk'
                 with open(out_name, 'w') as f:
