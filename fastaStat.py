@@ -63,9 +63,17 @@ if __name__ == '__main__':
             for base in basecount.keys():
                     sys.stdout.write(base + "\t" + str(basecount[base]) + "\n")
         else:
-            for seq_record in SeqIO.parse(handle, "fasta"):
-                basecount=baseCount(seq_record.seq)
-                print seq_record.name
-                for base in basecount.keys():
-                    sys.stdout.write("%s\t%s\t%s(%%)\n" % (base, basecount[base], round(float(basecount[base])/len(seq_record.seq)*100, 2)))                
+            rec = list(SeqIO.parse(handle, "fasta"))
+            all_names = [seq_record.name for seq_record in rec]
+            all_basecount = [baseCount(seq_record.seq) for seq_record in rec]
+            sys.stdout.write('\t' + '\t'.join(all_names) + '\n')
+            for base in ['A','T','G','C','N', '-']:
+                sys.stdout.write("%s\t" % base)
+                for i, seq_record in enumerate(rec):
+                    #basecount=baseCount(seq_record.seq)
+                    try:
+                        sys.stdout.write("%s (%s %%)\t" % (all_basecount[i][base], round(float(all_basecount[i][base])/len(seq_record.seq)*100, 2)))
+                    except:
+                        sys.stdout.write("-")
+                sys.stdout.write("\n")
     handle.close()

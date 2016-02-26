@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import pairwiseid_needle
+from blast_utils import run_prodigal
 
 def check_blast_colocalization(record1, record2, seq_range = 0.15):
     start1 = int(record1.alignments[0].hsps[0].sbjct_start)
@@ -31,39 +32,6 @@ def check_blast_colocalization(record1, record2, seq_range = 0.15):
         return False
 
 
-def run_prodigal(fasta_seq):
-    from Bio import SeqIO
-    import shell_command
-    import StringIO
-    from tempfile import NamedTemporaryFile
-    cmd = "prodigal -q -a temp.faa -i %s" % fasta_seq
-    print cmd
-    sdt_out, sdt_err, err = shell_command.shell_command(cmd)
-    print sdt_out
-    print sdt_err
-    shell_command.shell_command('sed -i "s/*//g" temp.faa')
-    #print sdt_out, sdt_err, err
-    #shell_command.shell_command("seqret -sequence %s -feature -fformat gff -fopenfile temp.gff -osformat genbank -auto -outseq temp.gbk" % fasta_seq)
-    #print sdt_out
-    #fasta_file = NamedTemporaryFile()
-    #fasta = open("temp.faa", 'w')
-    #fasta.write(sdt_out)
-    
-    #print "genbank", genbank
-    #for i in genbank:
-    #    print "record", i
-
-    #test = open("test.gbk", 'w')
-    #test.write(sdt_out)
-    
-    #for i in genbank:
-    #    print i
-    #records = [i for i in genbank]
-    #print records
-    #SeqIO.write(genbank, fasta, "fasta")
-    #fasta.close()
-    #fasta_file.flush()
-    return "temp.faa"
 
 
 def blastp_and_extract(query_fasta_prot, db_prot, seq_header = "query_seq"):

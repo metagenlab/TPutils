@@ -291,19 +291,52 @@ def write_id_table(record, array, out_name):
         row = [str(round(i,2)) for i in row]
         f.write(name + "\t" + "\t".join(row) + "\n")
 
+def pairewise_identity(seq1, seq2):
+    A=list(seq1)
+    B=list(seq2)
+    identical_sites = 0
+    aligned_sites = 0
+    gaps=0
+    for n in range(0, len(A)):
+        if A[n] != "-" and B[n] != "-":
+            aligned_sites+=1
+        else:
+            continue
+        if A[n]==B[n]:
+            identical_sites+=1
+    if aligned_sites == 0:
+        # return false if align length = 0
+        return False
+    else:
+        return 100*(identical_sites/float(aligned_sites))
 
+def get_identity_matrix_from_multiple_alignment(alignment):
+    # [len(alignment)+1, len(alignment)]
+    identity_matrix = np.chararray((len(alignment)+1, len(alignment)+1), itemsize=30)
+    identity_matrix[0,0] = "-"
+    # first column = locus tags
+    for x in range(0,len(alignment)):
+        identity_matrix[x+1, 0] = alignment[x].name
+        identity_matrix[0, x+1] = alignment[x].name
 
-
+        for y in range(x, len(alignment)):
+            identity = pairewise_identity(alignment[x], alignment[y])
+            #print "identity", identity
+            identity_matrix[y+1, x+1] = round(identity, 2)
+            identity_matrix[x+1, y+1] = round(identity, 2)
+    #print identity_matrix
+    return identity_matrix
 
 if __name__ == '__main__':
 
     import argparse
     parser = argparse.ArgumentParser()
-    parser.add_argument("-a", '--seq1',type=str,help="seq1")
-    parser.add_argument("-b", '--seq2',type=str,help="seq2")
+    parser.add_argument("-1", '--seq1',type=str,help="seq1")
+    parser.add_argument("-2", '--seq2',type=str,help="seq2")
     parser.add_argument("-m", '--multifasta',type=str,help="input multi fasta, align all against all")
     parser.add_argument("-o", '--out_name',type=str,help="output name, default = input_name_identity.tab")
-
+    parser.add_argument("-a", '--alignment',type=str,help="get identity matrix from msa")
+    
     args = parser.parse_args()
 
     if args.seq1 and args.seq2:
@@ -311,7 +344,13 @@ if __name__ == '__main__':
         sys.exit()
         #alns = pairwise2.align.globalds(args.seq1, args.seq2, DNA_matrix, -10, -0.5)
         #print format_alignment(*alns[0])
-
+    if len(args.alignment) >0:
+        align = AlignIO.read(args.alignment, "fasta")
+        m = get_identity_matrix_from_multiple_alignment(align)
+        for i, row in enumerate(m):
+            print '\t'.join(row)
+        
+        sys.exit()
     
     if not args.out_name:
         out_name = re.sub("\..*", "_identity.tab", args.multifasta)

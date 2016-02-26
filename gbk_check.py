@@ -45,14 +45,15 @@ def remove_record_taxon_id(record):
                         else:
                             strain = record.features[0].qualifiers['strain'][0]
                         if strain.lower() not in record.annotations['source'].lower():
-                             
+                            msg = 'changing source %s' % record.annotations['source']
                             record.annotations['source'] += ' %s' % strain
+                            print "ACHRTUNG\t" + msg + "\t--> %s " % record.annotations['source']
                             record.annotations['organism'] = record.annotations['source']
-                            print record.annotations['source']
+
                     else:
-                        print 'ACHTUNG: no strain for %s, source uniqueness should be checked' % record.name
+                        print 'ACHTUNG\t no strain  record \t%s, source uniqueness should be checked' % record.name
     else:
-        print 'ACHRTUNG: no source for record %s' % record.name
+        print 'ACHRTUNG\t no source for record \t%s' % record.name
     return record
     
 def clean_description(description):
@@ -65,11 +66,15 @@ def clean_description(description):
     description = re.sub(" complete genome sequence\.", "", description)
     description = re.sub(" complete genome\.", "", description)
     description = re.sub(" chromosome", "", description)
-    description = re.sub(" DNA", "S.", description)
+    description = re.sub(" DNA", "", description)
     description = re.sub("Merged record from ", "", description)
     description = re.sub(", wgs", "", description)
     description = re.sub("Candidatus ", "", description)
     description = re.sub(".contig.0_1, whole genome shotgun sequence.", "", description)
+    description = re.sub("complete genome, isolate", "", description)
+    description = re.sub(" complete", "", description)
+    #description = re.sub(", : 1.", "", description)
+    
     return description
 
 def check_gbk(gbff_files):
@@ -85,7 +90,7 @@ def check_gbk(gbff_files):
         reannotated_records = []
 
         if len(plasmids) > 0:
-            print '######### plasmid(s) ############'
+            #print '######### plasmid(s) ############'
             for plasmid in plasmids:
                 if is_annotated(plasmid):
                     out_name = plasmid.name + '.gbk'
@@ -102,14 +107,14 @@ def check_gbk(gbff_files):
                     #    SeqIO.write(reannotated_record[0], f, 'genbank')
 
         if len(chromosome) > 0:
-            print '########## chromosome ###########'
+            #print '########## chromosome ###########'
             import concat_gbk
 
             if  chromosome[0].seq == 'N'*len(chromosome[0].seq):
-                print 'No sequences for %s, skipping! #################' % gbff_file
+                #print 'No sequences for %s, skipping! #################' % gbff_file
                 continue
             if is_annotated(chromosome[0]):
-                print '## %s annotated (file: %s), %s contigs' % (chromosome[0].name, gbff_file, len(chromosome))
+                #print '## %s annotated (file: %s), %s contigs' % (chromosome[0].name, gbff_file, len(chromosome))
 
                 if len(chromosome) > 1:
                     merged_record = concat_gbk.merge_gbk(chromosome)
@@ -125,11 +130,11 @@ def check_gbk(gbff_files):
                 with open(out_name, 'w') as f:
                     SeqIO.write(merged_record, f, 'genbank')
             else:
-                print '## %s NOT annotated (file: %s), %s contigs' % (chromosome[0].name, gbff_file, len(chromosome))
-                print 'Concatenating and reannotating gbk files...'
+                #print '## %s NOT annotated (file: %s), %s contigs' % (chromosome[0].name, gbff_file, len(chromosome))
+                #print 'Concatenating and reannotating gbk files...'
                 merged_record = concat_gbk.merge_gbk(chromosome, filter_size=1000)
-                print '########### merged record ##############'
-                print merged_record
+                #print '########### merged record ##############'
+                #print merged_record
                 reannotation_list.append(merged_record)
                 #reannotated_record = reannotate_genomes.prokka_reannotation([[merged_record]])[0]
                 #print '########### reannotated record #########'
@@ -140,11 +145,11 @@ def check_gbk(gbff_files):
                 #print out_name
                 #with open(out_name, 'w') as f:
                 #    SeqIO.write(reannotated_record, f, 'genbank')
-    print '############ reannotation list #####################', len(reannotation_list)
-    print reannotation_list
+    #print '############ reannotation list #####################', len(reannotation_list)
+    #print reannotation_list
     reannotated_genomes = reannotate_genomes.prokka_reannotation(reannotation_list)
     for reannotated_record in reannotated_genomes:
-        print reannotated_record
+        #print reannotated_record
         out_name = reannotated_record.id + '.gbk'
         with open(out_name, 'w') as f:
             SeqIO.write(reannotated_record, f, 'genbank')

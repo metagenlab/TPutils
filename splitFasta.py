@@ -35,11 +35,12 @@ def batch_iterator(iterator, batch_size) :
             yield batch
 
 
-def split_fasta(fasta_file, number_per_file=1000):
+def split_fasta(fasta_file, number_per_file=1000, out_directory=""):
     from Bio import SeqIO
+    import os
     record_iter = SeqIO.parse(open(fasta_file), "fasta")
     for i, batch in enumerate(batch_iterator(record_iter, number_per_file)) :
-         filename = "group_%i.fasta" % (i+1)
+         filename = os.path.join(out_directory, "group_%i.fasta" % (i+1))
          handle = open(filename, "w")
          count = SeqIO.write(batch, handle, "fasta")
          handle.close()
