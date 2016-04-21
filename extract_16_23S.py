@@ -5,6 +5,7 @@ import re
 
 def parse_barrnap_output(barnap_out):
 
+    #print barnap_out
     rrna_list = []
     for line in barnap_out.split("\n"):
         s = line.rstrip().split("\t")
@@ -18,6 +19,7 @@ def parse_barrnap_output(barnap_out):
   
 #fabrique une liste avec les 16Srrna
 def search_16S_rrna(processed_list):
+   
     rrna_16S = []
     rrna_23S = []
     rrna_5S = []
@@ -39,8 +41,11 @@ def search_16S_rrna(processed_list):
 
 #trouve le plus long 16S
 def find_longest_16S(rrna_16S):
-
-    longest_rrna = rrna_16S[0]
+    #print 'rrna_list', rrna_16S
+    try:
+        longest_rrna = rrna_16S[0]
+    except:
+        return None
     for i in range(1,len(rrna_16S)):
         length_of_16S = int(rrna_16S[i][2]) - int(rrna_16S[i][1])
         length_longest = int(longest_rrna[2]) - int(longest_rrna[1])
@@ -87,14 +92,18 @@ if __name__ == '__main__':
     longest23 = find_longest_16S(rrna_23S)
 
 
-
-
+    
+    
     if args.only_16s:
-        extract_seq(args.input, longest16[0], longest16[1], longest16[2], "_16S")
+        if longest16:
+            extract_seq(args.input, longest16[0], longest16[1], longest16[2], "_16S")
     elif args.only_23s:
-        extract_seq(args.input, longest23[0], longest23[1], longest23[2], "_23S")
+        if longest23:
+            extract_seq(args.input, longest23[0], longest23[1], longest23[2], "_23S")
     else:
-        extract_seq(args.input, longest16[0], longest16[1], longest16[2], "_16S")
-        extract_seq(args.input, longest23[0], longest23[1], longest23[2], "_23S")
+        if longest16:
+            extract_seq(args.input, longest16[0], longest16[1], longest16[2], "_16S")
+        if longest23:
+            extract_seq(args.input, longest23[0], longest23[1], longest23[2], "_23S")
 
 

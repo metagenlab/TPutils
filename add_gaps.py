@@ -19,7 +19,7 @@ def add_gaps(gbk_record, start_end_list):
             gbk_record.features.append(my_feature)
 
     #print gbk_record[40000:50000].features
-    SeqIO.write(gbk_record, sys.stdout, "genbank")
+    return gbk_record
 
 
 def parse_search_input(match_file):
@@ -46,4 +46,5 @@ if __name__ == '__main__':
     record = SeqIO.read(open(args.input_gbk,"r"), "genbank")
     gaps = parse_search_input(args.match_file)
     #print gaps
-    add_gaps(record, gaps)
+    record = add_gaps(record, gaps)
+    SeqIO.write(record, sys.stdout, "genbank")

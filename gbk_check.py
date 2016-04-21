@@ -28,6 +28,27 @@ def is_annotated(gbk_record):
     else:
         return True
 
+
+def count_missing_locus_tags(gbk_record):
+    count_CDS = 0
+    count_no_locus = 0
+    for feature in gbk_record.features:
+        if feature.type=='CDS':
+            count_CDS += 1
+            try:
+                test = feature.qualifiers['locus_tag']
+                #print 'locus ok'
+            except:
+                # missing locus case
+                count_no_locus += 1
+        pass
+    return count_no_locus, count_CDS
+
+
+
+
+
+
 def remove_record_taxon_id(record):
     if record.features[0].type == 'source':
         # delete evendual taxon_id (taxon id will be reattributed in the db based on the organism name)
@@ -83,7 +104,12 @@ def check_gbk(gbff_files):
     reannotation_list = []
 
     for gbff_file in gbff_files:
-        records = SeqIO.parse(open(gbff_file, "r"), "genbank")
+        records = list(SeqIO.parse(open(gbff_file, "r"), "genbank"))
+
+        for record in records:
+            n_missing, total = count_missing_locus_tags(record)
+            if n_missing > 0:
+                print '%s/%s missing locus tag for record %s' % (n_missing, total, record.name)
 
         chromosome, plasmids = filter_plasmid(records)
 

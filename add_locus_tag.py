@@ -10,11 +10,14 @@ if __name__ == '__main__':
 
 
     args = parser.parse_args()
-    if not args.check_locus and not args.replace_gene:
-        from Bio import SeqIO
-        handle = open(args.input, "rU")
-        for record in SeqIO.parse(handle, "genbank") :
 
+    from Bio import SeqIO
+    handle = open(args.input, "rU")
+    gbk_records = [i for i in SeqIO.parse(handle, "genbank")]
+
+
+    if not args.check_locus and not args.replace_gene:
+        for record in  gbk_records:
             x = 1
             for i in range(0, len(record.features)):
                 print "x", x
@@ -46,9 +49,6 @@ if __name__ == '__main__':
                         y+=1
                 except:
                     pass
-
-                #print record.features[i+1]
-
             out_name = args.input.split(".")[0] + "_locus.gbk"
             handle2 = open(out_name, "w")
             SeqIO.write(record, handle2, "genbank")
@@ -59,7 +59,7 @@ if __name__ == '__main__':
         count_no_locus = 0
         from Bio import SeqIO
         handle = open(args.input, "rU")
-        for record in SeqIO.parse(handle, "genbank") :
+        for record in gbk_records :
             for feature in record.features:
                 if feature.type=='CDS':
                     count_CDS += 1
@@ -79,22 +79,8 @@ if __name__ == '__main__':
             SeqIO.write(record, handle2, "genbank")
 
     else:
-        import sys
-        count_CDS = 0
-        count_no_locus = 0
-        from Bio import SeqIO
-        handle = open(args.input, "rU")
-        for record in SeqIO.parse(handle, "genbank") :
-            for feature in record.features:
-                if feature.type=='CDS':
-                    count_CDS += 1
-                    try:
-                        test = feature.qualifiers['locus_tag']
-                        #print 'locus ok'
-                    except:
-                        print '############## no locus:', feature.qualifiers['gene']
-                        count_no_locus += 1
-                    #sys.exit()
-            pass
-        print 'Features without locus:', count_no_locus
-        print 'Total number of CDS:', count_CDS
+        import gbk_check
+        for record in gbk_records:
+            count_no_locus, count_CDS = gbk_check.count_missing_locus_tags(record)
+            print 'Features without locus:', count_no_locus
+            print 'Total number of CDS:', count_CDS

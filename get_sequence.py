@@ -22,7 +22,9 @@ def get_sequence(file_name, file_format, start=False, stop=False, contig=False, 
 
     tag = False
     if not contig:
+        #print 'AAA'
         for record_name in contig_name2record:
+            #print record_name
             record = contig_name2record[record_name]
             for feature in record.features:
                 if feature.type != "CDS":
