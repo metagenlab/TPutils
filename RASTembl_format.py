@@ -4,7 +4,7 @@ if __name__ == '__main__':
     import argparse
     parser = argparse.ArgumentParser(description='Edit embl file from RAST to work with embl submission system. Example usage: ' \
                                                  'RASTembl_format.py -i 2718.4.embl -l locux_prefixXYZ -o "Cardiobacterium hominis" -t 573 -p ' \
-                                                 ' PRJEB13157 -d "Draft genome sequence of Cardiobacterium hominis"')
+                                                 ' PRJEB13157 -d "Draft genome sequence of Cardiobacterium hominis. ATTENTION: sensitive to changes in the RAST FILE FORMAT!"')
     parser.add_argument("-i",'--input',type=str,help="input embl", required=True)
     parser.add_argument("-l",'--locus',type=str,help="locus_tag_prefix", required=True)
     parser.add_argument("-o",'--organism',type=str,help="organism name", required=True)
@@ -88,6 +88,10 @@ if __name__ == '__main__':
         record.features = new_features
         updated_records.append(record)
     print 'n locus: %s' % x
+
+    # write temp file and edit it...
+    # todo: use strings instead of writing the temp file
+
     out_name = args.input.split(".")[0] + "_locus.tmp"
     handle2 = open(out_name, "w")
     SeqIO.write(updated_records, handle2, "embl")
@@ -96,7 +100,7 @@ if __name__ == '__main__':
     for type in set(type_list):
         if type not in ["CDS", "tRNA","rRNA", 'source']:
             raise IOError('Unexpected feature type: %s' % type)
-    #import sys
+    # replace specific rows
     i = 0
     with open(args.input.split(".")[0] + "_locus.tmp") as f:
         match = False
