@@ -115,6 +115,10 @@ def check_gbk(gbff_files):
 
         reannotated_records = []
 
+        cleaned_records = []
+        plasmid_reannot = False
+        chromosome_reannot = False
+
         if len(plasmids) > 0:
             #print '######### plasmid(s) ############'
             for plasmid in plasmids:
@@ -124,7 +128,9 @@ def check_gbk(gbff_files):
                     plasmid = remove_record_taxon_id(plasmid)
                     with open(out_name, 'w') as f:
                         SeqIO.write(plasmid, f, 'genbank')
+                    cleaned_records.append(plasmid)
                 else:
+                    plasmid_reannot = True
                     reannotation_list.append([plasmid])
                     #reannotated_record = reannotate_genomes.prokka_reannotation([[plasmid]])
                     #accession = reannotated_record[0].annotations["accessions"][0]
@@ -133,6 +139,15 @@ def check_gbk(gbff_files):
                     #    SeqIO.write(reannotated_record[0], f, 'genbank')
 
         if len(chromosome) > 0:
+
+            '''
+
+            Assume single chromosome bacteria.
+            If multiple record founds, consider those as contigs.
+            Contigs contatenation with 200 N between each (labelled as assembly_gap feature)
+
+            '''
+
             #print '########## chromosome ###########'
             import concat_gbk
 
@@ -155,7 +170,9 @@ def check_gbk(gbff_files):
                 out_name = chromosome[0].name + '.gbk'
                 with open(out_name, 'w') as f:
                     SeqIO.write(merged_record, f, 'genbank')
+                cleaned_records.append(merged_record)
             else:
+                chromosome_reannot = True
                 #print '## %s NOT annotated (file: %s), %s contigs' % (chromosome[0].name, gbff_file, len(chromosome))
                 #print 'Concatenating and reannotating gbk files...'
                 merged_record = concat_gbk.merge_gbk(chromosome, filter_size=1000)
@@ -171,8 +188,18 @@ def check_gbk(gbff_files):
                 #print out_name
                 #with open(out_name, 'w') as f:
                 #    SeqIO.write(reannotated_record, f, 'genbank')
+            cleaned_records.append(merged_record)
+        if plasmid_reannot and not chromosome_reannot:
+            raise TypeError('combination of unannotated plasmid(s) and annotated chromosome')
+        elif not plasmid_reannot and chromosome_reannot:
+            raise TypeError('combination of annotated plasmid(s) and unannotated chromosome')
+        else:
+            out_name = gbff_file.split('.')[0] + '_merged.gbk'
+            with open(out_name, 'w') as f:
+                SeqIO.write(cleaned_records, f, 'genbank')
+
     #print '############ reannotation list #####################', len(reannotation_list)
-    #print reannotation_list
+    print "reannotating %s genomes" % len(reannotation_list)
     reannotated_genomes = reannotate_genomes.prokka_reannotation(reannotation_list)
     for reannotated_record in reannotated_genomes:
         #print reannotated_record
