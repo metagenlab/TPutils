@@ -54,7 +54,7 @@ def relaunch_vital_it_job(status, cmd_data):
     shell_command.shell_command("rm %s" % cmd_data["-o"])
     shell_command.shell_command("rm %s" % cmd_data["-e"])
     if status == "MEMKILL":
-        mem = int(cmd_data["-M"])/1000
+        mem = int(cmd_data["-M"])/1000000
         mem+=2
         script = generate_bsub_file.BSUB_script(command=cmd_data["cmd"],
                                         mem_in_GB=mem,
@@ -64,10 +64,8 @@ def relaunch_vital_it_job(status, cmd_data):
         generate_bsub_file.run_job(script)
         sys.stdout.write("Job %s relaunched with increased memory limit: %s GB" % (cmd_data["-J"], mem))
     elif status == "LIMITKILL":
-        mem = int(cmd_data["-M"])/1000000
-        mem+=2
         script = generate_bsub_file.BSUB_script(command=cmd_data["cmd"],
-                                        mem_in_GB=mem,
+                                        mem_in_GB=cmd_data["-M"]/1000000,
                                         name=cmd_data["-J"],
                                         log_file=cmd_data["-o"],
                                         error_file=cmd_data["-e"],
