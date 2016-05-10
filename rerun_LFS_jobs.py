@@ -62,10 +62,10 @@ def relaunch_vital_it_job(status, cmd_data):
                                         log_file=cmd_data["-o"],
                                         error_file=cmd_data["-e"])
         generate_bsub_file.run_job(script)
-        sys.stdout.write("Job %s relaunched with increased memory limit: %s GB" % (cmd_data["-J"], mem))
+        sys.stdout.write("Job %s relaunched with increased memory limit: %s GB\n" % (cmd_data["-J"], mem))
     elif status == "LIMITKILL":
         script = generate_bsub_file.BSUB_script(command=cmd_data["cmd"],
-                                        mem_in_GB=cmd_data["-M"]/1000000,
+                                        mem_in_GB=int(cmd_data["-M"])/1000000,
                                         name=cmd_data["-J"],
                                         log_file=cmd_data["-o"],
                                         error_file=cmd_data["-e"],
@@ -73,7 +73,7 @@ def relaunch_vital_it_job(status, cmd_data):
         generate_bsub_file.run_job(script)
         sys.stdout.write("Job %s relaunched with queue long" % cmd_data["-J"])
     else:
-        raise IOError("Uknwon LFS error status %s" % status)
+        raise IOError("Uknwon LFS error status %s\n" % status)
 
 if __name__ == '__main__':
     import argparse
