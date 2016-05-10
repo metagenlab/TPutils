@@ -80,6 +80,14 @@ def prokka_reannotation(seq_record_list, compare=False):
         else:
             all_locus.append(locus_tag)
         # wite fasta and annotate it using prokka
+        #print record.seq
+        #print str(record.seq) == len(record.seq) * 'N'
+        #print len(record.seq) * 'N'
+        #print record.id
+        if str(record.seq) == len(record.seq) * 'N':
+
+            print 'No sequence in record %s' % record.id
+            continue
         with open('temp_genome.fna', 'w') as f:
             f.write('>temp_seq\n%s' % record.seq)
 

@@ -14,7 +14,7 @@ from matplotlib.backends.backend_pdf import PdfPages
 
 
 
-def circos_gc_var(record):
+def circos_gc_var(record, windows=1000):
     '''
     :param record:
     :return: circos string with difference as compared to the average GC
@@ -46,9 +46,9 @@ def circos_gc_var(record):
                 seq = record.seq[gap_locations[i-1].end:gap_locations[i].start]
                 chr_start = gap_locations[i-1].end
             contig_name = record.name + "_%s" % (i +1)
-            for i in range(0, len(seq), 1000):
+            for i in range(0, len(seq), windows):
                 start = i
-                stop = i + 1000
+                stop = i + windows
                 #gc = ((GC(record.seq[start:stop])/average_gc) - 1)*100
                 gc = GC(record.seq[start:stop]) - average_gc
                 if stop > len(seq):
@@ -60,10 +60,10 @@ def circos_gc_var(record):
                 circos_string += "%s %s %s %s\n" % (contig_name, section_start, section_end, gc)
     else:
         seq = record.seq
-        contig_name = record.id.split('.')[0]
-        for i in range(0, len(seq), 1000):
+        contig_name = record.id #.split('.')[0]
+        for i in range(0, len(seq), windows):
             start = i
-            stop = i + 1000
+            stop = i + windows
             #gc = ((GC(record.seq[start:stop])/average_gc) - 1)*100
             gc = GC(record.seq[start:stop]) - average_gc
             if stop > len(seq):
@@ -74,7 +74,7 @@ def circos_gc_var(record):
     return circos_string
 
 
-def circos_gc_skew(record):
+def circos_gc_skew(record, windows=1000):
     '''
     :param record:
     :return: circos string with difference as compared to the average GC
@@ -85,7 +85,7 @@ def circos_gc_skew(record):
     '''
     from Bio.SeqFeature import FeatureLocation
     circos_string = ''
-    print "GENOME SIZE:", len(record.seq)
+    #print "GENOME SIZE:", len(record.seq)
 
     gap_locations = []
     for feature in record.features:
@@ -98,30 +98,41 @@ def circos_gc_skew(record):
     else:
         #gap_locations.append(FeatureLocation(gap_locations[-1].end + 1, len(record.seq)))
         gap_locations.append(FeatureLocation(len(record.seq), len(record.seq)))
+    #print 'gap locations', gap_locations
+    if len(gap_locations) > 1:
+        for i in range(0, len(gap_locations)):
+            if i == 0:
+                seq = record.seq[0:gap_locations[i].start]
+                chr_start = 0
+            else:
+                seq = record.seq[gap_locations[i-1].end:gap_locations[i].start]
+                chr_start = gap_locations[i-1].end
+            #print i, "seq", gap_locations[i-1].end, gap_locations[i].start, gap_locations[i].start - gap_locations[i-1].end
 
+            try:
+                values = GC_skew(seq, windows)
+            except:
+                print len(seq), seq
+            contig_name = record.name + "_%s" % (i + 1)
 
-    for i in range(0, len(gap_locations)):
-        if i == 0:
-            seq = record.seq[0:gap_locations[i].start]
-            chr_start = 0
-        else:
-            seq = record.seq[gap_locations[i-1].end:gap_locations[i].start]
-            chr_start = gap_locations[i-1].end
-        print i, "seq", gap_locations[i-1].end, gap_locations[i].start, gap_locations[i].start - gap_locations[i-1].end
-
+            for i in range(0, len(values)):
+                start = i *windows
+                stop = start + windows
+                #gc = ((GC(record.seq[start:stop])/average_gc) - 1)*100
+                section_start = chr_start + start
+                section_end = chr_start + stop
+                circos_string += "%s %s %s %s\n" % (contig_name, section_start, section_end, values[i])
+    else:
+        #print 'no gaps!'
         try:
-            values = GC_skew(seq, 1000)
+            values = GC_skew(record.seq, windows)
         except:
-            print len(seq), seq
-        contig_name = record.name + "_%s" % (i + 1)
-
+            values = GC_skew(record.seq, 2000)
         for i in range(0, len(values)):
-            start = i *1000
-            stop = start + 1000
-            #gc = ((GC(record.seq[start:stop])/average_gc) - 1)*100
-            section_start = chr_start + start
-            section_end = chr_start + stop
-            circos_string += "%s %s %s %s\n" % (contig_name, section_start, section_end, values[i])
+            start = i *windows
+            stop = start + windows
+
+            circos_string += "%s %s %s %s\n" % (record.name, start, stop, values[i])
 
     return circos_string
 
