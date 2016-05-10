@@ -26,6 +26,7 @@ Date: 2014
 from shell_command import shell_command
 import sys
 from time import sleep
+import time
 from tempfile import NamedTemporaryFile
 import re
 import string
@@ -164,8 +165,8 @@ def wait_multi_jobs(job_id_list):
            else:
               job_exited += status
               job_list.remove(job_id)
-        sleep(10)
-        print "wait!"
+        sleep(200)
+        print "Waiting for job completion : %s" % time.ctime()
     return job_exited
 
 
@@ -221,28 +222,30 @@ class BSUB_script(object):
         #import os
         # generate temporary file
         file_name = id_generator(24) + ".sub"
-        #file = NamedTemporaryFile()
+        #with NamedTemporaryFile() as temp_file:
+           
         # add content to temporary file
+        #temp_file.write(str(self))
         with open(file_name, "w") as f:
            f.write(str(self))
+        #f.close()
         # write file content to the disk
-        #file.flush()
-        f.close()
-        import time
-        #time.sleep(2)
+        #temp_file.flush()
+        #file_name.close()
+        #import time
+        #time.sleep(0.5)
         # define command line (file.name contain complete path)
-        command = 'bsub <' + file_name# file.name
+        command = 'bsub < ' + file_name # file_name
         # execute command line
         (stdout, stderr, return_code) = shell_command(command)
         # close temp file
         #file.close()
         #time.sleep(15)
-
         if return_code == 0:
-            # return job id
-            job_id=re.search("\d+", stdout).group(0)
-            print job_id
-            return int(job_id)
+           # return job id
+           job_id=re.search("\d+", stdout).group(0)
+           print job_id
+           return int(job_id)
         else:
-
-            raise(Exception('bsub submission command failed with exit status: ' + str(return_code)))
+          print command 
+          raise(Exception('bsub submission command failed with exit status: ' + str(return_code)))
