@@ -344,7 +344,7 @@ if __name__ == '__main__':
         sys.exit()
         #alns = pairwise2.align.globalds(args.seq1, args.seq2, DNA_matrix, -10, -0.5)
         #print format_alignment(*alns[0])
-    if len(args.alignment) >0:
+    if args.alignment is not None:
         align = AlignIO.read(args.alignment, "fasta")
         m = get_identity_matrix_from_multiple_alignment(align)
         for i, row in enumerate(m):

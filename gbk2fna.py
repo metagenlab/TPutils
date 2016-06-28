@@ -12,15 +12,16 @@
 def gbk2fna(seq_records, outname):
     output_handle = open(outname, "w")
 
-    for record in seq_records:
-        # if missing data, only write sequence and sequence id
+    if len(seq_records) > 1:
+        for record in seq_records:
+            output_handle.write(">%s\n%s\n" % (record.name, record.seq))
+    else:
         try:
-            gi = record.annotations["gi"]
-            source = record.annotations["source"]
-            output_handle.write(">%s gi|%s|%s\n%s\n" % (record.name, gi, source, record.seq))
+            gi = seq_records[0].annotations["gi"]
+            source = seq_records[0].annotations["source"]
+            output_handle.write(">%s gi|%s|%s\n%s\n" % (seq_records[0].name, gi, source, seq_records[0].seq))
         except:
-            output_handle.write(">%s\n%s\n" % (record.id, record.seq))
- 
+            output_handle.write(">%s\n%s\n" % (seq_records[0].name, seq_records[0].seq))
 
 if __name__ == '__main__':
     import argparse

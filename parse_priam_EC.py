@@ -11,7 +11,7 @@
 
 
 
-def locus2EC(priam_file, count_locus=False):
+def locus2EC(priam_file):
 
     locus_tag2EC_dico = {}
     with open(priam_file, "r") as f:
@@ -25,24 +25,10 @@ def locus2EC(priam_file, count_locus=False):
                 locus_tag = line.split(' ')[0][1:]
                 if locus_tag not in locus_tag2EC_dico:
                     locus_tag2EC_dico[locus_tag] = []
-
             else:
                 # valid EC
                 locus_tag2EC_dico[locus_tag].append(line.split('\t'))
-
-    if count_locus:
-        i = 0
-        for locus in locus_tag2EC_dico:
-            if len(locus_tag2EC_dico[locus]) > 0:
-                i+=1
-        print i
-    else:
-        for locus in locus_tag2EC_dico:
-            if len(locus_tag2EC_dico[locus]) > 0:
-                for i in locus_tag2EC_dico[locus]:
-                    print '%s\t%s' % (locus, i[0])
-
-
+    return locus_tag2EC_dico
 
 if __name__ == '__main__':
     import argparse
@@ -54,4 +40,16 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
 
-    locus2EC(args.input_priam, args.count_locus)
+    locus_tag2EC_dico = locus2EC(args.input_priam)
+
+    if args.count_locus:
+        i = 0
+        for locus in locus_tag2EC_dico:
+            if len(locus_tag2EC_dico[locus]) > 0:
+                i+=1
+        print i
+    else:
+        for locus in locus_tag2EC_dico:
+            if len(locus_tag2EC_dico[locus]) > 0:
+                for i in locus_tag2EC_dico[locus]:
+                    print '%s\t%s' % (locus, i[0])
