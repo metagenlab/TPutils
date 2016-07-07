@@ -168,7 +168,7 @@ def global_align(seq_record1, seq_record2):
 
     
     if _verify_alphabet(seq1) and _verify_alphabet(seq2):
-        #print "DNA!"
+        print "dna"
     #    alns = pairwise2.align.globalds(seq1, seq2, DNA_matrix, gap_open, gap_extend)
     #    print ">"+noms[id_seq1]
     #    print alns[0][0]
@@ -190,6 +190,10 @@ def global_align(seq_record1, seq_record2):
     #print _verify_alphabet(seq1)
 
     if _verify_alphabet(seq1) and _verify_alphabet(seq2):
+        print 'aa'
+        print _verify_alphabet(seq1)
+        print _verify_alphabet(seq2)
+
         #print "AA!"
     #    alns = pairwise2.align.globalds(seq1, seq2, matlist.blosum62, gap_open, gap_extend)
     #    return  alns[0]
@@ -199,7 +203,11 @@ def global_align(seq_record1, seq_record2):
         align = AlignIO.read(StringIO.StringIO(stdout), "emboss")
         return align
 
+
+
     else:
+        print _verify_alphabet(seq1)
+        print _verify_alphabet(seq2)
         raise "unkown alphabet!"
 
 
@@ -291,6 +299,7 @@ def write_id_table(record, array, out_name):
         row = [str(round(i,2)) for i in row]
         f.write(name + "\t" + "\t".join(row) + "\n")
 
+'''
 def pairewise_identity(seq1, seq2):
     A=list(seq1)
     B=list(seq2)
@@ -309,6 +318,8 @@ def pairewise_identity(seq1, seq2):
         return False
     else:
         return 100*(identical_sites/float(aligned_sites))
+'''
+
 
 def get_identity_matrix_from_multiple_alignment(alignment):
     # [len(alignment)+1, len(alignment)]
@@ -360,6 +371,7 @@ if __name__ == '__main__':
     if args.multifasta: 
         handle = open(args.multifasta, "rU")
         multifasta = [record for record in SeqIO.parse(handle, "fasta")]
+        handle.close()
         id_matrix = get_identity_matrix_from_multifasta(multifasta)
         write_id_table(multifasta, id_matrix, out_name)
 

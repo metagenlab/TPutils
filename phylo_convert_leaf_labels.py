@@ -10,7 +10,7 @@
 # ---------------------------------------------------------------------------
 
 
-def convert_leaf_labels(input_tree, biodb_name, accession2taxon=False):
+def convert_leaf_labels(input_tree, biodb_name, accession2taxon=False, taxon2accession=False):
     import shell_command
     import manipulate_trees
     import os
@@ -34,6 +34,14 @@ def convert_leaf_labels(input_tree, biodb_name, accession2taxon=False):
         manipulate_trees.convert_tree_accession2taxon_id(biodb_name,
                                                input_file,
                                                output_file)
+
+    if taxon2accession:
+        manipulate_trees.convert_tree_taxon_id2accession(biodb_name,
+                                               input_file,
+                                               output_file)
+
+
+
     else:
         manipulate_trees.convert_tree_taxon2genome(biodb_name,
                                                input_file,
@@ -42,7 +50,8 @@ def convert_leaf_labels(input_tree, biodb_name, accession2taxon=False):
 def convert_leaf_labels_from_genbank(input_tree, input_gbk_list):
     import gbk2accessiontodefinition
     import parse_newick_tree
-    
+
+
     id2description = gbk2accessiontodefinition.get_coressp(input_gbk_list)
     new_tree = parse_newick_tree.convert_terminal_node_names(input_tree, id2description, 'newick')
 
@@ -59,11 +68,15 @@ if __name__ == '__main__':
     parser.add_argument("-i", '--input_tree', type=str, help="input tree (newick)")
     parser.add_argument("-d", '--database_name', type=str, help="corresponding database name")
     parser.add_argument("-g", '--genbank_files', type=str, help="genbank files of all leaf nodes", nargs='+')
-    parser.add_argument("-t", '--accession2taxon', action='store_true', help="convert accession to taxon_id used in biosqldb")
+    parser.add_argument("-a", '--accession2taxon', action='store_true', help="convert accession to taxon_id used in biosqldb")
+    parser.add_argument("-t", '--taxon2accession', action='store_true', help="convert taxon id to accessions used in biosqldb")
 
     args = parser.parse_args()
     if args.database_name:
-        convert_leaf_labels(args.input_tree, args.database_name, accession2taxon=args.accession2taxon)
+        convert_leaf_labels(args.input_tree,
+                            args.database_name,
+                            accession2taxon=args.accession2taxon,
+                            taxon2accession=args.taxon2accession)
     if args.genbank_files:
         new_tree = convert_leaf_labels_from_genbank(args.input_tree, args.genbank_files)
         file_name = args.input_tree.split('.')[0]

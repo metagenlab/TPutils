@@ -24,6 +24,7 @@ def tblan2heatmap(fasta_file, genome_files):
         #a, b, c = shell_command.shell_command(cmd)
         sys.stdout.write('blasting %s vs %s\n' % (fasta_file, genome))
         out = genome.split('.')[0] + '_blast.xml'
+
         tblastn_cline = NcbitblastnCommandline(query=fasta_file,
                                              db=genome,
                                              evalue=0.001,
@@ -61,7 +62,7 @@ def tblan2heatmap(fasta_file, genome_files):
                     #print "% id", percent_identity, "% cov", query_coverage
 
                     if e_value < 0.05 and percent_identity > 0.8 and query_coverage > 0.5:
-                        genome2protein2hit[one_genome][query_name] = 1
+                        genome2protein2hit[one_genome][query_name] = percent_identity
                     else:
                         genome2protein2hit[one_genome][query_name] = 0
                 except IndexError:
