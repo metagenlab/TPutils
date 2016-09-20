@@ -17,20 +17,24 @@ def edit_svg(svg_string, locus_list, biodb_name):
     #locus_list=locus_list[::-1]
 
     i = 0
-
+    print locus_list
     for element in tree.iter():
+
         if element.tag.split("}")[1] == 'polygon':
             if len(element.get("points").split(","))==7:
-                print element.get("points")
+                #print element.get("points")
                 # window.location.href
-                add = 'window.open("/chlamdb/locusx/%s/%s", "theFrame");' % (biodb_name, locus_list[i])
+                try:
+                    add = 'window.open("/chlamdb/locusx/%s/%s", "theFrame");' % (biodb_name, locus_list[i])
+                except IndexError:
+                    add = 'window.open("/chlamdb/locusx/%s/%s", "theFrame");' % (biodb_name, locus_list[0])
                 #add = 'window.location.href="/chlamdb/locusx/%s/%s#target_div;' % (biodb_name, locus_list[i])
                 add2= "_blank"
                 mystyle = element.get("style")
                 add3 = mystyle + "cursor: pointer;"
                 add4 = "this.style.stroke = '#ff0000'; this.style['stroke-width'] = 5;"
                 add5 = "this.style.stroke = '#000000'; this.style['stroke-width'] = 0;"
-                print add3
+
                 i+=1
                 element.set("onclick", add)
                 element.set("target", add2)

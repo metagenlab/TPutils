@@ -34,13 +34,21 @@ def merge_gbk(gbk_records, filter_size=0, gi=False):
                     my_feature = SeqFeature(my_feature_location, type="assembly_gap")
 
                     merged_rec.features.append(my_feature)
-    merged_rec.id = gbk_records[0].annotations["accessions"][-1]
+    print "gbk_records[0].annotations", gbk_records[0].annotations
+    try:
+        merged_rec.id = gbk_records[0].annotations["accessions"][-1]
+    except KeyError:
+        merged_rec.id = gbk_records[0].id
+        
     if gi:
         merged_rec.annotations["gi"] = gi
 
     merged_rec.description = "%s (merged contigs)" % gbk_records[0].annotations["organism"]
     merged_rec.annotations = gbk_records[0].annotations
-    merged_rec.name = gbk_records[0].annotations["accessions"][-1]
+    try:
+        merged_rec.name = gbk_records[0].annotations["accessions"][-1]
+    except KeyError:
+        merged_rec.name = gbk_records[0].id
     return merged_rec
 
 

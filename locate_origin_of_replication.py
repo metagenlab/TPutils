@@ -143,6 +143,7 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument("-i", '--input_contigs', type=str, help="input contig file")
     parser.add_argument("-g", '--reference_genbank', type=str, help="reference genbank file")
+    parser.add_argument("-r", '--only_reorder', action='store_true', help="only reorder (do not cut any contig)")
 
     args = parser.parse_args()
 
@@ -178,20 +179,25 @@ if __name__ == '__main__':
 
             reference_start = int(feature.location.start)
             break
+    if not args.only_reorder:
+        contig, position = locate_origin(args.input_contigs, reference, reference_start)
 
-    contig, position = locate_origin(args.input_contigs, reference, reference_start)
+        sys.stdout.write('Spliting fasta using reference %s ...\n' % args.reference_genbank)
 
-    sys.stdout.write('Spliting fasta using reference %s ...\n' % args.reference_genbank)
+        new_record = split_origin(args.input_contigs, contig, position)
 
-    new_record = split_origin(args.input_contigs, contig, position)
-
-    out_name_prefix = os.path.basename(args.input_contigs).split('.')[0]
+        out_name_prefix = os.path.basename(args.input_contigs).split('.')[0]
 
 
-    output_handle = open(out_name_prefix + '_split.fa', 'w')
-    sys.stdout.write('Writing edited contig file to %s ...\n' % (out_name_prefix + '_split.fa'))
-    SeqIO.write(new_record, output_handle, 'fasta')
+        output_handle = open(out_name_prefix + '_split.fa', 'w')
+        sys.stdout.write('Writing edited contig file to %s ...\n' % (out_name_prefix + '_split.fa'))
+        SeqIO.write(new_record, output_handle, 'fasta')
 
-    sys.stdout.write('Reordering contigs with mauve\n')
-    reorder_contigs_with_mauve(args.reference_genbank, out_name_prefix + '_split.fa')
-    sys.stdout.write('Reordered contigs can be found in the folder "mauve_reorder"\n')
+        sys.stdout.write('Reordering contigs with mauve\n')
+        reorder_contigs_with_mauve(args.reference_genbank, out_name_prefix + '_split.fa')
+        sys.stdout.write('Reordered contigs can be found in the folder "mauve_reorder"\n')
+    else:
+        sys.stdout.write('Reordering contigs with mauve\n')
+        out_folder = 'mauve_%s' % (args.input_contigs.split('.')[0])
+        reorder_contigs_with_mauve(args.reference_genbank, args.input_contigs,output_folder=out_folder)
+        sys.stdout.write('Reordered contigs can be found in the folder "mauve_reorder"\n')

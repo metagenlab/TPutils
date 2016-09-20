@@ -104,6 +104,7 @@ def check_gbk(gbff_files):
     reannotation_list = []
 
     for gbff_file in gbff_files:
+        print gbff_file
         records = list(SeqIO.parse(open(gbff_file, "r"), "genbank"))
 
         for record in records:
@@ -158,7 +159,7 @@ def check_gbk(gbff_files):
                 continue
             if is_annotated(chromosome[0]):
                 #print '## %s annotated (file: %s), %s contigs' % (chromosome[0].name, gbff_file, len(chromosome))
-
+                print 'number of chromosomes:', len(chromosome)
                 if len(chromosome) > 1:
                     merged_record = concat_gbk.merge_gbk(chromosome)
                 else:

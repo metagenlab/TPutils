@@ -16,14 +16,13 @@ def split_gbk(seq_records, outname, format = False):
     output_handle = open(outname, "w")
 
     merged_record = ''
-
+    fasta_record = False
     for record in seq_records:
         #print record
 
         for feature in record.features:
             if feature.type == "fasta_record":
                 fasta_record = True
-                print feature
                 merged_record+=record[feature.location.start:feature.location.end]
                 merged_record += "N" * 200
                 my_start_pos = ExactPosition(len(merged_record)-200)
@@ -31,7 +30,7 @@ def split_gbk(seq_records, outname, format = False):
                 my_feature_location = FeatureLocation(my_start_pos,my_end_pos)
                 my_feature = SeqFeature(my_feature_location, type="assembly_gap")
                 merged_record.features.append(my_feature)
-            elif feature.type == 'source' and 'fasta_record' not in locals():
+            elif feature.type == 'source' and fasta_record == False:
                 merged_record+=record[feature.location.start:feature.location.end]
                 merged_record += "N" * 200
                 my_start_pos = ExactPosition(len(merged_record)-200)
@@ -44,6 +43,7 @@ def split_gbk(seq_records, outname, format = False):
     for n, feature in enumerate(merged_record.features):
         if feature.type == 'source':
            to_remove.append(n)
+           
 
     for index in sorted(to_remove, reverse=True):
         if index != 0:
