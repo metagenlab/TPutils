@@ -47,32 +47,40 @@ def count_missing_locus_tags(gbk_record):
 
 
 
+def rename_source(record):
+
+    if 'strain' in record.features[0].qualifiers:
+        if ';' in record.features[0].qualifiers['strain'][0]:
+            print 'ACHRTUNG: record has 2 strain names! \t%s\t --> check and edit source manually' % record.name
+            # put everythink lower size
+            strain = record.features[0].qualifiers['strain'][0].split(';')[1]
+        else:
+            strain = record.features[0].qualifiers['strain'][0]
+        if strain == 'strain':
+            return False
+        if strain.lower() not in record.annotations['source'].lower():
+            msg = '%s' % record.annotations['source']
+            record.annotations['source'] += ' %s' % strain
+            print "ACHTUNG changing source\t%s\t--> %s " % (msg, record.annotations['source'])
+
+        return record.annotations['source']
+    else:
+        return False
 
 
 def remove_record_taxon_id(record):
+
     if record.features[0].type == 'source':
         # delete evendual taxon_id (taxon id will be reattributed in the db based on the organism name)
+        # we need unique SOURCE to have unique taxon_id in the biosql database
+        # check
         #try:
+
         if 'db_xref' in record.features[0].qualifiers:
             for item in record.features[0].qualifiers['db_xref']:
                 if 'taxon' in item:
                     index = record.features[0].qualifiers['db_xref'].index(item)
                     record.features[0].qualifiers['db_xref'].pop(index)
-                    if 'strain' in record.features[0].qualifiers:
-                        if ';' in record.features[0].qualifiers['strain'][0]:
-                            print 'ACHRTUNG: record %s has 2 strain names! check and edit source manually' % record.name
-                            # put everythink lower size
-                            strain = record.features[0].qualifiers['strain'][0].split(';')[1]
-                        else:
-                            strain = record.features[0].qualifiers['strain'][0]
-                        if strain.lower() not in record.annotations['source'].lower():
-                            msg = 'changing source %s' % record.annotations['source']
-                            record.annotations['source'] += ' %s' % strain
-                            print "ACHRTUNG\t" + msg + "\t--> %s " % record.annotations['source']
-                            record.annotations['organism'] = record.annotations['source']
-
-                    else:
-                        print 'ACHTUNG\t no strain  record \t%s, source uniqueness should be checked' % record.name
     else:
         print 'ACHRTUNG\t no source for record \t%s' % record.name
     return record
@@ -103,8 +111,11 @@ def check_gbk(gbff_files):
     import reannotate_genomes
     reannotation_list = []
 
+    # count the number opf identical source names
+    source2count = {}
+    accession2count = {}
     for gbff_file in gbff_files:
-        print gbff_file
+        #print gbff_file
         records = list(SeqIO.parse(open(gbff_file, "r"), "genbank"))
 
         for record in records:
@@ -127,6 +138,17 @@ def check_gbk(gbff_files):
                     out_name = plasmid.name + '.gbk'
                     plasmid.description = clean_description(plasmid.description)
                     plasmid = remove_record_taxon_id(plasmid)
+                    new_source = rename_source(plasmid)
+                    if new_source:
+                        record.description = record.annotations['source']
+                        record.annotations['organism'] = record.annotations['source']
+                    else:
+                        print 'ACHTUNG\t no strain name for \t%s\t, SOUCE uniqueness should be checked manually' % gbff_file
+                    # check if accession is meaningful
+                    if 'NODE_' in merged_record.id or 'NODE_' in merged_record.name:
+                        print 'ACHTUNG\t accession probably not unique (%s) for \t%s\t --> should be checked manually' % (merged_record.id,
+                                                                                                                        gbff_file)
+
                     with open(out_name, 'w') as f:
                         SeqIO.write(plasmid, f, 'genbank')
                     cleaned_records.append(plasmid)
@@ -159,7 +181,7 @@ def check_gbk(gbff_files):
                 continue
             if is_annotated(chromosome[0]):
                 #print '## %s annotated (file: %s), %s contigs' % (chromosome[0].name, gbff_file, len(chromosome))
-                print 'number of chromosomes:', len(chromosome)
+                #print 'number of chromosomes:', len(chromosome)
                 if len(chromosome) > 1:
                     merged_record = concat_gbk.merge_gbk(chromosome)
                 else:
@@ -168,30 +190,36 @@ def check_gbk(gbff_files):
 
 
                 merged_record.description = clean_description(merged_record.description)
-                merged_record = remove_record_taxon_id(merged_record)
 
+                # check if source is unique (include strain name)
+                merged_record = remove_record_taxon_id(merged_record)
+                new_source = rename_source(merged_record)
+                if new_source:
+                    merged_record.description = record.annotations['source']
+                    merged_record.annotations['organism'] = record.annotations['source']
+                else:
+                    print 'ACHTUNG\t no strain name for \t%s\t --> SOUCE uniqueness should be checked manually' % gbff_file
+                # check if accession is meaningful
+                if 'NODE_' in merged_record.id or 'NODE_' in merged_record.name:
+                    print 'ACHTUNG\t accession probably not unique (%s) for \t%s\t --> should be checked manually' % (merged_record.id,
+                                                                                                                    gbff_file)
                 out_name = chromosome[0].name + '.gbk'
                 with open(out_name, 'w') as f:
                     SeqIO.write(merged_record, f, 'genbank')
                 cleaned_records.append(merged_record)
             else:
+                # unannotated record: merge genbank and keep it in memory
                 chromosome_reannot = True
-                #print '## %s NOT annotated (file: %s), %s contigs' % (chromosome[0].name, gbff_file, len(chromosome))
-                #print 'Concatenating and reannotating gbk files...'
                 merged_record = concat_gbk.merge_gbk(chromosome, filter_size=1000)
-                #print '########### merged record ##############'
-                #print merged_record
                 reannotation_list.append(merged_record)
-                #reannotated_record = reannotate_genomes.prokka_reannotation([[merged_record]])[0]
-                #print '########### reannotated record #########'
-                #print reannotated_record
 
-                #out_name = reannotated_record.id
-                #print '############ final out name ###############'
-                #print out_name
-                #with open(out_name, 'w') as f:
-                #    SeqIO.write(reannotated_record, f, 'genbank')
-            #cleaned_records.append(merged_record)
+            # count the source to identifiy redundant sources
+            if merged_record.annotations['source'] not in source2count:
+                source2count[merged_record.annotations['source']] = 1
+            else:
+                source2count[merged_record.annotations['source']] += 1
+
+
         if plasmid_reannot and not chromosome_reannot and len(chromosome) > 0:
             print "plasmid", plasmid_reannot
             print "chr", chromosome_reannot
@@ -208,6 +236,8 @@ def check_gbk(gbff_files):
             with open(out_name, 'w') as f:
                 SeqIO.write(cleaned_records, f, 'genbank')
 
+
+
     #print '############ reannotation list #####################', len(reannotation_list)
     print "reannotating %s genomes" % len(reannotation_list)
     reannotated_genomes = reannotate_genomes.prokka_reannotation(reannotation_list)
@@ -219,6 +249,13 @@ def check_gbk(gbff_files):
             SeqIO.write(reannotated_record, f, 'genbank')
         with open(out_name2, 'w') as f:
             SeqIO.write(reannotated_record, f, 'genbank')
+
+    # check if source list is non redundant
+    for one_source in source2count:
+        if source2count[one_source] > 1:
+            print '%s\tsource is redundant (found %sx), add a unique source' % (one_source, source2count[one_source])
+
+
 
 if __name__ == '__main__':
     import argparse

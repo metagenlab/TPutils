@@ -133,8 +133,10 @@ def pairewise_identity(seq1, seq2):
             continue
         if str(A[n])==str(B[n]):
             identical_sites+=1
-
-    identity = 100*(identical_sites/float(aligned_sites))
+    try:
+        identity = 100*(identical_sites/float(aligned_sites))
+    except:
+        identity = 0
     #print "aligned", float(aligned_sites)
     #print "identical", identical_sites
     if aligned_sites == 0:
@@ -187,9 +189,16 @@ def global_align(seq_record1, seq_record2):
     #    print ">"+noms[id_seq2]
     #    print alns[0][1]
     #    return  alns[0]
-        needle_cline=NeedleCommandline(asequence=seq1_file.name, bsequence=seq2_file.name, stdout=True, gapopen=10, gapextend=0.5, auto=True, aformat="srspair")
+        needle_cline=NeedleCommandline(asequence=seq1_file.name,
+                                       bsequence=seq2_file.name,
+                                       stdout=True,
+                                       gapopen=10,
+                                       gapextend=0.5,
+                                       auto=True,
+                                       aformat="srspair")
         stdout,stderr=needle_cline()
         #print stdout
+        print needle_cline
         align = AlignIO.read(StringIO.StringIO(stdout), "emboss")
         return align
 

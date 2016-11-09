@@ -14,13 +14,15 @@ def convert_leaf_labels(input_tree, biodb_name, accession2taxon=False, taxon2acc
     import shell_command
     import manipulate_trees
     import os
-    
+
+    print accession2taxon, taxon2accession
+
     cmd = 'newick2phyloxml.pl -i %s' % input_tree
 
     file_name = input_tree.split('.')[0]
     
     a,b,c = shell_command.shell_command(cmd)
-    print a,b,c
+    print a, b, c
     
     dirpath = os.getcwd()
 
@@ -35,7 +37,7 @@ def convert_leaf_labels(input_tree, biodb_name, accession2taxon=False, taxon2acc
                                                input_file,
                                                output_file)
 
-    if taxon2accession:
+    elif taxon2accession:
         manipulate_trees.convert_tree_taxon_id2accession(biodb_name,
                                                input_file,
                                                output_file)
@@ -53,7 +55,10 @@ def convert_leaf_labels_from_genbank(input_tree, input_gbk_list):
 
 
     id2description = gbk2accessiontodefinition.get_coressp(input_gbk_list)
-    new_tree = parse_newick_tree.convert_terminal_node_names(input_tree, id2description, 'newick')
+
+
+
+    new_tree = parse_newick_tree.convert_terminal_node_names(input_tree, id2description, 1)
 
     return new_tree
     
@@ -64,6 +69,7 @@ if __name__ == '__main__':
     from Bio import SeqIO
     from Bio import Phylo
     import os
+    import ete2
     parser = argparse.ArgumentParser()
     parser.add_argument("-i", '--input_tree', type=str, help="input tree (newick)")
     parser.add_argument("-d", '--database_name', type=str, help="corresponding database name")
@@ -73,12 +79,24 @@ if __name__ == '__main__':
 
     args = parser.parse_args()
     if args.database_name:
+        print args.accession2taxon, args.taxon2accession
         convert_leaf_labels(args.input_tree,
                             args.database_name,
                             accession2taxon=args.accession2taxon,
                             taxon2accession=args.taxon2accession)
     if args.genbank_files:
+
+
+
         new_tree = convert_leaf_labels_from_genbank(args.input_tree, args.genbank_files)
         file_name = args.input_tree.split('.')[0]
         output_file = file_name + '_renamed.tree'
-        Phylo.write(new_tree, output_file, 'newick')
+
+        new_tree.write(format=1, outfile=output_file)
+
+        #with open(output_file, 'w') as f:
+            #Phylo.write(new_tree, f, 'newick')
+        #import ete2
+        #t = ete2.Tree(output_file)
+        #print t.write()
+

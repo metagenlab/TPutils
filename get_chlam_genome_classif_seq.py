@@ -32,7 +32,56 @@ def check_blast_colocalization(record1, record2, seq_range = 0.15):
         return False
 
 
+def hmm_and_extract(query_fasta_prot, db_prot, seq_header = "query_seq"):
+    from Bio.Blast.Applications import NcbiblastpCommandline
+    from Bio.Blast import NCBIXML
+    from Bio import SeqIO
+    from Bio import SearchIO
+    import os
 
+    #print 'db_prot', db_prot
+    #print 'querxy', query_fasta_prot
+    db_prot_data = SeqIO.to_dict(SeqIO.parse(db_prot, "fasta"))
+    # -E 0.000001
+    # 0.000001
+    # -T 150
+    print
+    qcode = os.path.basename(query_fasta_prot).split('.')[0]
+    rcode = os.path.basename(db_prot).split('.')[0]
+    # --max
+    hmmer_cline = 'hmmsearch -T 150 --tblout temp_hmm_%s_%s.tab %s %s' % (qcode, rcode, query_fasta_prot, db_prot)
+    print hmmer_cline
+    stdout, stderr, code = shell_command.shell_command(hmmer_cline)
+
+    result_handle = open("temp_hmm_%s_%s.tab" % (qcode, rcode), 'r')
+    hmmer_records = [i for i in SearchIO.parse(result_handle, 'hmmer3-tab')]
+
+    try:
+        best_hit_id = hmmer_records[0].hits[0].id
+        #print dir(hmmer_records[0].hits[0])
+
+        if float(hmmer_records[0].hits[0].bias) > 0:
+            #print '################### bias!'
+            for one_hit in hmmer_records[0].hits:
+                score_diff = float(hmmer_records[0].hits[0].bitscore) - float(one_hit.bitscore)
+                print 'score 1', 'score 2'
+                print "score_diff", score_diff,  0.15*float(hmmer_records[0].hits[0].bitscore)
+                if (float(one_hit.bias) < float(hmmer_records[0].hits[0].bias)) \
+                        and (score_diff < (0.15*float(hmmer_records[0].hits[0].bitscore))):
+                    best_hit_id = one_hit.id
+                    break
+        print 'best hit', best_hit_id
+        best = db_prot_data[best_hit_id]
+        best.name = best.name.split('_')[0]
+        split_name = best.id.split('_')
+        if len(split_name)>2:
+            best.id = split_name[0] + '_' + split_name[1]
+        else:
+            best.id = split_name[0]
+
+        return db_prot_data[best_hit_id]
+    except:
+        return False
 
 def blastp_and_extract(query_fasta_prot, db_prot, seq_header = "query_seq"):
     from Bio.Blast.Applications import NcbiblastpCommandline
@@ -44,6 +93,7 @@ def blastp_and_extract(query_fasta_prot, db_prot, seq_header = "query_seq"):
     db_prot_data = SeqIO.to_dict(SeqIO.parse(db_prot, "fasta"))
     
     blastp_cline = NcbiblastpCommandline(query=query_fasta_prot, db=db_prot, evalue=0.001, outfmt=5, out="temp.xml")
+    print blastp_cline
     stdout, stderr = blastp_cline()
 
     result_handle = open("temp.xml")
@@ -68,7 +118,19 @@ def blastp_and_extract(query_fasta_prot, db_prot, seq_header = "query_seq"):
     #best_record.seq = best_record.seq.remove("*")
     if not best_hit:
         return False
-    return db_prot_data[best_hit]
+    else:
+
+        best = db_prot_data[best_hit]
+        best.name = best.name.split('_')[0]
+        split_name = best.id.split('_')
+        if len(split_name)>2:
+            best.id = split_name[0] + '_' + split_name[1]
+        else:
+            best.id = split_name[0]
+
+
+
+        return db_prot_data[best_hit]
 
 
 
@@ -136,34 +198,84 @@ def format_out(id_matrixes, genes_list, ids):
 
 
 
-def main(protein_multi_fasta, fasta_db, seq_header, out_name, blast_p = False):
+def main(protein_multi_fasta, fasta_files, seq_header, out_name, blast_p = False, hmmer = False):
+    import os
+    import re
     genes_list = []
     all_mat = []
-    for one_fasta in protein_multi_fasta:
-        print one_fasta
-        genes_list.append(os.path.basename(one_fasta).split(".")[0])
-        if not blast_p:
-            new_record = [tblastn_and_extract(one_fasta, fasta_db, seq_header)]
-        else:
-            new_record = [blastp_and_extract(one_fasta, fasta_db, seq_header)]
-        handle = open(one_fasta, "rU")
-        initial_records = [record for record in SeqIO.parse(handle, "fasta")]
-        print "new_record", new_record
-        if new_record[0]:
-            merged_record = initial_records + new_record
-            f = open("new_strain_" + os.path.basename(one_fasta), 'w')
-            SeqIO.write(merged_record, f, 'fasta')
-            id_matrix = pairwiseid_needle.get_identity_matrix_from_multifasta(merged_record)
-            all_mat.append(id_matrix)
-        else:
-            all_mat.append(None)
-            print "no hit for %s" % one_fasta
-    seq_ids = [i.name for i in initial_records]
+    target_id_list = []
 
-    f = open(out_name, "w")
-    f.write(format_out(all_mat, genes_list, seq_ids))
-    f.close()
+    aa_fasta = []
 
+    #print 'blast', blast_p
+    #print 'hmm', hmmer
+
+    if blast_p or hmmer:
+        for one_fasta in fasta_files:
+            out = one_fasta.split('.')[0]+'_prodig.fa'
+            aa_fasta.append(out)
+            run_prodigal(one_fasta,output_name=out)
+            if blast_p:
+                #shell_command.shell_command("formatdb -i %s -p T" % out)
+                pass
+
+    report_handle = open('classification_report.txt', 'w')
+
+    protein2genome2presence = {}
+
+    for one_protein in protein_multi_fasta:
+
+        protein_id = os.path.basename(one_protein).split('.')[0]
+        protein2genome2presence[protein_id] = {}
+
+        new_records = []
+        # for each aa file, make blast
+        for one_target_fasta in aa_fasta:
+            target_id = re.sub('_prodig',
+                               '',
+                               os.path.basename(one_target_fasta).split('.')[0])
+
+            #genes_list.append(os.path.basename(one_protein).split(".")[0])
+            if not blast_p and not hmmer:
+                new_record = [tblastn_and_extract(one_protein, one_target_fasta, seq_header)]
+            if hmmer:
+                new_record = hmm_and_extract(one_protein, one_target_fasta, seq_header)
+                if new_record:
+                    new_records.append(new_record)
+                    protein2genome2presence[protein_id][target_id] = 1
+                else:
+                    print 'no hits', one_protein, one_target_fasta
+                    report_handle.write('No hit:\t%s\t%s\n' % (protein_id,
+                                                               target_id))
+                    protein2genome2presence[protein_id][target_id] = 0
+            if blast_p:
+                new_record = blastp_and_extract(one_protein, one_target_fasta, seq_header)
+                if new_record:
+                    new_records.append(new_record)
+            #handle = open(one_protein, "rU")
+            #initial_records = [record for record in SeqIO.parse(handle, "fasta")]
+
+        if len(new_records)>0:
+            f = open("new_strain_" + os.path.basename(one_protein).split('.')[0] + '.faa', 'w')
+            SeqIO.write(new_records, f, 'fasta')
+            #id_matrix = pairwiseid_needle.get_identity_matrix_from_multifasta(new_records)
+            #all_mat.append(id_matrix)
+        else:
+            #all_mat.append(None)
+            print "no hit for %s" % one_protein
+
+        #out_name = one_protein.split('.')[0] + '_new.fa'
+        #f = open(out_name, "w")
+        #f.write(format_out(all_mat, genes_list, target_id_list))
+        #f.close()
+    report_handle.close()
+    print protein2genome2presence
+    with open("presence_absence_matrix_hanlde", 'w') as m:
+        protein_list = protein2genome2presence.keys()
+        m.write('\t' + '\t'.join(protein_list) + '\n')
+        for genome in protein2genome2presence[protein_list[0]].keys():
+            one_list = [str(protein2genome2presence[i][genome]) for i in protein_list]
+            m.write(genome + '\t' + '\t'.join(one_list) + '\n')
 
 
 if __name__ == '__main__':
@@ -174,19 +286,22 @@ if __name__ == '__main__':
     import os
 
     parser = argparse.ArgumentParser()
-    parser.add_argument("-d", '--fasta_db', type=str, help="input fasta file")
-    parser.add_argument("-q", '--prot_fasta', type=str, help="input protein fasta", nargs='+')
+    parser.add_argument("-d", '--fasta_list', type=str, help="input fasta file", nargs='+')
+    parser.add_argument("-q", '--prot_fasta', type=str, help="input protein fasta/hmm profiles", nargs='+')
     parser.add_argument("-n", '--seq_header', type=str, help="seq header name")
     parser.add_argument("-o", '--out_name', type=str, help="output_identity_matrix", default = "id_matrix.txt")
     parser.add_argument("-p", '--blast_p', action="store_true", help="perform ORFing with prodigal and blastP search")
-
+    parser.add_argument("-m", '--hmmer', action="store_true", help="perform ORFing with prodigal and hmm search search")
 
     args = parser.parse_args()
 
-    if args.blast_p:
-        blast_db = run_prodigal(args.fasta_db)
-        shell_command.shell_command("formatdb -i %s -p T" % blast_db)
-        main(args.prot_fasta, blast_db, args.seq_header, args.out_name, True)
+    if args.blast_p and args.hmmer:
+        raise('use either blastp or hmm searches, not both!')
+    elif args.blast_p:
+        main(args.prot_fasta, args.fasta_list, args.seq_header, args.out_name, True)
+    elif args.hmmer:
+        print 'hmm!'
+        main(args.prot_fasta, args.fasta_list, args.seq_header, args.out_name, False, True)
     else:
         shell_command.shell_command("formatdb -i %s -p F" % args.fasta_db)
         main(args.prot_fasta, args.fasta_db, args.seq_header, args.out_name)

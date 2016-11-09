@@ -80,10 +80,6 @@ def prokka_reannotation(seq_record_list, compare=False):
         else:
             all_locus.append(locus_tag)
         # wite fasta and annotate it using prokka
-        #print record.seq
-        #print str(record.seq) == len(record.seq) * 'N'
-        #print len(record.seq) * 'N'
-        #print record.id
         if str(record.seq) == len(record.seq) * 'N':
 
             print 'No sequence in record %s' % record.id
@@ -97,8 +93,6 @@ def prokka_reannotation(seq_record_list, compare=False):
         today = datetime.date.today()
         date = today.strftime('%m%d%Y')
         prokka_genbank = '%s/%s_%s.gbk' %(locus_tag, locus_tag, date)
-        #print prokka_genbank
-
 
         cmd2 = 'prokka --kingdom Bacteria --compliant --proteins proteins.faa --locustag Citr -genus Citronella -strain virus citro_spades_123_1000.fa'
 

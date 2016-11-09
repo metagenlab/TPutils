@@ -170,9 +170,13 @@ if __name__ == '__main__':
             try:
                 seq = Seq.Seq(feature.qualifiers['translation'][0], generic_protein)
             except:
-                import sys
-                print 'no translation for firt orf of the reference, please provide reference with translated sequences'
-                sys.exit(255)
+                if 'pseudo' in feature.qualifiers:
+                    print 'first orf is a pseudogene'
+                    continue
+                else:
+                    import sys
+                    print 'no translation for firt orf of the reference, please provide reference with translated sequences'
+                    sys.exit(255)
 
 
             reference = SeqRecord.SeqRecord(seq, id=id, name=name, description=description)
