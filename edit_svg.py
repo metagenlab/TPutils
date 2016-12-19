@@ -29,7 +29,7 @@ def edit_svg(svg_string, locus_list, biodb_name):
                 except IndexError:
                     add = 'window.open("/chlamdb/locusx/%s/%s/True", "theFrame");' % (biodb_name, locus_list[0])
                 #add = 'window.location.href="/chlamdb/locusx/%s/%s#target_div;' % (biodb_name, locus_list[i])
-                add2= "_blank"
+                #add2= "_blank"
                 mystyle = element.get("style")
                 add3 = mystyle + "cursor: pointer;"
                 add4 = "this.style.stroke = '#ff0000'; this.style['stroke-width'] = 5;"
@@ -37,7 +37,7 @@ def edit_svg(svg_string, locus_list, biodb_name):
 
                 i+=1
                 element.set("onclick", add)
-                element.set("target", add2)
+                #element.set("target", add2)
                 element.set("onmouseover", add4)
                 element.set("onmouseout", add5)
 
