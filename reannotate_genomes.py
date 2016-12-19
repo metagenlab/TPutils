@@ -126,7 +126,7 @@ def prokka_reannotation(seq_record_list, compare=False):
                     new_CDS+=1
                     for ref_feature in record.features:
                         if ref_feature.type == 'CDS':
-                            if ref_feature.location.start == new_feature.location.start and ref_feature.location.end == new_feature.location.end:
+                            if ref_feature.qualifiers['translation'] == new_feature.qualifiers['translation']:
                                 identical_CDS +=1
                                 break
             #accession = reanotated_gbk[0].annotations["accessions"][0]

@@ -25,9 +25,9 @@ def edit_svg(svg_string, locus_list, biodb_name):
                 #print element.get("points")
                 # window.location.href
                 try:
-                    add = 'window.open("/chlamdb/locusx/%s/%s", "theFrame");' % (biodb_name, locus_list[i])
+                    add = 'window.open("/chlamdb/locusx/%s/%s/True", "theFrame");' % (biodb_name, locus_list[i])
                 except IndexError:
-                    add = 'window.open("/chlamdb/locusx/%s/%s", "theFrame");' % (biodb_name, locus_list[0])
+                    add = 'window.open("/chlamdb/locusx/%s/%s/True", "theFrame");' % (biodb_name, locus_list[0])
                 #add = 'window.location.href="/chlamdb/locusx/%s/%s#target_div;' % (biodb_name, locus_list[i])
                 add2= "_blank"
                 mystyle = element.get("style")

@@ -6,6 +6,10 @@ def run_prodigal(fasta_seq, output_name='temp.faa'):
     import shell_command
     import StringIO
     from tempfile import NamedTemporaryFile
+    # -q quiet
+    # -a Write protein translations to the selected file
+    # -i Specify input file
+    # -c:  Closed ends.  Do not allow genes to run off edges. # not activated
     cmd = "prodigal -q -a %s -i %s" % (output_name, fasta_seq)
     print cmd
     sdt_out, sdt_err, err = shell_command.shell_command(cmd)
@@ -34,6 +38,150 @@ def run_prodigal(fasta_seq, output_name='temp.faa'):
     #fasta.close()
     #fasta_file.flush()
     return output_name
+
+
+class Hmm():
+
+    def __init__(self, hmm_profiles, database, output_dir=False, call_genes=False, score_cutoff=100, filter_bitscore='best'):
+        from tempfile import NamedTemporaryFile
+
+        assert isinstance(hmm_profiles, list)
+
+        if isinstance(database, list) and len(database)>1:
+            # if multiple databases, compare the bitscore obtained for each profile against each protein
+            # use either the best biscrore or the median bitscrore to filter results
+            self.bitscore_litering = filter_bitscore
+            self.multiple_databases = True
+            self.profile2scores = {}
+
+        self.hmm_profiles = hmm_profiles
+        self.database = database
+        # -T <x>     : report sequences >= this score threshold in output
+        # out, query and db
+        #self.hmmer_cmd = 'hmmsearch -T %s -E 1e-10 -o %s %s %s'
+        self.hmmer_cmd = 'hmmsearch -E 1e-10 -o %s %s %s'
+        self.hmmer_score_cutoff = score_cutoff
+        self.hmmer_output_list = []
+
+        if call_genes:
+            #if not output_dir:
+
+            temp_prodigal_file = NamedTemporaryFile()
+            self.database = temp_prodigal_file.name
+            # add content to temporary file
+            #temp_file.write(str(self))
+
+            run_prodigal(database, output_name=self.database)
+
+    def run_hmmer(self, profiles=False):
+        from tempfile import NamedTemporaryFile
+        import shell_command
+
+
+        if not profiles:
+            profiles = self.hmm_profiles
+
+        header = ["profile_id",
+                "profile_length",
+                "best_hit_id",
+                "bias",
+                "bitscore",
+                "evalue",
+                "query_start",
+                "query_end",
+                "query_coverage",
+                "hit_start",
+                "hit_end"]
+        results = '\t'.join(header) + '\n'
+        for profile in profiles:
+            temp_file = NamedTemporaryFile()
+            self.hmmer_output_list.append(temp_file.name)
+            if not isinstance(self.database, list):
+                stout, sterr, code = shell_command.shell_command(self.hmmer_cmd % (temp_file.name, profile, self.database)) # self.hmmer_score_cutoff,
+                if code != 0:
+                    import sys
+                    sys.stdout.write("\n%s\n%s\n" % (stout, sterr))
+                    sys.exit()
+
+                parsed_data = self._parse_hmmsearch(temp_file.name)
+                if not isinstance(parsed_data[0], dict):
+                    results += '%s\t-\t-\t-\t-\t-\t-\t-\t-\t-\t\n' % parsed_data[0]
+                else:
+                    hsp_list = parsed_data
+                    for x in range(0,len(hsp_list)):
+                        results += '\t'.join([str(hsp_list[x][i]) for i in header])
+                        results += '\n'
+            else:
+                # multiple databases: performing bitscrore filtering
+                self.biodb2best_hits = {}
+                for database in self.database:
+                    stout, sterr, code = shell_command.shell_command(self.hmmer_cmd % (self.hmmer_score_cutoff, temp_file.name, profile, self.database))
+                    if code != 0:
+                        import sys
+                        sys.stdout.write("\n%s\n%s\n" % (stout, sterr))
+                        sys.exit()
+
+                    parsed_data = self._parse_hmmsearch(temp_file.name)
+
+
+
+                    if not isinstance(parsed_data[0], dict):
+                        pass
+                    else:
+                        # all hsp have the same bitscore, only use the first hsp
+                        if parsed_data[0]['profile_id'] not in self.profile2scores:
+                            self.profile2scores[parsed_data[0]['profile_id']] = [parsed_data[0]['bitscore']]
+                        else:
+                            self.profile2scores[parsed_data[0]['profile_id']].append(parsed_data[0]['bitscore'])
+                        hsp_list = parsed_data
+                        for x in range(0,len(hsp_list)):
+                            pass
+
+
+
+        print results
+
+    def _parse_hmmsearch(self, hmmsearch_result):
+        from Bio import SearchIO
+
+        result_handle = open(hmmsearch_result, 'r')
+        hmmer_records = [i for i in SearchIO.parse(result_handle, 'hmmer3-text')]
+
+        try:
+            best_hit_id = hmmer_records[0].hits[0].id
+        except IndexError:
+            return [hmmer_records[0].id]
+        else:
+
+            hsp_list = []
+            #print dir(hmmer_records[0])
+            profile_id =  hmmer_records[0].id
+            '''
+            'append', 'bias', 'bitscore', 'description', 'description_all', 'domain_exp_num', 'domain_obs_num',
+            'evalue', 'filter', 'fragments', 'hsps', 'id',
+            'id_all', 'index', 'is_included', 'map', 'pop', 'query_description', 'query_id', 'sort'
+
+            '''
+            for hsp in hmmer_records[0].hits[0].hsps:
+                result = {
+                    "profile_id" : hmmer_records[0].id,
+                    "profile_length" : hmmer_records[0].seq_len,
+                    "best_hit_id" : hmmer_records[0].hits[0].id,
+                    "bias" : hmmer_records[0].hits[0].bias,
+                    "bitscore" : hmmer_records[0].hits[0].bitscore,
+                    "hit_start" : hsp.hit_start,
+                    "hit_end" : hsp.hit_end,
+                    "query_start" : hsp.query_start,
+                    "query_end" : hsp.query_end,
+                    "evalue" : hmmer_records[0].hits[0].evalue,
+                    "query_coverage" : round((hsp.query_end-hsp.query_start)/float(hmmer_records[0].seq_len),2)
+                    }
+                hsp_list.append(result)
+            return hsp_list
+
+    def filter_hmmer_results(self):
+        pass
+
 
 
 class Blast():

@@ -49,6 +49,7 @@ def hmm_and_extract(query_fasta_prot, db_prot, seq_header = "query_seq"):
     qcode = os.path.basename(query_fasta_prot).split('.')[0]
     rcode = os.path.basename(db_prot).split('.')[0]
     # --max
+    # -T <x>     : report sequences >= this score threshold in output
     hmmer_cline = 'hmmsearch -T 150 --tblout temp_hmm_%s_%s.tab %s %s' % (qcode, rcode, query_fasta_prot, db_prot)
     print hmmer_cline
     stdout, stderr, code = shell_command.shell_command(hmmer_cline)
@@ -206,9 +207,6 @@ def main(protein_multi_fasta, fasta_files, seq_header, out_name, blast_p = False
     target_id_list = []
 
     aa_fasta = []
-
-    #print 'blast', blast_p
-    #print 'hmm', hmmer
 
     if blast_p or hmmer:
         for one_fasta in fasta_files:

@@ -68,11 +68,14 @@ def get_sequence(file_name, file_format, start=False, stop=False, contig=False, 
             else:
                 SeqIO.write(contig_name2record[contig], sys.stdout ,"fasta")
     if protein_id and file_format=="fasta":
-        record = contig_name2record[protein_id]
+        records = []
+        for one_prot in protein_id:
+            record = contig_name2record[one_prot]
+            records.append(record)
         out_handle = StringIO()
-        SeqIO.write(record, out_handle, "fasta")
+        SeqIO.write(records, out_handle, "fasta")
         new_gb_output = out_handle.getvalue()
-        print new_gb_output
+        sys.stdout.write(new_gb_output)
 
 
 
@@ -86,7 +89,7 @@ if __name__ == '__main__':
     parser.add_argument("-s",'--start',type=int,help="start", default=False)
     parser.add_argument("-e",'--end',type=int,help="end", default=False)
     parser.add_argument("-c",'--contig',type=str,help="contig_name", default=False)
-    parser.add_argument("-p",'--protein_id',type=str,help="protein id", default=False)
+    parser.add_argument("-p",'--protein_id',type=str,help="protein id", default=False, nargs='+')
     parser.add_argument("-r",'--region',type=int,help="extract flanking region (bp)", default=0)
     parser.add_argument("-v",'--revcomp',action="store_true",help="reverse complement", default=False)
     parser.add_argument("-t",'--translate',action="store_true",help="translate", default=False)

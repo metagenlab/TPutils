@@ -141,12 +141,25 @@ def gbk2faa(seq_records, pformat=False, lformat=False, remove_redundancy=False):
                                     description,
                                     seq_feature.qualifiers['translation'][0]))
                             except:
-                                output_handle.write(">gi|%s|ref|%s| [%s]\n%s\n" % (
-                                    seq_feature.qualifiers["locus_tag"][0],
-                                    seq_feature.qualifiers["locus_tag"][0],
-                                    #seq_feature.qualifiers["note"][0],
-                                    description,
-                                    seq_feature.qualifiers['translation'][0]))
+                                try:
+                                    output_handle.write(">gi|%s|ref|%s| [%s]\n%s\n" % (
+                                        seq_feature.qualifiers["locus_tag"][0],
+                                        seq_feature.qualifiers["locus_tag"][0],
+                                        #seq_feature.qualifiers["note"][0],
+                                        description,
+                                        seq_feature.qualifiers['translation'][0]))
+                                except:
+                                    if 'gene' in seq_feature.qualifiers:
+                                        output_handle.write(">%s %s %s \n%s\n" % (
+                                        seq_feature.qualifiers["gene"][0],
+                                        seq_feature.qualifiers["product"][0],
+                                        description,
+                                        seq_feature.qualifiers['translation'][0]))
+                                    else:
+                                        output_handle.write(">%s %s\n%s\n" % (
+                                        seq_feature.qualifiers["product"][0],
+                                        description,
+                                        seq_feature.qualifiers['translation'][0]))                                        
 
 
 
