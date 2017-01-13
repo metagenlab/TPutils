@@ -76,9 +76,9 @@ def hmm_and_extract(query_fasta_prot, db_prot, seq_header = "query_seq"):
         best.name = best.name.split('_')[0]
         split_name = best.id.split('_')
         if len(split_name)>2:
-            best.id = split_name[0] + '_' + split_name[1]
+            best.id = best_hit_id + '|' + split_name[0] + '_' + split_name[1]
         else:
-            best.id = split_name[0]
+            best.id = best_hit_id #+ '|' + split_name[0]
 
         return db_prot_data[best_hit_id]
     except:
@@ -199,36 +199,43 @@ def format_out(id_matrixes, genes_list, ids):
 
 
 
-def main(protein_multi_fasta, fasta_files, seq_header, out_name, blast_p = False, hmmer = False):
+def main(protein_multi_fasta, fasta_files, seq_header, out_name, blast_p = False, hmmer = False, reannotate=False):
     import os
     import re
     genes_list = []
     all_mat = []
     target_id_list = []
 
-    aa_fasta = []
 
-    if blast_p or hmmer:
-        for one_fasta in fasta_files:
-            out = one_fasta.split('.')[0]+'_prodig.fa'
-            aa_fasta.append(out)
-            run_prodigal(one_fasta,output_name=out)
-            if blast_p:
-                #shell_command.shell_command("formatdb -i %s -p T" % out)
-                pass
 
+    if reannotate:
+        aa_fasta = []
+        if blast_p or hmmer:
+            for one_fasta in fasta_files:
+                out = one_fasta.split('.')[0]+'_prodig.fa'
+                aa_fasta.append(out)
+                run_prodigal(one_fasta,output_name=out)
+                if blast_p:
+                    #shell_command.shell_command("formatdb -i %s -p T" % out)
+                    pass
+    else:
+        aa_fasta = fasta_files
     report_handle = open('classification_report.txt', 'w')
 
     protein2genome2presence = {}
+
+    marker2genome2best_hit = {}
 
     for one_protein in protein_multi_fasta:
 
         protein_id = os.path.basename(one_protein).split('.')[0]
         protein2genome2presence[protein_id] = {}
+        marker2genome2best_hit[protein_id] = {}
 
         new_records = []
         # for each aa file, make blast
         for one_target_fasta in aa_fasta:
+
             target_id = re.sub('_prodig',
                                '',
                                os.path.basename(one_target_fasta).split('.')[0])
@@ -241,11 +248,13 @@ def main(protein_multi_fasta, fasta_files, seq_header, out_name, blast_p = False
                 if new_record:
                     new_records.append(new_record)
                     protein2genome2presence[protein_id][target_id] = 1
+                    marker2genome2best_hit[protein_id][target_id] = new_record.id
                 else:
                     print 'no hits', one_protein, one_target_fasta
                     report_handle.write('No hit:\t%s\t%s\n' % (protein_id,
                                                                target_id))
                     protein2genome2presence[protein_id][target_id] = 0
+                    marker2genome2best_hit[protein_id][target_id] = '-'
             if blast_p:
                 new_record = blastp_and_extract(one_protein, one_target_fasta, seq_header)
                 if new_record:
@@ -268,12 +277,22 @@ def main(protein_multi_fasta, fasta_files, seq_header, out_name, blast_p = False
         #f.close()
     report_handle.close()
     print protein2genome2presence
-    with open("presence_absence_matrix_hanlde", 'w') as m:
+
+    with open("presence_absence_matrix.tab", 'w') as m:
         protein_list = protein2genome2presence.keys()
         m.write('\t' + '\t'.join(protein_list) + '\n')
         for genome in protein2genome2presence[protein_list[0]].keys():
             one_list = [str(protein2genome2presence[i][genome]) for i in protein_list]
             m.write(genome + '\t' + '\t'.join(one_list) + '\n')
+    with open("locus_table.tab", 'w') as n:
+        protein_list = marker2genome2best_hit.keys()
+        n.write('\t' + '\t'.join(protein_list) + '\n')
+        for genome in marker2genome2best_hit[protein_list[0]].keys():
+            one_list = [str(marker2genome2best_hit[i][genome]) for i in protein_list]
+            n.write(genome + '\t' + '\t'.join(one_list) + '\n')
+
+    return marker2genome2best_hit
+
 
 
 if __name__ == '__main__':
@@ -284,12 +303,13 @@ if __name__ == '__main__':
     import os
 
     parser = argparse.ArgumentParser()
-    parser.add_argument("-d", '--fasta_list', type=str, help="input fasta file", nargs='+')
+    parser.add_argument("-d", '--fasta_list', type=str, help="input fasta file: nucl (reannotation) or protein (no reannotation)", nargs='+')
     parser.add_argument("-q", '--prot_fasta', type=str, help="input protein fasta/hmm profiles", nargs='+')
     parser.add_argument("-n", '--seq_header', type=str, help="seq header name")
     parser.add_argument("-o", '--out_name', type=str, help="output_identity_matrix", default = "id_matrix.txt")
     parser.add_argument("-p", '--blast_p', action="store_true", help="perform ORFing with prodigal and blastP search")
     parser.add_argument("-m", '--hmmer', action="store_true", help="perform ORFing with prodigal and hmm search search")
+    parser.add_argument("-r", '--reanotate', action="store_true", help="reannotate with prodigual (default=False, aa input)")
 
     args = parser.parse_args()
 
@@ -298,10 +318,44 @@ if __name__ == '__main__':
     elif args.blast_p:
         main(args.prot_fasta, args.fasta_list, args.seq_header, args.out_name, True)
     elif args.hmmer:
+        import biosql_own_sql_tables
         print 'hmm!'
-        main(args.prot_fasta, args.fasta_list, args.seq_header, args.out_name, False, True)
+        marker2genome2best_hit = main(args.prot_fasta, args.fasta_list, args.seq_header, args.out_name, False, True, args.reanotate)
+
+        dico_seq = {}
+        for genome in marker2genome2best_hit[marker2genome2best_hit.keys()[0]]:
+            genome_file = '%s.ffn' % genome
+            print genome_file
+            dico_seq.update(SeqIO.to_dict(SeqIO.parse(genome_file, 'fasta')))
+
+        for marker in marker2genome2best_hit:
+            locus_list = []
+            for genome in marker2genome2best_hit[marker]:
+                if marker2genome2best_hit[marker][genome] != '-':
+                    locus_list.append(marker2genome2best_hit[marker][genome])
+
+            # récuperation des séquences avec mysql
+            ''''
+            records = biosql_own_sql_tables.locus_list2nucleotide_fasta("chlamydia_04_16", locus_list)
+
+            with open('%s_best_hits.ffn' % marker, 'w') as m:
+                #SeqIO.write(records, m, 'fasta')
+
+                for i in records:
+                    m.write(">%s|%s\n%s\n" % (i.id, i.description, str(i.seq)))
+                #with open('%s_best_hits.ffn' % marker, 'w') as m:
+                #    SeqIO.write(records, m, 'fasta')
+            '''
+            # a adapter: possibilité de fournir les ffn correspondant
+            with open('%s_best_hits.ffn' % marker, 'w') as m:
+                record_l = []
+                for locus in locus_list:
+                    record_l.append(dico_seq[locus])
+                SeqIO.write(record_l, m, 'fasta')
+
     else:
-        shell_command.shell_command("formatdb -i %s -p F" % args.fasta_db)
-        main(args.prot_fasta, args.fasta_db, args.seq_header, args.out_name)
+        if args.reanotate:
+            shell_command.shell_command("formatdb -i %s -p F" % args.fasta_db)
+        main(args.prot_fasta, args.fasta_db, args.seq_header, args.out_name, args)
 
 

@@ -10,6 +10,24 @@ if __name__ == '__main__':
     
     args = parser.parse_args()
     genbank = [i for i in SeqIO.parse(args.gbk, "genbank")]
+
+    if args.gbk is not None and args.faa is None and args.fna is None:
+	for record in genbank:
+             for feature in record.features: 
+                 if feature.type == 'CDS':
+                    try:
+                        len(feature.qualifiers['translation'])
+                    except:
+                        import re
+                        print "adding translation to %s" % feature.qualifiers['locus_tag']
+                        seq = str(feature.extract(record.seq).translate())
+			if seq[-1] == '*':
+                            seq = seq[0:-1]
+			feature.qualifiers['translation'] = [seq]
+        out_name = args.gbk.split('.')[0] + '_translations.gbk'
+        output_handle = open(out_name, 'w')            
+        SeqIO.write(genbank,output_handle, "genbank")                   
+
     if args.faa is not None and args.gbk is not None:
         
         faa = SeqIO.parse(args.faa, "fasta")
@@ -48,8 +66,10 @@ if __name__ == '__main__':
             #print record_gbk.seq
             for feature in record_gbk.features:
                 if feature.type == 'CDS':
-                               
-                    feature.qualifiers['translation'] = [str(feature.extract(record_fna.seq).translate())[0:-1]]
+                    seq = str(feature.extract(record_fna.seq).translate())
+		    if seq[-1] == '*':
+                        seq = seq[0:-1]                               
+                    feature.qualifiers['translation'] = [seq]
                     #print feature
         output_handle = open("test.gbk", 'w')            
         SeqIO.write(genbank,output_handle, "genbank")

@@ -10,7 +10,7 @@
 # ---------------------------------------------------------------------------
 
 
-def gbk2faa(seq_records, pformat=False, lformat=False, remove_redundancy=False):
+def gbk2faa(seq_records, pformat=False, lformat=False, remove_redundancy=False, get_translation=False):
     import re, sys
 
     all_locus_ids = []
@@ -80,11 +80,21 @@ def gbk2faa(seq_records, pformat=False, lformat=False, remove_redundancy=False):
                     except:
                         #print seq_feature
                         #sys.stderr.write(seq_feature.location.start)
-                        sys.stderr.write("%s (%s) - %s: no sequence, is it a pseudogene, or genbank without translated CDS?\n" % (record.id,
-                                                                     record.description,
-                                                                     seq_feature.qualifiers["locus_tag"][0]))
+		        sys.stderr.write("%s (%s) - %s: no sequence, is it a pseudogene, or genbank without translated CDS?\n" % (record.id,
+		                                                             record.description,
+		                                                             seq_feature.qualifiers["locus_tag"][0]))
+			if get_translation:
+                                import re
+                                seq = str(seq_feature.extract(record.seq).translate())
+				if seq[-1] == '*':
+                                    seq = seq[0:-1]
+				seq_feature.qualifiers['translation'] = [seq]
+				print seq
+			else:
+				continue
 
-                        continue
+
+                        
                     #assert len(seq_feature.qualifiers['translation'])==1
                     # gi|83716028|ref|YP_443839.1| matrix protein [Avian metapneumovirus]
 
@@ -172,6 +182,7 @@ if __name__ == '__main__':
     parser.add_argument("-f", '--lformat', action='store_true', help="format header: >locus description", default=False)
     parser.add_argument("-p", '--pformat', action='store_true', help="format header: >protein_id description", default=False)
     parser.add_argument("-r", '--remove', action='store_true', help="remove redundancy (protein id or locus tags persent mor than once)", default=False)
+    parser.add_argument("-t", '--translate', action='store_true', help="translate from DNA if translation not available (not for pseudo tagged features)", default=False)
 
     args = parser.parse_args()
 
@@ -181,8 +192,8 @@ if __name__ == '__main__':
 
 
     if args.lformat:
-        gbk2faa(args.input_gbk, lformat=args.lformat, remove_redundancy=args.remove)
+        gbk2faa(args.input_gbk, lformat=args.lformat, remove_redundancy=args.remove, get_translation=args.translate)
     elif args.pformat:
-        gbk2faa(args.input_gbk, pformat=args.pformat, remove_redundancy=args.remove)
+        gbk2faa(args.input_gbk, pformat=args.pformat, remove_redundancy=args.remove, get_translation=args.translate)
     else:
-        gbk2faa(args.input_gbk, False, False, remove_redundancy=args.remove)
+        gbk2faa(args.input_gbk, False, False, remove_redundancy=args.remove, get_translation=args.translate)

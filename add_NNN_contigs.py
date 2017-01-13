@@ -17,8 +17,8 @@ def split_gbk(seq_records, outname, format = False):
 
     merged_record = ''
     fasta_record = False
-    for record in seq_records:
-        #print record
+    for i, record in enumerate(seq_records):
+        print i
 
         for feature in record.features:
             if feature.type == "fasta_record":
@@ -30,6 +30,7 @@ def split_gbk(seq_records, outname, format = False):
                 my_feature_location = FeatureLocation(my_start_pos,my_end_pos)
                 my_feature = SeqFeature(my_feature_location, type="assembly_gap")
                 merged_record.features.append(my_feature)
+               
             elif feature.type == 'source' and fasta_record == False:
                 merged_record+=record[feature.location.start:feature.location.end]
                 merged_record += "N" * 200
@@ -38,16 +39,17 @@ def split_gbk(seq_records, outname, format = False):
                 my_feature_location = FeatureLocation(my_start_pos,my_end_pos)
                 my_feature = SeqFeature(my_feature_location, type="assembly_gap")
                 merged_record.features.append(my_feature)
+            
 
     to_remove = []
     for n, feature in enumerate(merged_record.features):
-        if feature.type == 'source':
+        if feature.type == 'source' or feature.type == "fasta_record":
            to_remove.append(n)
            
 
     for index in sorted(to_remove, reverse=True):
         if index != 0:
-            print index
+            #print index
             del merged_record.features[index]
 
     merged_record.id = seq_records[0].annotations["accessions"][-1]

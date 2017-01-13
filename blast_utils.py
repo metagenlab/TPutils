@@ -11,7 +11,7 @@ def run_prodigal(fasta_seq, output_name='temp.faa'):
     # -i Specify input file
     # -c:  Closed ends.  Do not allow genes to run off edges. # not activated
     cmd = "prodigal -q -a %s -i %s" % (output_name, fasta_seq)
-    print cmd
+
     sdt_out, sdt_err, err = shell_command.shell_command(cmd)
     print sdt_out
     print sdt_err
@@ -42,7 +42,7 @@ def run_prodigal(fasta_seq, output_name='temp.faa'):
 
 class Hmm():
 
-    def __init__(self, hmm_profiles, database, output_dir=False, call_genes=False, score_cutoff=100, filter_bitscore='best'):
+    def __init__(self, hmm_profiles, database, output_dir=False, call_genes=False, score_cutoff=100, cut_tc=False, filter_bitscore='best'):
         from tempfile import NamedTemporaryFile
 
         assert isinstance(hmm_profiles, list)
@@ -59,7 +59,10 @@ class Hmm():
         # -T <x>     : report sequences >= this score threshold in output
         # out, query and db
         #self.hmmer_cmd = 'hmmsearch -T %s -E 1e-10 -o %s %s %s'
-        self.hmmer_cmd = 'hmmsearch -E 1e-10 -o %s %s %s'
+        if not cut_tc:
+            self.hmmer_cmd = 'hmmsearch -T %s -o' % score_cutoff + ' %s %s %s'
+        else:
+            self.hmmer_cmd = 'hmmsearch --cut_tc -o %s %s %s'
         self.hmmer_score_cutoff = score_cutoff
         self.hmmer_output_list = []
 
@@ -92,27 +95,35 @@ class Hmm():
                 "query_coverage",
                 "hit_start",
                 "hit_end"]
-        results = '\t'.join(header) + '\n'
+        results = []#[header]
         for profile in profiles:
             temp_file = NamedTemporaryFile()
             self.hmmer_output_list.append(temp_file.name)
             if not isinstance(self.database, list):
-                stout, sterr, code = shell_command.shell_command(self.hmmer_cmd % (temp_file.name, profile, self.database)) # self.hmmer_score_cutoff,
+                cmd = self.hmmer_cmd % (temp_file.name, profile, self.database)
+                print cmd
+                stout, sterr, code = shell_command.shell_command(cmd) # self.hmmer_score_cutoff,
                 if code != 0:
                     import sys
                     sys.stdout.write("\n%s\n%s\n" % (stout, sterr))
                     sys.exit()
 
                 parsed_data = self._parse_hmmsearch(temp_file.name)
+
+                if len(parsed_data) == 0:
+                    print 'No domains respecting score threshold for %s, continue...' % profile
+                    continue
+
                 if not isinstance(parsed_data[0], dict):
-                    results += '%s\t-\t-\t-\t-\t-\t-\t-\t-\t-\t\n' % parsed_data[0]
+                    results.append(['%s' % parsed_data[0], '-', '-', '-', '-', '-', '-', '-', '-', '-'])
                 else:
                     hsp_list = parsed_data
                     for x in range(0,len(hsp_list)):
-                        results += '\t'.join([str(hsp_list[x][i]) for i in header])
-                        results += '\n'
+                        #results += '\t'.join([str(hsp_list[x][i]) for i in header])
+                        #results += '\n'
+                        results.append([str(hsp_list[x][i]) for i in header])
             else:
-                # multiple databases: performing bitscrore filtering
+                # multiple databases: performing bitscore filtering
                 self.biodb2best_hits = {}
                 for database in self.database:
                     stout, sterr, code = shell_command.shell_command(self.hmmer_cmd % (self.hmmer_score_cutoff, temp_file.name, profile, self.database))
@@ -124,7 +135,7 @@ class Hmm():
                     parsed_data = self._parse_hmmsearch(temp_file.name)
 
 
-
+                    '''
                     if not isinstance(parsed_data[0], dict):
                         pass
                     else:
@@ -135,11 +146,12 @@ class Hmm():
                             self.profile2scores[parsed_data[0]['profile_id']].append(parsed_data[0]['bitscore'])
                         hsp_list = parsed_data
                         for x in range(0,len(hsp_list)):
-                            pass
+                            results += '\t'.join([str(hsp_list[x][i]) for i in header])
+                            results += '\n'
+                    '''
 
 
-
-        print results
+        return results
 
     def _parse_hmmsearch(self, hmmsearch_result):
         from Bio import SearchIO
