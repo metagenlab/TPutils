@@ -51,8 +51,6 @@ def relaunch_vital_it_job(status, cmd_data):
     import generate_bsub_file
     import shell_command
     import sys
-    shell_command.shell_command("rm %s" % cmd_data["-o"])
-    shell_command.shell_command("rm %s" % cmd_data["-e"])
     if status == "MEMKILL":
         mem = int(cmd_data["-M"])/1000000
         mem+=2
@@ -63,6 +61,9 @@ def relaunch_vital_it_job(status, cmd_data):
                                         error_file=cmd_data["-e"])
         generate_bsub_file.run_job(script)
         sys.stdout.write("Job %s relaunched with increased memory limit: %s GB\n" % (cmd_data["-J"], mem))
+        shell_command.shell_command("rm %s" % cmd_data["-o"])
+        shell_command.shell_command("rm %s" % cmd_data["-e"])
+
     elif status == "LIMITKILL":
         script = generate_bsub_file.BSUB_script(command=cmd_data["cmd"],
                                         mem_in_GB=int(cmd_data["-M"])/1000000,
@@ -72,6 +73,13 @@ def relaunch_vital_it_job(status, cmd_data):
                                         queue="long")
         generate_bsub_file.run_job(script)
         sys.stdout.write("Job %s relaunched with queue long" % cmd_data["-J"])
+        shell_command.shell_command("rm %s" % cmd_data["-o"])
+        shell_command.shell_command("rm %s" % cmd_data["-e"])
+
+    elif status == "SUCCESS":
+        pass
+    elif status == "UNKNOWN":
+        print 'status unknown for %s' % cmd_data
     else:
         raise IOError("Uknwon LFS error status %s\n" % status)
 
