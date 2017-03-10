@@ -25,11 +25,11 @@ def search_16S_rrna(processed_list):
     rrna_5S = []
     for line in processed_list:
         if re.match('Name=16S_rRNA;product=16S ribosomal RNA', line[-1]) is not None:
-            print line
+            #print line
             rrna_16S.append(line)
             
         elif re.match('Name=23S_rRNA;product=23S ribosomal RNA', line[-1]) is not None:
-            print line
+            #print line
             rrna_23S.append(line)
             
         elif re.match('Name=5S_rRNA;product=5S ribosomal RNA', line[-1]) is not None:
@@ -120,26 +120,27 @@ if __name__ == '__main__':
     if args.only_16s:
         if longest16:
             if longest16[3] == "+":
-                recs.append(extract_seq(args.input, longest16[0], longest16[1], longest16[2] ,"16S", title))
+                #print longest16
+                recs.append(extract_seq(args.input, longest16[0], longest16[1], longest16[2] , longest16[0], longest16[4]))
             else:
-                recs.append(extract_seq(args.input, longest16[0], longest16[1], longest16[2], "16S", title, True))
+                recs.append(extract_seq(args.input, longest16[0], longest16[1], longest16[2], longest16[0], longest16[4], True))
     elif args.only_23s:
         if longest23:
             if longest23[3] == "+":
-                recs.append(extract_seq(args.input, longest23[0], longest23[1], longest23[2], "23S", title))
+                recs.append(extract_seq(args.input, longest23[0], longest23[1], longest23[2], longest16[0], longest16[4]))
             else:
-                recs.append(extract_seq(args.input, longest23[0], longest23[1], longest23[2], "23S", title, True))
+                recs.append(extract_seq(args.input, longest23[0], longest23[1], longest23[2], longest16[0], longest16[4], True))
     else:
         if longest16:
             if longest23[3] == "+":
-                recs.append(extract_seq(args.input, longest16[0], longest16[1], longest16[2], "16S", title))
+                recs.append(extract_seq(args.input, longest16[0], longest16[1], longest16[2], longest16[0], longest16[4]))
             else:
-                recs.append(extract_seq(args.input, longest16[0], longest16[1], longest16[2], "16S", title, True))
+                recs.append(extract_seq(args.input, longest16[0], longest16[1], longest16[2], longest16[0], longest16[4], True))
         if longest23:
             if longest23[3] == "+":
-                recs.append(extract_seq(args.input, longest23[0], longest23[1], longest23[2], "23S", title))
+                recs.append(extract_seq(args.input, longest23[0], longest23[1], longest23[2], longest16[0], longest16[4]))
             else:
-                recs.append(extract_seq(args.input, longest23[0], longest23[1], longest23[2], "23S", title, True))
+                recs.append(extract_seq(args.input, longest23[0], longest23[1], longest23[2], longest16[0], longest16[4], True))
     from Bio import SeqIO
     import sys
     for rec in recs:

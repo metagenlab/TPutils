@@ -117,8 +117,8 @@ def _read_text_matrix(data_file):
 
 def pairewise_identity(seq1, seq2):
     "return identity calculated as: n identical sites/n aligned sites (gaps non included)"
-    A=list(seq1)
-    B=list(seq2)
+    A=list(seq1.upper())
+    B=list(seq2.upper())
     identical_sites = 0
     aligned_sites = 0
     gaps=0
@@ -131,6 +131,10 @@ def pairewise_identity(seq1, seq2):
             identical_sites+=1
 
     identity = 100*(identical_sites/float(aligned_sites))
+
+    #print 'identical_sites', identical_sites
+    #print 'aligned_sites', aligned_sites
+
     if aligned_sites == 0:
         # return false if align length = 0
         return False
@@ -166,7 +170,9 @@ def global_align(seq_record1, seq_record2):
     seq1.alphabet = IUPAC.ambiguous_dna
     seq2.alphabet = IUPAC.ambiguous_dna
 
-    
+    print 'test nt1', _verify_alphabet(seq1)
+    print 'test nt1', _verify_alphabet(seq2)
+
     if _verify_alphabet(seq1) and _verify_alphabet(seq2):
         print "dna"
     #    alns = pairwise2.align.globalds(seq1, seq2, DNA_matrix, gap_open, gap_extend)
@@ -206,8 +212,9 @@ def global_align(seq_record1, seq_record2):
 
 
     else:
-        print _verify_alphabet(seq1)
-        print _verify_alphabet(seq2)
+        print 'test seq1', _verify_alphabet(seq1)
+        print seq1.alphabet
+        print 'test seq2', _verify_alphabet(seq2)
         raise "unkown alphabet!"
 
 
@@ -219,9 +226,9 @@ def get_identity_from_2_seqrecord(record, seq1, seq2):
     seq1 and seq2: indexes of the to sequences to align and get identity
 
     """
+
     align = global_align(record[seq1], record[seq2])
     identity = pairewise_identity(align[0].seq, align[1].seq)
-    return identity
 
 
 def get_identity_from_combination_list(record, combinations, out_q):
@@ -368,7 +375,8 @@ if __name__ == '__main__':
     else:
         out_name = args.out_name
 
-    if args.multifasta: 
+    if args.multifasta:
+        print 'multifasta'
         handle = open(args.multifasta, "rU")
         multifasta = [record for record in SeqIO.parse(handle, "fasta")]
         handle.close()

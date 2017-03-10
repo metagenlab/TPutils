@@ -14,7 +14,7 @@ from matplotlib.backends.backend_pdf import PdfPages
 
 
 
-def circos_gc_var(record, windows=1000):
+def circos_gc_var(record, windows=1000, shift=0):
     '''
     :param record:
     :return: circos string with difference as compared to the average GC
@@ -70,11 +70,11 @@ def circos_gc_var(record, windows=1000):
                 stop = len(seq)
                 if stop - start < 200:
                     break
-            circos_string += "%s %s %s %s\n" % (contig_name, start, stop, gc)
+            circos_string += "%s %s %s %s\n" % (contig_name, start+shift, stop+shift, gc)
     return circos_string
 
 
-def circos_gc_skew(record, windows=1000):
+def circos_gc_skew(record, windows=1000, shift=0):
     '''
     :param record:
     :return: circos string with difference as compared to the average GC
@@ -121,7 +121,7 @@ def circos_gc_skew(record, windows=1000):
                 #gc = ((GC(record.seq[start:stop])/average_gc) - 1)*100
                 section_start = chr_start + start
                 section_end = chr_start + stop
-                circos_string += "%s %s %s %s\n" % (contig_name, section_start, section_end, values[i])
+                circos_string += "%s %s %s %s\n" % (contig_name, section_start+shift, section_end+shift, values[i])
     else:
         #print 'no gaps!'
         try:
@@ -132,8 +132,7 @@ def circos_gc_skew(record, windows=1000):
             start = i *windows
             stop = start + windows
 
-            circos_string += "%s %s %s %s\n" % (record.name, start, stop, values[i])
-
+            circos_string += "%s %s %s %s\n" % (record.id, start+shift, stop+shift, values[i])
     return circos_string
 
 def plot_contig_len(handle, out_name):

@@ -10,12 +10,22 @@
 # ---------------------------------------------------------------------------
 
 def gbk2fna(seq_records, outname):
-    output_handle = open(outname, "w")
-
+    
+    max_len = 0
     if len(seq_records) > 1:
+        rec_list = []
         for record in seq_records:
+            if len(record.seq)>max_len:
+                print 'plus long!!!!!!!!!!!!!!'
+                max_len = len(record.seq)
+                print max_len
+                outname = record.id.split('.')[0] + ".fna"
+            rec_list.append(record)
+        output_handle = open(outname, "w")
+        for record in rec_list:
             output_handle.write(">%s\n%s\n" % (record.name, record.seq))
     else:
+        output_handle = open(outname, "w")
         try:
             gi = seq_records[0].annotations["gi"]
             source = seq_records[0].annotations["source"]

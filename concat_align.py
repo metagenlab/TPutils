@@ -31,8 +31,16 @@ def multiple_alignments2concatenated_alignments(fasta_files, out_name):
     # building dictionnary of the form: dico[one_fasta][one_taxon] = sequence
     concat_data = {}
 
+    start_stop_list = []
+    start = 0
+    stop = 0
+
     for one_fasta in fasta_files:
+        start = stop + 1
+        stop = start + len(all_seq_data[one_fasta][all_seq_data[one_fasta].keys()[0]]) - 1
+        start_stop_list.append([start, stop])
         for taxon in taxons:
+
             # check if the considered taxon is present in the record
             if taxon not in all_seq_data[one_fasta]:
                 # if taxon absent, create SeqRecord object "-"*len(alignments): gap of the size of the alignment
@@ -47,7 +55,9 @@ def multiple_alignments2concatenated_alignments(fasta_files, out_name):
     MSA = MultipleSeqAlignment([concat_data[i] for i in concat_data])
     with open(out_name, "w") as handle:
         AlignIO.write(MSA, handle, "fasta")
-
+    with open('raxml_partitions_msa.txt', "w") as r:
+        for i, start_stop in enumerate(start_stop_list):
+            r.write('LG, gene%s = %s-%s\n' % (i+1, start_stop[0], start_stop[1]))
 if __name__ == '__main__':
     import argparse
 

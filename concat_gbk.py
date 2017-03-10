@@ -5,15 +5,29 @@ import sys
 
 def merge_gbk(gbk_records, filter_size=0, gi=False):
 
+    '''
+
+    merge multiple contigs into a single DNA molecule with 200*N between contigs
+    keep source description from the first record
+    remove contigs smaller than <filter_size>
+
+    :param gbk_records:
+    :param filter_size:
+    :param gi:
+    :return:
+    '''
+
     from Bio.SeqFeature import SeqFeature, FeatureLocation, ExactPosition
     from Bio.SeqRecord import SeqRecord
     n=0
     if len(gbk_records) == 1:
         merged_rec = gbk_records[0]
+
     else:
         for i, rec in enumerate(gbk_records):
-            # remove source feature
-            rec.features.pop(0)
+            # remove source feature of all records except the first one
+            if rec.features[0].type == 'source' and i != 0:
+                rec.features.pop(0)
             # filter small contigs
             if len(rec) > filter_size:
                 if n == 0:
@@ -28,19 +42,28 @@ def merge_gbk(gbk_records, filter_size=0, gi=False):
 
                     my_start_pos = ExactPosition(len(merged_rec)-200)
                     my_end_pos = ExactPosition(len(merged_rec))
-
-                    my_feature_location = FeatureLocation(my_start_pos,my_end_pos)
-
+                    my_feature_location = FeatureLocation(my_start_pos, my_end_pos)
                     my_feature = SeqFeature(my_feature_location, type="assembly_gap")
-
                     merged_rec.features.append(my_feature)
-    merged_rec.id = gbk_records[0].annotations["accessions"][-1]
+
+    try:
+        merged_rec.id = gbk_records[0].annotations["accessions"][-1]
+    except KeyError:
+        merged_rec.id = gbk_records[0].id
+        
     if gi:
         merged_rec.annotations["gi"] = gi
 
-    merged_rec.description = "%s (merged contigs)" % gbk_records[0].annotations["organism"]
+    merged_rec.description = "%s" % gbk_records[0].annotations["organism"]
     merged_rec.annotations = gbk_records[0].annotations
-    merged_rec.name = gbk_records[0].annotations["accessions"][-1]
+    try:
+        merged_rec.name = gbk_records[0].annotations["accessions"][-1]
+    except KeyError:
+        merged_rec.name = gbk_records[0].id
+    my_start_pos = ExactPosition(0)
+    my_end_pos = ExactPosition(len(merged_rec))
+    merged_rec.features[0].location = FeatureLocation(my_start_pos, my_end_pos)
+
     return merged_rec
 
 
