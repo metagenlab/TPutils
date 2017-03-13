@@ -49,20 +49,56 @@ def convert_leaf_labels(input_tree, biodb_name, accession2taxon=False, taxon2acc
                                                input_file,
                                                output_file)
 
-def convert_leaf_labels_from_genbank(input_tree, input_gbk_list):
+def convert_leaf_labels_from_genbank(input_tree, input_gbk_list, show_rank=False):
     import gbk2accessiontodefinition
     import parse_newick_tree
 
 
     id2description = gbk2accessiontodefinition.get_coressp(input_gbk_list)
+    if show_rank:
+        for id in id2description:
+            print 'searching rank for %s...' % id
+            try:
 
+                id2description[id] = id2description[id] + ' (%s)' % accession2taxon_rank(id, 'phylum')
+            except:
+                print 'no phylum for %s' % id
+                try:
 
+                    id2description[id] = id2description[id] + ' (order: %s)' % accession2taxon_rank(id, 'order')
+                except:
+                    print 'no order for %s' % id
+                    id2description[id] = id2description[id] + ' (?)'
 
     new_tree = parse_newick_tree.convert_terminal_node_names(input_tree, id2description, 1)
 
     return new_tree
-    
-    
+
+
+def accession2taxon_rank(accession, rank='phylum'):
+    from Bio import Entrez
+    import sequence_id2scientific_classification
+
+    Entrez.email = "trestan.pillonel@unil.ch"
+
+    handle1 = Entrez.esearch(db="nuccore", term=accession)
+    record1 = Entrez.read(handle1)
+
+    ncbi_id = record1['IdList'][0]
+
+    handle2 = Entrez.elink(dbfrom="nuccore", db="taxonomy", id=ncbi_id)
+    record2 = Entrez.read(handle2)
+
+    id = record2[0]['LinkSetDb'][0]['Link'][0]['Id']
+
+    taxo_data = sequence_id2scientific_classification.taxon_id2scientific_classification([id])
+    try:
+        data = taxo_data[id][rank]
+    except:
+        print accession, ncbi_id,taxo_data[id]
+        return False
+    return data
+
 
 if __name__ == '__main__':
     import argparse
@@ -76,8 +112,10 @@ if __name__ == '__main__':
     parser.add_argument("-g", '--genbank_files', type=str, help="genbank files of all leaf nodes", nargs='+')
     parser.add_argument("-a", '--accession2taxon', action='store_true', help="convert accession to taxon_id used in biosqldb")
     parser.add_argument("-t", '--taxon2accession', action='store_true', help="convert taxon id to accessions used in biosqldb")
+    parser.add_argument("-r", '--show_rank', action='store_true', help="show rank (phylum)")
 
     args = parser.parse_args()
+
     if args.database_name:
         print args.accession2taxon, args.taxon2accession
         convert_leaf_labels(args.input_tree,
@@ -88,7 +126,7 @@ if __name__ == '__main__':
 
 
 
-        new_tree = convert_leaf_labels_from_genbank(args.input_tree, args.genbank_files)
+        new_tree = convert_leaf_labels_from_genbank(args.input_tree, args.genbank_files, show_rank = args.show_rank)
         file_name = args.input_tree.split('.')[0]
         output_file = file_name + '_renamed.tree'
 

@@ -320,7 +320,13 @@ if __name__ == '__main__':
     elif args.hmmer:
         import biosql_own_sql_tables
         print 'hmm!'
-        marker2genome2best_hit = main(args.prot_fasta, args.fasta_list, args.seq_header, args.out_name, False, True, args.reanotate)
+        marker2genome2best_hit = main(args.prot_fasta,
+                                      args.fasta_list,
+                                      args.seq_header,
+                                      args.out_name,
+                                      False,
+                                      True,
+                                      args.reanotate)
 
         dico_seq = {}
         for genome in marker2genome2best_hit[marker2genome2best_hit.keys()[0]]:
