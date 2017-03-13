@@ -10,7 +10,7 @@
 # ---------------------------------------------------------------------------
 
 
-def gbk2faa(seq_records, pformat=False, lformat=False, remove_redundancy=False, get_translation=False):
+def gbk2faa(seq_records, pformat=False, lformat=False, remove_redundancy=False, get_translation=False, outname=False):
     import re, sys
 
     all_locus_ids = []
@@ -22,7 +22,8 @@ def gbk2faa(seq_records, pformat=False, lformat=False, remove_redundancy=False, 
         length_records = [len(i.seq) for i in seq_records]
         longest_record = length_records.index(max(length_records))
 
-        outname = seq_records[longest_record].id.split('.')[0] + ".faa"
+        if not outname:
+            outname = seq_records[longest_record].id.split('.')[0] + ".faa"
 
         output_handle = open(outname, "w")
 
@@ -181,6 +182,7 @@ if __name__ == '__main__':
     #parser.add_argument("-o", '--outname', type=str, help="putput_name", default=False)
     parser.add_argument("-f", '--lformat', action='store_true', help="format header: >locus description", default=False)
     parser.add_argument("-p", '--pformat', action='store_true', help="format header: >protein_id description", default=False)
+    parser.add_argument("-o", '--outname', help="outname (optinal)", default=False)
     parser.add_argument("-r", '--remove', action='store_true', help="remove redundancy (protein id or locus tags persent mor than once)", default=False)
     parser.add_argument("-t", '--translate', action='store_true', help="translate from DNA if translation not available (not for pseudo tagged features)", default=False)
 
@@ -192,8 +194,8 @@ if __name__ == '__main__':
 
 
     if args.lformat:
-        gbk2faa(args.input_gbk, lformat=args.lformat, remove_redundancy=args.remove, get_translation=args.translate)
+        gbk2faa(args.input_gbk, lformat=args.lformat, remove_redundancy=args.remove, get_translation=args.translate, outname=args.outname)
     elif args.pformat:
-        gbk2faa(args.input_gbk, pformat=args.pformat, remove_redundancy=args.remove, get_translation=args.translate)
+        gbk2faa(args.input_gbk, pformat=args.pformat, remove_redundancy=args.remove, get_translation=args.translate, outname=args.outname)
     else:
-        gbk2faa(args.input_gbk, False, False, remove_redundancy=args.remove, get_translation=args.translate)
+        gbk2faa(args.input_gbk, False, False, remove_redundancy=args.remove, get_translation=args.translate, outname=args.outname)

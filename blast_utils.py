@@ -198,12 +198,15 @@ class Hmm():
 
 class Blast():
 
-    def __init__(self, query, database, protein=False):
-        import NCBIXML
-        import shell_command
+    def __init__(self, query, database, protein=False, formatdb=False, best_hit_only=True):
+        import os
+
         self.query = query
         self.database = database
         self.protein = protein
+        self.best_hit_only = best_hit_only
+        self.formatdb = formatdb
+        self.working_dir = os.getcwd()
         self.blast_path_var= '$BLASTDB:/temp/blastdb.temp'
 
 
@@ -221,17 +224,40 @@ class Blast():
         new_database = self.id_generator(8)
 
         if self.protein:
-            shell_command.shell_command('formatdb -i %s -t /tmp/%s.temp -o T -p F -n /tmp/%s.temp -b T' % (self.database, new_database, new_database))
-        else:
             shell_command.shell_command('formatdb -i %s -t /tmp/%s.temp -o T -p T -n /tmp/%s.temp -b T' % (self.database, new_database, new_database))
+        else:
+            shell_command.shell_command('formatdb -i %s -t /tmp/%s.temp -o T -p F -n /tmp/%s.temp -b T' % (self.database, new_database, new_database))
 
-        self.database = new_database
+        self.database_path = '/tmp/%s.temp' % new_database
+
+    def run_blastp(self):
+        from Bio.Blast.Applications import NcbiblastpCommandline
+        import os
+
+        outpath = os.path.join(self.working_dir, 'blast_result.tab')
+        blastp_cline = NcbiblastpCommandline(query= self.query,
+                                            db=self.database,
+                                            evalue=0.005,
+                                            outfmt=6,
+                                            out=outpath)
+        stdout, stderr = blastp_cline()
+        print stderr
+
+        with open(outpath, 'r') as result_handle:
+
+            self.best_hit_list = []
+            for line in result_handle:
+                if line.split('\t')[0] in self.best_hit_list:
+                    continue
+                else:
+                    self.best_hit_list.append(line.rstrip().split('\t'))
+
 
 
     def run_tblastn(self):
 
 
-
+        '''
         tblastn_cline = NcbitblastnCommandline(query='dnaa.temp',
                                              db=contig_file,
                                              evalue=0.001,
@@ -242,3 +268,5 @@ class Blast():
 
         result_handle = open("dnaa_blast2.xml", 'r')
         blast_records = [i for i in NCBIXML.parse(result_handle)]
+        '''
+        pass

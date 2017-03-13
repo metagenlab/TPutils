@@ -61,10 +61,15 @@ if __name__ == '__main__':
     parser.add_argument("-i", '--input_fna', type=str, help="input gbk file")
     parser.add_argument("-l", '--min_len', type=int, help="minimum translated sequence length (default 30)", default=30)
     parser.add_argument("-p", '--trans_table', type=int, help="translation table (default: 11)", default=11)
-
+    parser.add_argument("-n", '--header_name', type=str, help="faa header prefix (default=orf)", default="orf")
+    
     args = parser.parse_args()
     handle = open(args.input_fna, 'r')
-    record = SeqIO.read(handle, 'fasta')
+    records = [i for i in SeqIO.parse(handle, 'fasta')]
 
-    all_cds = find_orfs_with_trans(record.seq, trans_table=args.trans_table, min_protein_length=args.min_len)
-    format_seqquences(all_cds)
+    
+    all_cds = []
+    for record in records:
+        all_cds += find_orfs_with_trans(record.seq, trans_table=args.trans_table, min_protein_length=args.min_len)
+    outname = args.input_fna.split('.')[0] + '_six_frame_translation.faa'
+    format_seqquences(all_cds, outname, args.header_name)

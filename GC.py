@@ -68,7 +68,7 @@ def circos_gc_var(record, windows=1000, shift=0):
             gc = GC(record.seq[start:stop]) - average_gc
             if stop > len(seq):
                 stop = len(seq)
-                if stop - start < 200:
+                if stop - start < 500:
                     break
             circos_string += "%s %s %s %s\n" % (contig_name, start+shift, stop+shift, gc)
     return circos_string
@@ -128,7 +128,9 @@ def circos_gc_skew(record, windows=1000, shift=0):
             values = GC_skew(record.seq, windows)
         except:
             values = GC_skew(record.seq, 2000)
-        for i in range(0, len(values)):
+        # skip last value
+        for i in range(0, len(values)-1):
+
             start = i *windows
             stop = start + windows
 
