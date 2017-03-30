@@ -26,4 +26,5 @@ if __name__ == '__main__':
 
     input_handle = open(args.input_embl, "rU")
     seq_records = list(SeqIO.parse(input_handle, "embl"))
+    print seq_records
     SeqIO.write(seq_records, outname, "genbank")

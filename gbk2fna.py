@@ -9,17 +9,18 @@
 # Date: 2014
 # ---------------------------------------------------------------------------
 
-def gbk2fna(seq_records, outname):
+def gbk2fna(seq_records, outname=False):
     
     max_len = 0
     if len(seq_records) > 1:
         rec_list = []
         for record in seq_records:
             if len(record.seq)>max_len:
-                print 'plus long!!!!!!!!!!!!!!'
+                #print 'plus long!!!!!!!!!!!!!!'
                 max_len = len(record.seq)
-                print max_len
-                outname = record.id.split('.')[0] + ".fna"
+                #print max_len
+                if not outname:
+                    outname = record.id.split('.')[0] + ".fna"
             rec_list.append(record)
         output_handle = open(outname, "w")
         for record in rec_list:

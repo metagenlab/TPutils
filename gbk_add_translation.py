@@ -19,11 +19,15 @@ if __name__ == '__main__':
                         len(feature.qualifiers['translation'])
                     except:
                         import re
-                        print "adding translation to %s" % feature.qualifiers['locus_tag']
-                        seq = str(feature.extract(record.seq).translate())
-			if seq[-1] == '*':
-                            seq = seq[0:-1]
-			feature.qualifiers['translation'] = [seq]
+                        try:
+                            print "adding translation to %s" % feature.qualifiers['locus_tag']
+                            seq = str(feature.extract(record.seq).translate())
+                            if seq[-1] == '*':
+                                seq = seq[0:-1]
+			    feature.qualifiers['translation'] = [seq]
+                        except KeyError:
+                            print '----------------No locus tag for:'
+                            print feature
         out_name = args.gbk.split('.')[0] + '_translations.gbk'
         output_handle = open(out_name, 'w')            
         SeqIO.write(genbank,output_handle, "genbank")                   

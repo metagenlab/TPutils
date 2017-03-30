@@ -11,10 +11,24 @@
 
 
 
-def gbk2ffn(seq_records, outname, locus_tag=False):
+def gbk2ffn(seq_records, outname, locus_tag=False, genome_accession=False):
+    max_len = 0
+    if len(seq_records) > 1:
+        rec_list = []
+        for record in seq_records:
+            if len(record.seq)>max_len:
+                print 'plus long!!!!!!!!!!!!!!'
+                max_len = len(record.seq)
+                print max_len
+                outname = record.id.split('.')[0] + ".ffn"
+            rec_list.append(record)
+        if genome_accession:
+            header_accession = outname.split('.')[0]
+    else:
+        rec_list = seq_records
+        header_accession = seq_records[0].name.split('.')[0]
     output_handle = open(outname, "w")
-
-    for record in seq_records:
+    for record in rec_list:
         for seq_feature in record.features:
             if seq_feature.type == "CDS":
 
@@ -23,6 +37,12 @@ def gbk2ffn(seq_records, outname, locus_tag=False):
                             seq_feature.qualifiers["locus_tag"][0],
                             record.description,
                             seq_feature.extract(record.seq)))
+                elif genome_accession:
+                    output_handle.write(">%s %s\n%s\n" % (
+                            header_accession,
+                            record.description,
+                            seq_feature.extract(record.seq)))
+
                 else:
                     #print seq_feature
                     #try:
@@ -63,6 +83,7 @@ if __name__ == '__main__':
     parser.add_argument("-i", '--input_gbk', type=str, help="input gbk file")
     parser.add_argument("-o", '--outname', type=str, help="putput_name", default=False)
     parser.add_argument("-l", '--locus_tag', action='store_true', help="add locus_tag to header (optional)", default=False)
+    parser.add_argument("-a", '--genome_accession', action='store_true', help="replace header of all CDS by the genome accession (optional)", default=False)
 
     args = parser.parse_args()
 
@@ -83,4 +104,4 @@ if __name__ == '__main__':
     else:
         outname = args.outname
 
-    gbk2ffn(seq_records, outname, args.locus_tag)
+    gbk2ffn(seq_records, outname, args.locus_tag, args.genome_accession)

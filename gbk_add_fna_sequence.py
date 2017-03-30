@@ -9,14 +9,15 @@ if __name__ == '__main__':
     
     args = parser.parse_args()
     genbank = [i for i in SeqIO.parse(args.gbk, "genbank")]
-
+    print 'genbank', genbank
     from Bio.Seq import Seq
     from Bio.Alphabet import generic_dna, generic_protein
     fna = [i for i in SeqIO.parse(args.fna, "fasta")]
-    print fna[0]
+    
     for record_gbk, record_fna in zip(genbank, fna):
-
+        print 'record_gbk', record_gbk
         record_gbk.seq = Seq(str(record_fna.seq), generic_dna)
-
+    print genbank
     output_handle = open("%s_seq.gbk" % args.gbk.split('.')[0], 'w')
     SeqIO.write(genbank,output_handle, "genbank")
+    output_handle.close()

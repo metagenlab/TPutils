@@ -145,7 +145,7 @@ def check_gbk(gbff_files):
                     else:
                         print 'ACHTUNG\t no strain name for \t%s\t, SOUCE uniqueness should be checked manually' % gbff_file
                     # check if accession is meaningful
-                    if 'NODE_' in merged_record.id or 'NODE_' in merged_record.name:
+                    if 'NODE_' in record.id or 'NODE_' in record.name:
                         print 'ACHTUNG\t accession probably not unique (%s) for \t%s\t --> should be checked manually' % (merged_record.id,
                                                                                                                         gbff_file)
 
@@ -176,7 +176,7 @@ def check_gbk(gbff_files):
             #print '########## chromosome ###########'
             import concat_gbk
 
-            if  chromosome[0].seq == 'N'*len(chromosome[0].seq):
+            if chromosome[0].seq == 'N'*len(chromosome[0].seq):
                 #print 'No sequences for %s, skipping! #################' % gbff_file
                 continue
             if is_annotated(chromosome[0]):
