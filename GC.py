@@ -12,8 +12,6 @@ import pylab
 import numpy as np
 from matplotlib.backends.backend_pdf import PdfPages
 
-
-
 def circos_gc_var(record, windows=1000, shift=0):
     '''
     :param record:
@@ -50,6 +48,10 @@ def circos_gc_var(record, windows=1000, shift=0):
                 start = i
                 stop = i + windows
                 #gc = ((GC(record.seq[start:stop])/average_gc) - 1)*100
+                if 'n' in record.seq[start:stop]:
+                    continue
+                if 'N' in record.seq[start:stop]:
+                    continue
                 gc = GC(record.seq[start:stop]) - average_gc
                 if stop > len(seq):
                     stop = len(seq)
@@ -167,8 +169,11 @@ def circos_gc_skew(record, windows=1000, shift=0):
                 seq = record.seq[0:gap_locations[i].start]
                 chr_start = 0
             else:
-                seq = record.seq[gap_locations[i-1].end:gap_locations[i].start]
-                chr_start = gap_locations[i-1].end
+                seq = record.seq[gap_locations[i-1].end+1:gap_locations[i].start]
+                chr_start = gap_locations[i-1].end+1
+            if 'n' in seq or 'N' in seq:
+                print 'n in seq!!!!!!!!!!!!!!'
+
             #print i, "seq", gap_locations[i-1].end, gap_locations[i].start, gap_locations[i].start - gap_locations[i-1].end
 
             try:
@@ -176,6 +181,10 @@ def circos_gc_skew(record, windows=1000, shift=0):
             except:
                 print len(seq), seq
             contig_name = record.name + "_%s" % (i + 1)
+
+            # skip very small contigs!!!!!!!!
+            if len(values)<5:
+                continue
 
             for i in range(0, len(values)):
                 start = i *windows

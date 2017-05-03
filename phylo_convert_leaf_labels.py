@@ -113,6 +113,7 @@ if __name__ == '__main__':
     parser.add_argument("-a", '--accession2taxon', action='store_true', help="convert accession to taxon_id used in biosqldb")
     parser.add_argument("-t", '--taxon2accession', action='store_true', help="convert taxon id to accessions used in biosqldb")
     parser.add_argument("-r", '--show_rank', action='store_true', help="show rank (phylum)")
+    parser.add_argument("-f", '--tab_file', type=str, help="tabulated table with accession\tdescription", default=False)
 
     args = parser.parse_args()
 
@@ -122,6 +123,18 @@ if __name__ == '__main__':
                             args.database_name,
                             accession2taxon=args.accession2taxon,
                             taxon2accession=args.taxon2accession)
+    if args.tab_file:
+        import parse_newick_tree
+        id2description = {}
+        with open(args.tab_file, 'r') as f:
+            for row in f:
+                data = row.rstrip().split('\t')
+                id2description[data[0]] = data[1]
+        new_tree = parse_newick_tree.convert_terminal_node_names(args.input_tree, id2description, 1)
+        file_name = args.input_tree.split('.')[0]
+        output_file = file_name + '_renamed_tab.tree'
+        new_tree.write(format=1, outfile=output_file)
+
     if args.genbank_files:
 
 

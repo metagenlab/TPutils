@@ -303,23 +303,26 @@ if __name__ == '__main__':
     import os
 
     parser = argparse.ArgumentParser()
-    parser.add_argument("-d", '--fasta_list', type=str, help="input fasta file: nucl (reannotation) or protein (no reannotation)", nargs='+')
+    parser.add_argument("-d", '--fasta_list', type=str, help="input fasta file: nucl (reannotation/6 frame translation) or protein (no reannotation)", nargs='+')
     parser.add_argument("-q", '--prot_fasta', type=str, help="input protein fasta/hmm profiles", nargs='+')
     parser.add_argument("-n", '--seq_header', type=str, help="seq header name")
     parser.add_argument("-o", '--out_name', type=str, help="output_identity_matrix", default = "id_matrix.txt")
     parser.add_argument("-p", '--blast_p', action="store_true", help="perform ORFing with prodigal and blastP search")
     parser.add_argument("-m", '--hmmer', action="store_true", help="perform ORFing with prodigal and hmm search search")
     parser.add_argument("-r", '--reanotate', action="store_true", help="reannotate with prodigual (default=False, aa input)")
+    parser.add_argument("-s", '--six_trame_translation', default=False, help="biodb_name for six frame tranlsation complete ORFing (min size of 30aa)")
+
 
     args = parser.parse_args()
+
 
     if args.blast_p and args.hmmer:
         raise('use either blastp or hmm searches, not both!')
     elif args.blast_p:
         main(args.prot_fasta, args.fasta_list, args.seq_header, args.out_name, True)
-    elif args.hmmer:
+    elif args.hmmer and not args.six_trame_translation:
         import biosql_own_sql_tables
-        print 'hmm!'
+        print 'hmm!---'
         marker2genome2best_hit = main(args.prot_fasta,
                                       args.fasta_list,
                                       args.seq_header,
@@ -359,9 +362,55 @@ if __name__ == '__main__':
                     record_l.append(dico_seq[locus])
                 SeqIO.write(record_l, m, 'fasta')
 
-    else:
-        if args.reanotate:
-            shell_command.shell_command("formatdb -i %s -p F" % args.fasta_db)
+    elif args.reanotate and not args.six_trame_translation:
+        shell_command.shell_command("formatdb -i %s -p F" % args.fasta_db)
         main(args.prot_fasta, args.fasta_db, args.seq_header, args.out_name, args)
+    elif args.six_trame_translation and args.hmmer:
+        import universal_markers_hmm
+        fasta_genome_list = universal_markers_hmm.biodatabase2six_frame_translation_all(args.six_trame_translation)
+        print 'six frame trans!!!'
+        print fasta_genome_list
+        marker2genome2best_hit = main(args.prot_fasta,
+                                      fasta_genome_list,
+                                      args.seq_header,
+                                      args.out_name,
+                                      False,
+                                      True,
+                                      args.reanotate)
+
+        dico_seq = {}
+        for genome in marker2genome2best_hit[marker2genome2best_hit.keys()[0]]:
+            genome_file = '%s.ffn' % genome
+            print genome_file
+            dico_seq.update(SeqIO.to_dict(SeqIO.parse(genome_file, 'fasta')))
+
+        for marker in marker2genome2best_hit:
+            locus_list = []
+            for genome in marker2genome2best_hit[marker]:
+                if marker2genome2best_hit[marker][genome] != '-':
+                    locus_list.append(marker2genome2best_hit[marker][genome])
+
+            # récuperation des séquences avec mysql
+            ''''
+            records = biosql_own_sql_tables.locus_list2nucleotide_fasta("chlamydia_04_16", locus_list)
+
+            with open('%s_best_hits.ffn' % marker, 'w') as m:
+                #SeqIO.write(records, m, 'fasta')
+
+                for i in records:
+                    m.write(">%s|%s\n%s\n" % (i.id, i.description, str(i.seq)))
+                #with open('%s_best_hits.ffn' % marker, 'w') as m:
+                #    SeqIO.write(records, m, 'fasta')
+            '''
+            # a adapter: possibilité de fournir les ffn correspondant
+            with open('%s_best_hits.ffn' % marker, 'w') as m:
+                record_l = []
+                for locus in locus_list:
+                    record_l.append(dico_seq[locus])
+                SeqIO.write(record_l, m, 'fasta')
+
+    else:
+        print 'wrong combination of args'
+
 
 
