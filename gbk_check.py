@@ -194,6 +194,7 @@ def check_gbk(gbff_files):
                 # check if source is unique (include strain name)
                 merged_record = remove_record_taxon_id(merged_record)
                 new_source = rename_source(merged_record)
+                print 'new source:', new_source
                 if new_source:
                     merged_record.description = record.annotations['source']
                     merged_record.annotations['organism'] = record.annotations['source']
