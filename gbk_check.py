@@ -60,9 +60,9 @@ def rename_source(record):
             return False
         if strain.lower() not in record.annotations['source'].lower():
             msg = '%s' % record.annotations['source']
-            print "ACHTUNG changing source\t%s\t--> %s " % (msg, record.annotations['source'])
+            print "ACHTUNG changing source\t%s\t--> %s " % (msg, record.annotations['source'] + strain)
 
-        return record.annotations['source']
+        return "%s %s" % (record.annotations['source'], strain)
     else:
         return False
 
@@ -140,8 +140,9 @@ def check_gbk(gbff_files):
                     new_source = rename_source(plasmid)
                     print 'new source:', new_source
                     if new_source:
-                        record.description = record.annotations['source']
-                        record.annotations['organism'] = record.annotations['source']
+                        record.description = new_source
+                        record.annotations['organism'] = new_source
+                        record.annotations['source'] = new_source
                     else:
                         print 'ACHTUNG\t no strain name for \t%s\t, SOUCE uniqueness should be checked manually' % gbff_file
                     # check if accession is meaningful
