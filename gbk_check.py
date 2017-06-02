@@ -60,7 +60,6 @@ def rename_source(record):
             return False
         if strain.lower() not in record.annotations['source'].lower():
             msg = '%s' % record.annotations['source']
-            record.annotations['source'] += ' %s' % strain
             print "ACHTUNG changing source\t%s\t--> %s " % (msg, record.annotations['source'])
 
         return record.annotations['source']
@@ -139,6 +138,7 @@ def check_gbk(gbff_files):
                     plasmid.description = clean_description(plasmid.description)
                     plasmid = remove_record_taxon_id(plasmid)
                     new_source = rename_source(plasmid)
+                    print 'new source:', new_source
                     if new_source:
                         record.description = record.annotations['source']
                         record.annotations['organism'] = record.annotations['source']

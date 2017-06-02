@@ -222,6 +222,8 @@ class Blast():
             self.query = query
 
         else:
+            print type(query)
+            print query
             raise TypeError('wrong inut format: either SeqRecord or string')
 
 
@@ -239,10 +241,12 @@ class Blast():
             print 'database path:', temp_db.name
             # add content to temporary file
 
-        elif type(database) == str:
+        elif type(database) == str or type(database) == unicode:
             self.database = database
 
         else:
+            print database
+            print type(database)
             raise TypeError('wrong inut format: either SeqRecord or string')
 
         self.protein = protein
@@ -347,6 +351,37 @@ class Blast():
 
         return outpath
 
+    def run_tblastx(self):
+        from Bio.Blast.Applications import NcbitblastxCommandline
+        import os
+
+        blast_id = self.id_generator(8)
+
+        outpath = os.path.join(self.working_dir, '%s.tab' % blast_id)
+        blastn_cline = NcbitblastxCommandline(query= self.query,
+                                            db=self.database,
+                                            evalue=0.1,
+                                            outfmt=6,
+                                            out=outpath,
+                                            num_threads=8,
+                                            max_hsps=1000)
+
+        print blastn_cline
+        stdout, stderr = blastn_cline()
+        print stderr
+
+        with open(outpath, 'r') as result_handle:
+
+            self.best_hit_list = []
+            self.complete_hit_list = []
+            for line in result_handle:
+                self.complete_hit_list.append(line.rstrip().split('\t'))
+                if line.split('\t')[0] in self.best_hit_list:
+                    continue
+                else:
+                    self.best_hit_list.append(line.rstrip().split('\t'))
+
+        return outpath
 
     def run_tblastn(self):
 
