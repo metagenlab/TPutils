@@ -66,7 +66,6 @@ def rename_source(record):
     else:
         return False
 
-
 def remove_record_taxon_id(record):
 
     if record.features[0].type == 'source':
@@ -197,8 +196,10 @@ def check_gbk(gbff_files):
                 new_source = rename_source(merged_record)
                 print 'new source:', new_source
                 if new_source:
-                    merged_record.description = record.annotations['source']
-                    merged_record.annotations['organism'] = record.annotations['source']
+                    merged_record.description = new_source
+                    merged_record.annotations['organism'] = new_source
+                    merged_record.annotations['source'] = new_source
+
                 else:
                     print 'ACHTUNG\t no strain name for \t%s\t --> SOUCE uniqueness should be checked manually' % gbff_file
                 # check if accession is meaningful
