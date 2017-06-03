@@ -150,7 +150,6 @@ class Hmm():
                             results += '\n'
                     '''
 
-
         return results
 
     def _parse_hmmsearch(self, hmmsearch_result):
