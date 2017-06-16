@@ -20,6 +20,9 @@ def circos_gc_var(record, windows=1000, shift=0):
         GC(seq[3000:4000]) = 44
         diff = 44 - 32 = 12%
 
+
+
+
     '''
     circos_string = ''
     from Bio.SeqFeature import FeatureLocation
@@ -33,7 +36,7 @@ def circos_gc_var(record, windows=1000, shift=0):
     else:
         gap_locations.append(FeatureLocation(gap_locations[-1].end + 1, len(record.seq)))
     if len(gap_locations) > 1:
-        gap_locations.append(FeatureLocation(gap_locations[-1].end + 1, len(record.seq)))
+        #gap_locations.append(FeatureLocation(gap_locations[-1].end + 1, len(record.seq)))
 
 
         for i in range(0, len(gap_locations)):
@@ -44,7 +47,14 @@ def circos_gc_var(record, windows=1000, shift=0):
                 seq = record.seq[gap_locations[i-1].end:gap_locations[i].start]
                 chr_start = gap_locations[i-1].end
             contig_name = record.name + "_%s" % (i +1)
-            for i in range(0, len(seq), windows):
+
+            if len(seq) < windows:
+                windows_range = len(seq)
+                print seq
+            else:
+                windows_range = windows
+
+            for i in range(0, len(seq), windows_range):
                 start = i
                 stop = i + windows
                 #gc = ((GC(record.seq[start:stop])/average_gc) - 1)*100
@@ -55,8 +65,8 @@ def circos_gc_var(record, windows=1000, shift=0):
                 gc = GC(record.seq[start:stop]) - average_gc
                 if stop > len(seq):
                     stop = len(seq)
-                    if stop - start < 200:
-                        break
+                    #if stop - start < 200:
+                    #    break
                 section_start = chr_start + start
                 section_end = chr_start + stop
                 circos_string += "%s %s %s %s\n" % (contig_name, section_start, section_end, gc)
@@ -85,6 +95,7 @@ def circos_gc_content(record, windows=1000, shift=0):
         GC(seq[3000:4000]) = 44
         diff = 44 - 32 = 12%
 
+    UPDATE 12.06.2017: calculs based on complete (concatenated) sequence, then converted to draft contigs coords
     '''
     circos_string = ''
     from Bio.SeqFeature import FeatureLocation
@@ -98,7 +109,9 @@ def circos_gc_content(record, windows=1000, shift=0):
     else:
         gap_locations.append(FeatureLocation(gap_locations[-1].end + 1, len(record.seq)))
     if len(gap_locations) > 1:
-        gap_locations.append(FeatureLocation(gap_locations[-1].end + 1, len(record.seq)))
+        #gap_locations.append(FeatureLocation(gap_locations[-1].end + 1, len(record.seq)))
+
+
 
 
         for i in range(0, len(gap_locations)):
@@ -109,18 +122,27 @@ def circos_gc_content(record, windows=1000, shift=0):
                 seq = record.seq[gap_locations[i-1].end:gap_locations[i].start]
                 chr_start = gap_locations[i-1].end
             contig_name = record.name + "_%s" % (i +1)
-            for i in range(0, len(seq), windows):
+            if len(seq) <= windows:
+                window_range = len(seq)
+                print 'small contig!!!!!!!!!!', len(seq)
+            else:
+                print 'len contig', len(seq)
+                window_range = windows
+            for i in range(0, len(seq), window_range):
                 start = i
                 stop = i + windows
                 #gc = ((GC(record.seq[start:stop])/average_gc) - 1)*100
                 gc = GC(record.seq[start:stop])
                 if stop > len(seq):
+
                     stop = len(seq)
-                    if stop - start < 200:
-                        break
+                    print "small contig!!", start, stop, gc
+                    #if stop - start < 200:
+                    #    #break
                 section_start = chr_start + start
                 section_end = chr_start + stop
                 circos_string += "%s %s %s %s\n" % (contig_name, section_start, section_end, gc)
+
     else:
         seq = record.seq
         contig_name = record.id #.split('.')[0]
@@ -146,6 +168,8 @@ def circos_gc_skew(record, windows=1000, shift=0):
         GC(seq[3000:4000]) = 44
         diff = 44 - 32 = 12%
 
+    NEW 12.06.2017: calculate GC based on whole sequence
+
     '''
     from Bio.SeqFeature import FeatureLocation
     circos_string = ''
@@ -164,7 +188,25 @@ def circos_gc_skew(record, windows=1000, shift=0):
         gap_locations.append(FeatureLocation(len(record.seq), len(record.seq)))
     #print 'gap locations', gap_locations
     if len(gap_locations) > 1:
-        for i in range(0, len(gap_locations)):
+        import circos_convert_contigs_coords
+
+        contig_coords =  []
+        start = 0
+        for i, coord in enumerate(gap_locations):
+            contig_name = record.name + "_%s" % (i + 1)
+            contig_coords.append([contig_name, start, int(coord.start)])
+            start = coord.end + 1
+
+        values = GC_skew(record.seq, windows)
+        data_list = []
+        for n_value, value in enumerate(values):
+
+            start = (windows * n_value) + 1
+            end = (start + windows)
+            #for i in range(0, len(gap_locations)):
+            data_list.append([record.name, start, end, value])
+
+            '''
             if i == 0:
                 seq = record.seq[0:gap_locations[i].start]
                 chr_start = 0
@@ -180,7 +222,9 @@ def circos_gc_skew(record, windows=1000, shift=0):
                 values = GC_skew(seq, windows)
             except:
                 print len(seq), seq
-            contig_name = record.name + "_%s" % (i + 1)
+
+
+
 
             # skip very small contigs!!!!!!!!
             if len(values)<5:
@@ -193,6 +237,17 @@ def circos_gc_skew(record, windows=1000, shift=0):
                 section_start = chr_start + start
                 section_end = chr_start + stop
                 circos_string += "%s %s %s %s\n" % (contig_name, section_start+shift, section_end+shift, values[i])
+            '''
+        #print "contig_coords", contig_coords
+        #print "data_list", data_list[0:4]
+        renamed_data = circos_convert_contigs_coords.rename_karyotype(contig_coords, data_list)
+        for row in renamed_data:
+            contig_name = row[0]
+            start = row[1]
+            end = row[2]
+            value = row[3]
+            circos_string += "%s %s %s %s\n" % (contig_name, start, end, value)
+
     else:
         #print 'no gaps!'
         try:
