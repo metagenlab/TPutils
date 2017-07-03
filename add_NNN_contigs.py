@@ -43,7 +43,7 @@ def split_gbk(seq_records, outname, format = False):
 
     to_remove = []
     for n, feature in enumerate(merged_record.features):
-        if feature.type == 'source' or feature.type == "fasta_record":
+        if (feature.type == 'source') or (feature.type == "fasta_record"):
            to_remove.append(n)
            
 
@@ -54,7 +54,7 @@ def split_gbk(seq_records, outname, format = False):
 
     merged_record.id = seq_records[0].annotations["accessions"][-1]
     try:
-        merged_record.description = "%s (merged contigs)" % seq_records[0].annotations["organism"]
+        merged_record.description = "%s" % seq_records[0].annotations["organism"]
     except:
         merged_record.description = 'Unkown bacteria'
     merged_record.annotations = seq_records[0].annotations

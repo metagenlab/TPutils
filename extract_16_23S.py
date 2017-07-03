@@ -43,7 +43,7 @@ def search_16S_rrna(processed_list):
 
 #trouve le plus long 16S
 def find_longest_16S(rrna_16S):
-    #print 'rrna_list', rrna_16S
+    print 'rrna_list', rrna_16S
     try:
         longest_rrna = rrna_16S[0]
     except:

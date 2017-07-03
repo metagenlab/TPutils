@@ -48,6 +48,9 @@ def hmm_and_extract(query_fasta_prot, db_prot, seq_header = "query_seq"):
     print
     qcode = os.path.basename(query_fasta_prot).split('.')[0]
     rcode = os.path.basename(db_prot).split('.')[0]
+
+    print 'reference, query:', qcode, rcode
+
     # --max
     # -T <x>     : report sequences >= this score threshold in output
     hmmer_cline = 'hmmsearch -T 150 --tblout temp_hmm_%s_%s.tab %s %s' % (qcode, rcode, query_fasta_prot, db_prot)
@@ -55,6 +58,7 @@ def hmm_and_extract(query_fasta_prot, db_prot, seq_header = "query_seq"):
     stdout, stderr, code = shell_command.shell_command(hmmer_cline)
 
     result_handle = open("temp_hmm_%s_%s.tab" % (qcode, rcode), 'r')
+
     hmmer_records = [i for i in SearchIO.parse(result_handle, 'hmmer3-tab')]
 
     try:
@@ -330,6 +334,7 @@ if __name__ == '__main__':
                                       False,
                                       True,
                                       args.reanotate)
+
 
         dico_seq = {}
         for genome in marker2genome2best_hit[marker2genome2best_hit.keys()[0]]:

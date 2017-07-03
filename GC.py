@@ -53,7 +53,9 @@ def circos_gc_var(record, windows=1000, shift=0):
                 print seq
             else:
                 windows_range = windows
-
+            if len(seq) == 0:
+                continue
+            #print record
             for i in range(0, len(seq), windows_range):
                 start = i
                 stop = i + windows
@@ -245,7 +247,11 @@ def circos_gc_skew(record, windows=1000, shift=0):
             contig_name = row[0]
             start = row[1]
             end = row[2]
-            value = row[3]
+            try:
+                value = row[3]
+            except:
+                print 'problem with', row
+                continue
             circos_string += "%s %s %s %s\n" % (contig_name, start, end, value)
 
     else:

@@ -64,7 +64,7 @@ def rename_source(record):
 
         return strain, "%s %s" % (record.annotations['source'], strain)
     else:
-        return False
+        return False, False
 
 def remove_record_taxon_id(record):
 
