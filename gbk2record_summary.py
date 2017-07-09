@@ -26,8 +26,21 @@ def gbk2summary(records):
                 assembly = '-'
         description = record.description
         length= len(record)
+
+        try:
+            date = record.annotations['date']
+        except:
+            date = '-'
+        #try:
+        #    annot_date = record.annotations['structured_comment']['Genome-Annotation-Data']['Annotation Software revision']
+        #    annot_version = record.annotations['structured_comment']['Genome-Annotation-Data']['Annotation Date']
+        #except:
+        #    annot_data = '-'
+        #    annot_version = '-'
+        #['structured_comment']['Genome-Annotation-Data']
+        refseq_annotation_data = []
         n_features = len([i for i in record.features if i.type=='CDS'])
-        print '%s\t%s\t%s\t%s\t%s\t%s' % (assembly, accession, description, gc_content,length, n_features)
+        print '%s\t%s\t%s\t%s\t%s\t%s\t%s' % (assembly, accession, description, gc_content,length, n_features, date)
 
 
 if __name__ == '__main__':

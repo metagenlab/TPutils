@@ -23,6 +23,7 @@ def merge_gbk(gbk_records, filter_size=0, gi=False):
     if len(gbk_records) == 1:
         merged_rec = gbk_records[0]
 
+
     else:
         for i, rec in enumerate(gbk_records):
             # remove source feature of all records except the first one
@@ -50,12 +51,12 @@ def merge_gbk(gbk_records, filter_size=0, gi=False):
         merged_rec.id = gbk_records[0].annotations["accessions"][-1]
     except KeyError:
         merged_rec.id = gbk_records[0].id
-        
+
     if gi:
         merged_rec.annotations["gi"] = gi
 
     merged_rec.description = "%s" % gbk_records[0].annotations["organism"]
-    merged_rec.annotations = gbk_records[0].annotations
+    merged_rec.annotations = gbk_records[0].annotations                                             
     try:
         merged_rec.name = gbk_records[0].annotations["accessions"][-1]
     except KeyError:

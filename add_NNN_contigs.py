@@ -27,7 +27,7 @@ def split_gbk(seq_records, outname, format = False):
                 merged_record += "N" * 200
                 my_start_pos = ExactPosition(len(merged_record)-200)
                 my_end_pos = ExactPosition(len(merged_record))
-                my_feature_location = FeatureLocation(my_start_pos,my_end_pos)
+                my_feature_location = FeatureLocation(my_start_pos, my_end_pos)
                 my_feature = SeqFeature(my_feature_location, type="assembly_gap")
                 merged_record.features.append(my_feature)
                
