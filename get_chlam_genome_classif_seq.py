@@ -32,7 +32,7 @@ def check_blast_colocalization(record1, record2, seq_range = 0.15):
         return False
 
 
-def hmm_and_extract(query_fasta_prot, db_prot, seq_header = "query_seq"):
+def hmm_and_extract(query_fasta_prot, db_prot, seq_header = "query_seq", hmm_score=150):
     from Bio.Blast.Applications import NcbiblastpCommandline
     from Bio.Blast import NCBIXML
     from Bio import SeqIO
@@ -53,7 +53,7 @@ def hmm_and_extract(query_fasta_prot, db_prot, seq_header = "query_seq"):
 
     # --max
     # -T <x>     : report sequences >= this score threshold in output
-    hmmer_cline = 'hmmsearch -T 150 --tblout temp_hmm_%s_%s.tab %s %s' % (qcode, rcode, query_fasta_prot, db_prot)
+    hmmer_cline = 'hmmsearch -T %s --tblout temp_hmm_%s_%s.tab %s %s' % (hmm_score, qcode, rcode, query_fasta_prot, db_prot)
     print hmmer_cline
     stdout, stderr, code = shell_command.shell_command(hmmer_cline)
 
@@ -203,7 +203,7 @@ def format_out(id_matrixes, genes_list, ids):
 
 
 
-def main(protein_multi_fasta, fasta_files, seq_header, out_name, blast_p = False, hmmer = False, reannotate=False):
+def main(protein_multi_fasta, fasta_files, seq_header, out_name, blast_p = False, hmmer = False, reannotate=False, hmm_score=150):
     import os
     import re
     genes_list = []
@@ -248,7 +248,7 @@ def main(protein_multi_fasta, fasta_files, seq_header, out_name, blast_p = False
             if not blast_p and not hmmer:
                 new_record = [tblastn_and_extract(one_protein, one_target_fasta, seq_header)]
             if hmmer:
-                new_record = hmm_and_extract(one_protein, one_target_fasta, seq_header)
+                new_record = hmm_and_extract(one_protein, one_target_fasta, seq_header, hmm_score=hmm_score)
                 if new_record:
                     new_records.append(new_record)
                     protein2genome2presence[protein_id][target_id] = 1
@@ -310,6 +310,7 @@ if __name__ == '__main__':
     parser.add_argument("-d", '--fasta_list', type=str, help="input fasta file: nucl (reannotation/6 frame translation) or protein (no reannotation)", nargs='+')
     parser.add_argument("-q", '--prot_fasta', type=str, help="input protein fasta/hmm profiles", nargs='+')
     parser.add_argument("-n", '--seq_header', type=str, help="seq header name")
+    parser.add_argument("-T", '--hmm_score_cutoff', type=str, help="hmm_score_cutoff")
     parser.add_argument("-o", '--out_name', type=str, help="output_identity_matrix", default = "id_matrix.txt")
     parser.add_argument("-p", '--blast_p', action="store_true", help="perform ORFing with prodigal and blastP search")
     parser.add_argument("-m", '--hmmer', action="store_true", help="perform ORFing with prodigal and hmm search search")
@@ -333,7 +334,8 @@ if __name__ == '__main__':
                                       args.out_name,
                                       False,
                                       True,
-                                      args.reanotate)
+                                      args.reanotate,
+                                      hmm_score=args.hmm_score_cutoff)
 
 
         dico_seq = {}
@@ -369,7 +371,11 @@ if __name__ == '__main__':
 
     elif args.reanotate and not args.six_trame_translation:
         shell_command.shell_command("formatdb -i %s -p F" % args.fasta_db)
-        main(args.prot_fasta, args.fasta_db, args.seq_header, args.out_name, args)
+        main(args.prot_fasta,
+             args.fasta_db,
+             args.seq_header,
+             args.out_name,
+             args)
     elif args.six_trame_translation and args.hmmer:
         import universal_markers_hmm
         fasta_genome_list = universal_markers_hmm.biodatabase2six_frame_translation_all(args.six_trame_translation)
@@ -381,7 +387,8 @@ if __name__ == '__main__':
                                       args.out_name,
                                       False,
                                       True,
-                                      args.reanotate)
+                                      args.reanotate,
+                                      hmm_score=args.hmm_score_cutoff)
 
         dico_seq = {}
         for genome in marker2genome2best_hit[marker2genome2best_hit.keys()[0]]:

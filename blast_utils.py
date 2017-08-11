@@ -350,7 +350,7 @@ class Blast():
 
         return outpath
 
-    def run_tblastx(self):
+    def run_tblastx(self,evalue=0.1):
         from Bio.Blast.Applications import NcbitblastxCommandline
         import os
 
@@ -359,7 +359,7 @@ class Blast():
         outpath = os.path.join(self.working_dir, '%s.tab' % blast_id)
         blastn_cline = NcbitblastxCommandline(query= self.query,
                                             db=self.database,
-                                            evalue=0.1,
+                                            evalue=evalue,
                                             outfmt=6,
                                             out=outpath,
                                             num_threads=8,

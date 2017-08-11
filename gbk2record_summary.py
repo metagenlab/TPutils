@@ -39,9 +39,12 @@ def gbk2summary(records):
         #    annot_version = '-'
         #['structured_comment']['Genome-Annotation-Data']
         refseq_annotation_data = []
+        taxo_data = '\t'.join(record.annotations['taxonomy'])
         n_features = len([i for i in record.features if i.type=='CDS'])
-        print '%s\t%s\t%s\t%s\t%s\t%s\t%s' % (assembly, accession, description, gc_content,length, n_features, date)
-
+        try:
+            print '%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s' % (assembly, accession, description, gc_content,length, n_features, date, taxo_data)
+        except:
+            print '%s\t%s\t%s\t%s\t%s\t%s\t%s' % (assembly, accession, description, gc_content,length, n_features, date)
 
 if __name__ == '__main__':
     import argparse
