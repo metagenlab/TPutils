@@ -12,6 +12,18 @@
 
 
 def gbk2ffn(seq_records, outname, locus_tag=False, genome_accession=False):
+    from Bio.SeqRecord import SeqRecord
+
+    if type(seq_records) == list:
+        if type(seq_records[0]) == str:
+           seq_records = list(SeqIO.parse(input_handle, "genbank"))
+        elif isinstance(seq_records[0], SeqRecord):
+            pass
+    elif isinstance(seq_records, SeqRecord):
+        seq_records = [seq_records]
+    else:
+        raise('unknown input format of record')
+
     max_len = 0
     if len(seq_records) > 1:
         rec_list = []
