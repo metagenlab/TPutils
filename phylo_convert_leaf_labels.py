@@ -49,12 +49,15 @@ def convert_leaf_labels(input_tree, biodb_name, accession2taxon=False, taxon2acc
                                                input_file,
                                                output_file)
 
-def convert_leaf_labels_from_genbank(input_tree, input_gbk_list, show_rank=False):
+def convert_leaf_labels_from_genbank(input_tree,
+                                     input_gbk_list,
+                                     show_rank=False,
+                                     use_gbk_file_names=False):
     import gbk2accessiontodefinition
     import parse_newick_tree
 
 
-    id2description = gbk2accessiontodefinition.get_coressp(input_gbk_list)
+    id2description = gbk2accessiontodefinition.get_coressp(input_gbk_list, use_gbk_file_names=use_gbk_file_names)
     if show_rank:
         for id in id2description:
             print 'searching rank for %s...' % id
@@ -114,6 +117,7 @@ if __name__ == '__main__':
     parser.add_argument("-t", '--taxon2accession', action='store_true', help="convert taxon id to accessions used in biosqldb")
     parser.add_argument("-r", '--show_rank', action='store_true', help="show rank (phylum)")
     parser.add_argument("-f", '--tab_file', type=str, help="tabulated table with accession\tdescription", default=False)
+    parser.add_argument("-gp", '--gbk_prefix', action='store_true', help="gbk file name were used as label for the newick tree")
 
     args = parser.parse_args()
 
@@ -139,7 +143,10 @@ if __name__ == '__main__':
 
 
 
-        new_tree = convert_leaf_labels_from_genbank(args.input_tree, args.genbank_files, show_rank = args.show_rank)
+        new_tree = convert_leaf_labels_from_genbank(args.input_tree,
+                                                    args.genbank_files,
+                                                    show_rank = args.show_rank,
+                                                    use_gbk_file_names=args.gbk_prefix)
         file_name = args.input_tree.split('.')[0]
         output_file = file_name + '_renamed.tree'
 
