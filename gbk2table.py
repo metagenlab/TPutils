@@ -149,4 +149,4 @@ if __name__ == '__main__':
     (options, args) = parser.parse_args()
 
     # get list of all records present in the gbk file
-    gbk2table(options.input_file, options.output)
+    gbk2table(options.input_file, options.output_file)

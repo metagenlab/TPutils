@@ -11,7 +11,7 @@
 
 def gbk2summary(records):
     from Bio.SeqUtils import GC
-
+    import re
     for record in records:
         gc_content = round(GC(record.seq),2)
         accession = record.id
@@ -25,7 +25,7 @@ def gbk2summary(records):
             except:
                 assembly = '-'
         description = record.description
-        length= len(record)
+        length= len(re.sub("N","",str(record.seq)))
 
         try:
             date = record.annotations['date']
@@ -38,13 +38,15 @@ def gbk2summary(records):
         #    annot_data = '-'
         #    annot_version = '-'
         #['structured_comment']['Genome-Annotation-Data']
+        n_contigs = len(record.seq.split(200*'N'))
+        
         refseq_annotation_data = []
         taxo_data = '\t'.join(record.annotations['taxonomy'])
         n_features = len([i for i in record.features if i.type=='CDS'])
         try:
-            print '%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s' % (assembly, accession, description, gc_content,length, n_features, date, taxo_data)
+            print '%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s' % (assembly, accession, description, gc_content,length, n_features, date, taxo_data, str(n_contigs))
         except:
-            print '%s\t%s\t%s\t%s\t%s\t%s\t%s' % (assembly, accession, description, gc_content,length, n_features, date)
+            print '%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s' % (assembly, accession, description, gc_content,length, n_features, date, str(n_contigs))
 
 if __name__ == '__main__':
     import argparse

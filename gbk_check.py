@@ -157,7 +157,7 @@ def check_gbk(gbff_files):
                     cleaned_records.append(plasmid)
                 else:
                     plasmid_reannot = True
-                    reannotation_list.append([plasmid])
+                    reannotation_list.append(plasmid)
                     #reannotated_record = reannotate_genomes.prokka_reannotation([[plasmid]])
                     #accession = reannotated_record[0].annotations["accessions"][0]
                     #out_name = '%s_prokka_reannot.gbk' % accession
