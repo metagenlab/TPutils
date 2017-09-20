@@ -48,8 +48,10 @@ def count_missing_locus_tags(gbk_record):
 
 
 def rename_source(record):
-
+    print 'ok'
     if 'strain' in record.features[0].qualifiers:
+
+        print '--', record.features[0].qualifiers['strain'][0]
         if ';' in record.features[0].qualifiers['strain'][0]:
             print 'ACHRTUNG: record has 2 strain names! \t%s\t --> check and edit source manually' % record.name
             # put everythink lower size
@@ -57,14 +59,14 @@ def rename_source(record):
         else:
             strain = record.features[0].qualifiers['strain'][0]
         if strain == 'strain':
-            return False
+            return (False, False)
         if strain.lower() not in record.annotations['source'].lower():
             msg = '%s' % record.annotations['source']
             print "ACHTUNG changing source\t%s\t--> %s " % (msg, record.annotations['source'] + strain)
 
         return strain, "%s %s" % (record.annotations['source'], strain)
     else:
-        return False, False
+        return (False, False)
 
 def remove_record_taxon_id(record):
 
