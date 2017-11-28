@@ -150,7 +150,6 @@ class Hmm():
                             results += '\n'
                     '''
 
-
         return results
 
     def _parse_hmmsearch(self, hmmsearch_result):
@@ -200,14 +199,62 @@ class Blast():
 
     def __init__(self, query, database, protein=False, formatdb=False, best_hit_only=True):
         import os
+        from Bio import SeqRecord, SeqIO
 
-        self.query = query
-        self.database = database
+        print type(query)
+
+        if type(query) == list or isinstance(query, SeqRecord.SeqRecord):
+            print 'SeqRecord list!!!!'
+            print query
+            import StringIO
+            from tempfile import NamedTemporaryFile
+            temp_query = NamedTemporaryFile(delete=False)
+            fastastr = StringIO.StringIO()
+            SeqIO.write(query, fastastr, 'fasta')
+            temp_query.write(fastastr.getvalue())
+            temp_query.flush()
+            self.query = temp_query.name
+            # add content to temporary file
+
+        elif type(query) == str:
+            self.query = query
+            self.query = query
+
+        else:
+            print type(query)
+            print query
+            raise TypeError('wrong inut format: either SeqRecord or string')
+
+
+        if type(database) == list or isinstance(database, SeqRecord.SeqRecord):
+            print 'SeqRecord list database!!!!'
+            print database
+            import StringIO
+            from tempfile import NamedTemporaryFile
+            temp_db = NamedTemporaryFile(delete=False)
+            fastastrdb = StringIO.StringIO()
+            SeqIO.write(database, fastastrdb, 'fasta')
+            temp_db.write(fastastrdb.getvalue())
+            temp_db.flush()
+            self.database = temp_db.name
+            print 'database path:', temp_db.name
+            # add content to temporary file
+
+        elif type(database) == str or type(database) == unicode:
+            self.database = database
+
+        else:
+            print database
+            print type(database)
+            raise TypeError('wrong inut format: either SeqRecord or string')
+
         self.protein = protein
         self.best_hit_only = best_hit_only
         self.formatdb = formatdb
         self.working_dir = os.getcwd()
-        self.blast_path_var= '$BLASTDB:/temp/blastdb.temp'
+        self.blast_path_var= 'export BLASTDB=/tmp/'
+        import shell_command
+        shell_command.shell_command(self.blast_path_var)
 
 
     def id_generator(self, size=6, chars=False): # + string.digits
@@ -224,35 +271,116 @@ class Blast():
         new_database = self.id_generator(8)
 
         if self.protein:
-            shell_command.shell_command('formatdb -i %s -t /tmp/%s.temp -o T -p T -n /tmp/%s.temp -b T' % (self.database, new_database, new_database))
+            print 'proteins'
+            #cmd = 'formatdb -i %s -t %s -o T -p T -n /tmp/%s.temp -b T' % (self.database, new_database, new_database)
+            cmd = 'formatdb -i %s -p T' % (self.database)
+            print cmd
+            shell_command.shell_command(cmd )
         else:
-            shell_command.shell_command('formatdb -i %s -t /tmp/%s.temp -o T -p F -n /tmp/%s.temp -b T' % (self.database, new_database, new_database))
+            print 'nucl'
+            cmd = 'formatdb -i %s -p F' % (self.database)
+            print cmd
+            shell_command.shell_command(cmd)
 
         self.database_path = '/tmp/%s.temp' % new_database
+
 
     def run_blastp(self):
         from Bio.Blast.Applications import NcbiblastpCommandline
         import os
 
-        outpath = os.path.join(self.working_dir, 'blast_result.tab')
+        blast_id = self.id_generator(8)
+
+        outpath = os.path.join(self.working_dir, '%s.tab' % blast_id)
         blastp_cline = NcbiblastpCommandline(query= self.query,
                                             db=self.database,
                                             evalue=0.005,
                                             outfmt=6,
-                                            out=outpath)
+                                            out=outpath,
+                                            num_threads=8)
+        print blastp_cline
         stdout, stderr = blastp_cline()
         print stderr
 
         with open(outpath, 'r') as result_handle:
 
             self.best_hit_list = []
+            self.complete_hit_list = []
             for line in result_handle:
+                self.complete_hit_list.append(line.rstrip().split('\t'))
                 if line.split('\t')[0] in self.best_hit_list:
                     continue
                 else:
                     self.best_hit_list.append(line.rstrip().split('\t'))
 
+        return outpath
 
+
+    def run_blastn(self, min_identity=50):
+        from Bio.Blast.Applications import NcbiblastnCommandline
+        import os
+
+        blast_id = self.id_generator(8)
+
+        outpath = os.path.join(self.working_dir, '%s.tab' % blast_id)
+        blastn_cline = NcbiblastnCommandline(query= self.query,
+                                             task="dc-megablast",
+                                            db=self.database,
+                                            evalue=0.1,
+                                            outfmt=6,
+                                            out=outpath,
+                                            num_threads=8,
+                                            max_hsps=1000,
+                                             perc_identity=min_identity)
+
+        print blastn_cline
+        stdout, stderr = blastn_cline()
+        print stderr
+
+        with open(outpath, 'r') as result_handle:
+
+            self.best_hit_list = []
+            self.complete_hit_list = []
+            for line in result_handle:
+                self.complete_hit_list.append(line.rstrip().split('\t'))
+                if line.split('\t')[0] in self.best_hit_list:
+                    continue
+                else:
+                    self.best_hit_list.append(line.rstrip().split('\t'))
+
+        return outpath
+
+    def run_tblastx(self,evalue=0.1):
+        from Bio.Blast.Applications import NcbitblastxCommandline
+        import os
+
+        blast_id = self.id_generator(8)
+
+        outpath = os.path.join(self.working_dir, '%s.tab' % blast_id)
+        blastn_cline = NcbitblastxCommandline(query= self.query,
+                                            db=self.database,
+                                            evalue=evalue,
+                                            outfmt=6,
+                                            out=outpath,
+                                            num_threads=8,
+                                            max_hsps=1000)
+
+        print blastn_cline
+        stdout, stderr = blastn_cline()
+        print stderr
+
+        with open(outpath, 'r') as result_handle:
+
+            self.best_hit_list = []
+            self.complete_hit_list = []
+            for line in result_handle:
+                self.complete_hit_list.append(line.rstrip().split('\t'))
+                if line.split('\t')[0] in self.best_hit_list:
+                    continue
+                else:
+                    self.best_hit_list.append(line.rstrip().split('\t'))
+
+        return outpath
 
     def run_tblastn(self):
 

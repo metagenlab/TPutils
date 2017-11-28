@@ -107,6 +107,36 @@ class Record:
         return feature_list
 
 
+def gbk2table(gb_file_or_record, output_file):
+    from Bio.SeqRecord import SeqRecord
+
+    record_list=[]
+
+    if isinstance(gb_file_or_record, list):
+        record_list = gb_file_or_record
+
+    elif isinstance(gb_file_or_record, str):
+        for gb_record in SeqIO.parse(open(gb_file_or_record,"r"), "genbank") :
+            #print gb_record
+            record_list.append(Record(gb_record))
+    elif isinstance(gb_file_or_record, SeqRecord):
+        record_list = [Record(gb_file_or_record)]
+    else:
+        raise('Unknown input format: provide either path to gbk file or a SeqRecord object of list of SeqRecords')
+
+    with open(output_file, 'w') as f:
+        # format output tab delimited table
+        f.write("contig\ttype\tstart\tstop\tlength\tGC\tstrand\tgene\tfunction\tinference\tgi\tlocus\ttranslation\tsequence\n")
+        for record in record_list:
+          for feature in record.features:
+            if feature is None:
+              continue
+            if feature.type == "source":
+              pass
+              #print "%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t \t " % (feature.contig, feature.type, feature.start, feature.stop, feature.length, feature.GC, feature.strand, feature.gene, feature.product, feature.inference, feature.gi, feature.locus)
+            else:
+              f.write("%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n" % (feature.contig, feature.type, feature.start, feature.stop, feature.length, feature.GC, feature.strand, feature.gene, feature.product, feature.inference, feature.gi, feature.locus, feature.translation, feature.seq))
+
 
 
 if __name__ == '__main__':
@@ -118,26 +148,5 @@ if __name__ == '__main__':
     parser.add_option("-o", "--output",dest="output_file",action="store",default="record", type="string", help="genbank file", metavar="FILE")
     (options, args) = parser.parse_args()
 
-
-
-    gb_file = options.input_file
     # get list of all records present in the gbk file
-    record_list=[]
-   
-    for gb_record in SeqIO.parse(open(gb_file,"r"), "genbank") :
-        #print gb_record
-        record_list.append(Record(gb_record))
-
-
-    # format output tab delimited table
-    print "contig\ttype\tstart\tstop\tlength\tGC\tstrand\tgene\tfunction\tinference\tgi\tlocus\ttranslation\tsequence"
-    for record in record_list:
-      for feature in record.features:
-        if feature is None:
-          continue
-        if feature.type == "source":
-          pass
-          #print "%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t \t " % (feature.contig, feature.type, feature.start, feature.stop, feature.length, feature.GC, feature.strand, feature.gene, feature.product, feature.inference, feature.gi, feature.locus)
-        else:
-          print "%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s" % (feature.contig, feature.type, feature.start, feature.stop, feature.length, feature.GC, feature.strand, feature.gene, feature.product, feature.inference, feature.gi, feature.locus, feature.translation, feature.seq)
-
+    gbk2table(options.input_file, options.output_file)

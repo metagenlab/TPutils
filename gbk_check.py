@@ -48,8 +48,10 @@ def count_missing_locus_tags(gbk_record):
 
 
 def rename_source(record):
-
+    print 'ok'
     if 'strain' in record.features[0].qualifiers:
+
+        print '--', record.features[0].qualifiers['strain'][0]
         if ';' in record.features[0].qualifiers['strain'][0]:
             print 'ACHRTUNG: record has 2 strain names! \t%s\t --> check and edit source manually' % record.name
             # put everythink lower size
@@ -57,16 +59,14 @@ def rename_source(record):
         else:
             strain = record.features[0].qualifiers['strain'][0]
         if strain == 'strain':
-            return False
+            return (False, False)
         if strain.lower() not in record.annotations['source'].lower():
             msg = '%s' % record.annotations['source']
-            record.annotations['source'] += ' %s' % strain
-            print "ACHTUNG changing source\t%s\t--> %s " % (msg, record.annotations['source'])
+            print "ACHTUNG changing source\t%s\t--> %s " % (msg, record.annotations['source'] + strain)
 
-        return record.annotations['source']
+        return strain, "%s %s" % (record.annotations['source'], strain)
     else:
-        return False
-
+        return (False, False)
 
 def remove_record_taxon_id(record):
 
@@ -138,14 +138,19 @@ def check_gbk(gbff_files):
                     out_name = plasmid.name + '.gbk'
                     plasmid.description = clean_description(plasmid.description)
                     plasmid = remove_record_taxon_id(plasmid)
-                    new_source = rename_source(plasmid)
+                    strain, new_source = rename_source(plasmid)
+                    print 'new source:', new_source
                     if new_source:
-                        record.description = record.annotations['source']
-                        record.annotations['organism'] = record.annotations['source']
+                        if strain.lower() not in record.annotations['source'].lower():
+                            record.description = new_source
+                        if strain.lower() not in record.annotations['organism'].lower():
+                            record.annotations['organism'] = new_source
+                        if strain.lower() not in record.annotations['source'].lower():
+                            record.annotations['source'] = new_source
                     else:
                         print 'ACHTUNG\t no strain name for \t%s\t, SOUCE uniqueness should be checked manually' % gbff_file
                     # check if accession is meaningful
-                    if 'NODE_' in merged_record.id or 'NODE_' in merged_record.name:
+                    if 'NODE_' in record.id or 'NODE_' in record.name:
                         print 'ACHTUNG\t accession probably not unique (%s) for \t%s\t --> should be checked manually' % (merged_record.id,
                                                                                                                         gbff_file)
 
@@ -154,7 +159,7 @@ def check_gbk(gbff_files):
                     cleaned_records.append(plasmid)
                 else:
                     plasmid_reannot = True
-                    reannotation_list.append([plasmid])
+                    reannotation_list.append(plasmid)
                     #reannotated_record = reannotate_genomes.prokka_reannotation([[plasmid]])
                     #accession = reannotated_record[0].annotations["accessions"][0]
                     #out_name = '%s_prokka_reannot.gbk' % accession
@@ -176,7 +181,7 @@ def check_gbk(gbff_files):
             #print '########## chromosome ###########'
             import concat_gbk
 
-            if  chromosome[0].seq == 'N'*len(chromosome[0].seq):
+            if chromosome[0].seq == 'N'*len(chromosome[0].seq):
                 #print 'No sequences for %s, skipping! #################' % gbff_file
                 continue
             if is_annotated(chromosome[0]):
@@ -193,10 +198,15 @@ def check_gbk(gbff_files):
 
                 # check if source is unique (include strain name)
                 merged_record = remove_record_taxon_id(merged_record)
-                new_source = rename_source(merged_record)
+                strain, new_source = rename_source(merged_record)
+                print 'new source:', new_source
                 if new_source:
-                    merged_record.description = record.annotations['source']
-                    merged_record.annotations['organism'] = record.annotations['source']
+                    if strain.lower() not in merged_record.annotations['source'].lower():
+                        merged_record.description = new_source
+                    if strain.lower() not in merged_record.annotations['organism'].lower():
+                        merged_record.annotations['organism'] = new_source
+                    if strain.lower() not in merged_record.annotations['source'].lower():
+                        merged_record.annotations['source'] = new_source
                 else:
                     print 'ACHTUNG\t no strain name for \t%s\t --> SOUCE uniqueness should be checked manually' % gbff_file
                 # check if accession is meaningful

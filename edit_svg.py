@@ -17,7 +17,7 @@ def edit_svg(svg_string, locus_list, biodb_name):
     #locus_list=locus_list[::-1]
 
     i = 0
-    print locus_list
+    #print locus_list
     for element in tree.iter():
 
         if element.tag.split("}")[1] == 'polygon':

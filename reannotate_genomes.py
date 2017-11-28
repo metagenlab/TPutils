@@ -30,6 +30,10 @@ def prokka_reannotation(seq_record_list, compare=False):
     l.write('reference_name\tnew_name\taccession\tref_locus_tag\tnew_locus_tag\tref_n_CDS\tnew_n_CDS\tn_CDS_identical\n')
     #print 'reference_name\tnew_name\taccession\tref_locus_tag\tnew_locus_tag\tref_n_CDS\tnew_n_CDS\tn_CDS_identical'
 
+    print 'reannotation:'
+    for i, record in enumerate(seq_record_list):
+        print i, record
+
     reanotated_gbk_list = []
 
     for record in seq_record_list:

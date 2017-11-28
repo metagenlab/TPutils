@@ -32,7 +32,11 @@ def check_blast_colocalization(record1, record2, seq_range = 0.15):
         return False
 
 
-def hmm_and_extract(query_fasta_prot, db_prot, seq_header = "query_seq"):
+def hmm_and_extract(query_fasta_prot,
+                    db_prot,
+                    seq_header = "query_seq",
+                    hmm_score=150,
+                    cut_tc=False):
     from Bio.Blast.Applications import NcbiblastpCommandline
     from Bio.Blast import NCBIXML
     from Bio import SeqIO
@@ -48,13 +52,20 @@ def hmm_and_extract(query_fasta_prot, db_prot, seq_header = "query_seq"):
     print
     qcode = os.path.basename(query_fasta_prot).split('.')[0]
     rcode = os.path.basename(db_prot).split('.')[0]
+
+    print 'reference, query:', qcode, rcode
+
     # --max
     # -T <x>     : report sequences >= this score threshold in output
-    hmmer_cline = 'hmmsearch -T 150 --tblout temp_hmm_%s_%s.tab %s %s' % (qcode, rcode, query_fasta_prot, db_prot)
+    if not cut_tc:
+        hmmer_cline = 'hmmsearch -T %s --tblout temp_hmm_%s_%s.tab %s %s' % (hmm_score, qcode, rcode, query_fasta_prot, db_prot)
+    else:
+        hmmer_cline = 'hmmsearch --cut_tc --tblout temp_hmm_%s_%s.tab %s %s' % (qcode, rcode, query_fasta_prot, db_prot)
     print hmmer_cline
     stdout, stderr, code = shell_command.shell_command(hmmer_cline)
 
     result_handle = open("temp_hmm_%s_%s.tab" % (qcode, rcode), 'r')
+
     hmmer_records = [i for i in SearchIO.parse(result_handle, 'hmmer3-tab')]
 
     try:
@@ -199,7 +210,15 @@ def format_out(id_matrixes, genes_list, ids):
 
 
 
-def main(protein_multi_fasta, fasta_files, seq_header, out_name, blast_p = False, hmmer = False, reannotate=False):
+def main(protein_multi_fasta,
+         fasta_files,
+         seq_header,
+         out_name,
+         blast_p = False,
+         hmmer = False,
+         reannotate=False,
+         hmm_score=150,
+         hmm_tc_cutoff=False):
     import os
     import re
     genes_list = []
@@ -244,7 +263,11 @@ def main(protein_multi_fasta, fasta_files, seq_header, out_name, blast_p = False
             if not blast_p and not hmmer:
                 new_record = [tblastn_and_extract(one_protein, one_target_fasta, seq_header)]
             if hmmer:
-                new_record = hmm_and_extract(one_protein, one_target_fasta, seq_header)
+                new_record = hmm_and_extract(one_protein,
+                                             one_target_fasta,
+                                             seq_header,
+                                             hmm_score=hmm_score,
+                                             cut_tc=hmm_tc_cutoff)
                 if new_record:
                     new_records.append(new_record)
                     protein2genome2presence[protein_id][target_id] = 1
@@ -303,30 +326,93 @@ if __name__ == '__main__':
     import os
 
     parser = argparse.ArgumentParser()
-    parser.add_argument("-d", '--fasta_list', type=str, help="input fasta file: nucl (reannotation) or protein (no reannotation)", nargs='+')
+    parser.add_argument("-d", '--fasta_list', type=str, help="input fasta file: nucl (reannotation/6 frame translation) or protein (no reannotation)", nargs='+')
     parser.add_argument("-q", '--prot_fasta', type=str, help="input protein fasta/hmm profiles", nargs='+')
     parser.add_argument("-n", '--seq_header', type=str, help="seq header name")
+    parser.add_argument("-T", '--hmm_score_cutoff', type=str, help="hmm_score_cutoff")
     parser.add_argument("-o", '--out_name', type=str, help="output_identity_matrix", default = "id_matrix.txt")
     parser.add_argument("-p", '--blast_p', action="store_true", help="perform ORFing with prodigal and blastP search")
     parser.add_argument("-m", '--hmmer', action="store_true", help="perform ORFing with prodigal and hmm search search")
     parser.add_argument("-r", '--reanotate', action="store_true", help="reannotate with prodigual (default=False, aa input)")
+    parser.add_argument("-s", '--six_trame_translation', default=False, help="biodb_name for six frame tranlsation complete ORFing (min size of 30aa)")
+    parser.add_argument("-c", '--cut_tc', action="store_true", help="Use the TC (trusted cutoff) bit score thresholds in the model to set per-sequence " \
+                                                                              "(TC1) and per-domain (TC2) reporting and inclusion thresholds. TC thresholds are" \
+                                                                              "generally considered to be the score of the lowest-scoring known true positive that" \
+                                                                              " above all known false positives")
 
     args = parser.parse_args()
+
 
     if args.blast_p and args.hmmer:
         raise('use either blastp or hmm searches, not both!')
     elif args.blast_p:
         main(args.prot_fasta, args.fasta_list, args.seq_header, args.out_name, True)
-    elif args.hmmer:
+    elif args.hmmer and not args.six_trame_translation:
         import biosql_own_sql_tables
-        print 'hmm!'
+        print 'hmm!---'
         marker2genome2best_hit = main(args.prot_fasta,
                                       args.fasta_list,
                                       args.seq_header,
                                       args.out_name,
                                       False,
                                       True,
-                                      args.reanotate)
+                                      args.reanotate,
+                                      hmm_score=args.hmm_score_cutoff,
+                                      hmm_tc_cutoff=args.cut_tc)
+
+
+        dico_seq = {}
+        for genome in marker2genome2best_hit[marker2genome2best_hit.keys()[0]]:
+            genome_file = '%s.ffn' % genome
+            print genome_file
+            dico_seq.update(SeqIO.to_dict(SeqIO.parse(genome_file, 'fasta')))
+
+        for marker in marker2genome2best_hit:
+            locus_list = []
+            for genome in marker2genome2best_hit[marker]:
+                if marker2genome2best_hit[marker][genome] != '-':
+                    locus_list.append(marker2genome2best_hit[marker][genome])
+
+            # récuperation des séquences avec mysql
+            ''''
+            records = biosql_own_sql_tables.locus_list2nucleotide_fasta("chlamydia_04_16", locus_list)
+
+            with open('%s_best_hits.ffn' % marker, 'w') as m:
+                #SeqIO.write(records, m, 'fasta')
+
+                for i in records:
+                    m.write(">%s|%s\n%s\n" % (i.id, i.description, str(i.seq)))
+                #with open('%s_best_hits.ffn' % marker, 'w') as m:
+                #    SeqIO.write(records, m, 'fasta')
+            '''
+            # a adapter: possibilité de fournir les ffn correspondant
+            with open('%s_best_hits.ffn' % marker, 'w') as m:
+                record_l = []
+                for locus in locus_list:
+                    record_l.append(dico_seq[locus])
+                SeqIO.write(record_l, m, 'fasta')
+
+    elif args.reanotate and not args.six_trame_translation:
+        shell_command.shell_command("formatdb -i %s -p F" % args.fasta_db)
+        main(args.prot_fasta,
+             args.fasta_db,
+             args.seq_header,
+             args.out_name,
+             args)
+    elif args.six_trame_translation and args.hmmer:
+        import universal_markers_hmm
+        fasta_genome_list = universal_markers_hmm.biodatabase2six_frame_translation_all(args.six_trame_translation)
+        print 'six frame trans!!!'
+        print fasta_genome_list
+        marker2genome2best_hit = main(args.prot_fasta,
+                                      fasta_genome_list,
+                                      args.seq_header,
+                                      args.out_name,
+                                      False,
+                                      True,
+                                      args.reanotate,
+                                      hmm_score=args.hmm_score_cutoff,
+                                      hmm_tc_cutoff=args.cut_tc)
 
         dico_seq = {}
         for genome in marker2genome2best_hit[marker2genome2best_hit.keys()[0]]:
@@ -360,8 +446,7 @@ if __name__ == '__main__':
                 SeqIO.write(record_l, m, 'fasta')
 
     else:
-        if args.reanotate:
-            shell_command.shell_command("formatdb -i %s -p F" % args.fasta_db)
-        main(args.prot_fasta, args.fasta_db, args.seq_header, args.out_name, args)
+        print 'wrong combination of args'
+
 
 
