@@ -32,7 +32,11 @@ def check_blast_colocalization(record1, record2, seq_range = 0.15):
         return False
 
 
-def hmm_and_extract(query_fasta_prot, db_prot, seq_header = "query_seq", hmm_score=150):
+def hmm_and_extract(query_fasta_prot,
+                    db_prot,
+                    seq_header = "query_seq",
+                    hmm_score=150,
+                    cut_tc=False):
     from Bio.Blast.Applications import NcbiblastpCommandline
     from Bio.Blast import NCBIXML
     from Bio import SeqIO
@@ -53,7 +57,10 @@ def hmm_and_extract(query_fasta_prot, db_prot, seq_header = "query_seq", hmm_sco
 
     # --max
     # -T <x>     : report sequences >= this score threshold in output
-    hmmer_cline = 'hmmsearch -T %s --tblout temp_hmm_%s_%s.tab %s %s' % (hmm_score, qcode, rcode, query_fasta_prot, db_prot)
+    if not cut_tc:
+        hmmer_cline = 'hmmsearch -T %s --tblout temp_hmm_%s_%s.tab %s %s' % (hmm_score, qcode, rcode, query_fasta_prot, db_prot)
+    else:
+        hmmer_cline = 'hmmsearch --cut_tc --tblout temp_hmm_%s_%s.tab %s %s' % (qcode, rcode, query_fasta_prot, db_prot)
     print hmmer_cline
     stdout, stderr, code = shell_command.shell_command(hmmer_cline)
 
@@ -203,7 +210,15 @@ def format_out(id_matrixes, genes_list, ids):
 
 
 
-def main(protein_multi_fasta, fasta_files, seq_header, out_name, blast_p = False, hmmer = False, reannotate=False, hmm_score=150):
+def main(protein_multi_fasta,
+         fasta_files,
+         seq_header,
+         out_name,
+         blast_p = False,
+         hmmer = False,
+         reannotate=False,
+         hmm_score=150,
+         hmm_tc_cutoff=False):
     import os
     import re
     genes_list = []
@@ -248,7 +263,11 @@ def main(protein_multi_fasta, fasta_files, seq_header, out_name, blast_p = False
             if not blast_p and not hmmer:
                 new_record = [tblastn_and_extract(one_protein, one_target_fasta, seq_header)]
             if hmmer:
-                new_record = hmm_and_extract(one_protein, one_target_fasta, seq_header, hmm_score=hmm_score)
+                new_record = hmm_and_extract(one_protein,
+                                             one_target_fasta,
+                                             seq_header,
+                                             hmm_score=hmm_score,
+                                             cut_tc=hmm_tc_cutoff)
                 if new_record:
                     new_records.append(new_record)
                     protein2genome2presence[protein_id][target_id] = 1
@@ -316,7 +335,10 @@ if __name__ == '__main__':
     parser.add_argument("-m", '--hmmer', action="store_true", help="perform ORFing with prodigal and hmm search search")
     parser.add_argument("-r", '--reanotate', action="store_true", help="reannotate with prodigual (default=False, aa input)")
     parser.add_argument("-s", '--six_trame_translation', default=False, help="biodb_name for six frame tranlsation complete ORFing (min size of 30aa)")
-
+    parser.add_argument("-c", '--cut_tc', action="store_true", help="Use the TC (trusted cutoff) bit score thresholds in the model to set per-sequence " \
+                                                                              "(TC1) and per-domain (TC2) reporting and inclusion thresholds. TC thresholds are" \
+                                                                              "generally considered to be the score of the lowest-scoring known true positive that" \
+                                                                              " above all known false positives")
 
     args = parser.parse_args()
 
@@ -335,7 +357,8 @@ if __name__ == '__main__':
                                       False,
                                       True,
                                       args.reanotate,
-                                      hmm_score=args.hmm_score_cutoff)
+                                      hmm_score=args.hmm_score_cutoff,
+                                      hmm_tc_cutoff=args.cut_tc)
 
 
         dico_seq = {}
@@ -388,7 +411,8 @@ if __name__ == '__main__':
                                       False,
                                       True,
                                       args.reanotate,
-                                      hmm_score=args.hmm_score_cutoff)
+                                      hmm_score=args.hmm_score_cutoff,
+                                      hmm_tc_cutoff=args.cut_tc)
 
         dico_seq = {}
         for genome in marker2genome2best_hit[marker2genome2best_hit.keys()[0]]:
