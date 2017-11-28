@@ -16,4 +16,12 @@ def fasta2tab(fasta_file):
         for record in records:
             print "%s\t%s" % (file_description, record.name)
 
-fasta2tab('GCF_000721275.1_ASM72127v1_protein.faa')
+
+
+if __name__ == '__main__':
+    import argparse
+    parser = argparse.ArgumentParser()
+    parser.add_argument("-i", "--input", help="input fasta file")
+
+    args = parser.parse_args()
+    fasta2tab(args.input)
