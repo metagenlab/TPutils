@@ -101,7 +101,7 @@ class Hmm():
             self.hmmer_output_list.append(temp_file.name)
             if not isinstance(self.database, list):
                 cmd = self.hmmer_cmd % (temp_file.name, profile, self.database)
-                print cmd
+                #print cmd
                 stout, sterr, code = shell_command.shell_command(cmd) # self.hmmer_score_cutoff,
                 if code != 0:
                     import sys
@@ -282,8 +282,9 @@ def remove_blast_redundancy(blast_file_list, check_overlap=True):
                                 print 'removing', ref_gene
                                 break
                     except KeyError:
+                        # colocation already resolved
                         pass
-                        #print 'colocation already resolved:', one_blast, query_gene, ref_gene
+                         
     return blast2data, queries
 
 
@@ -294,11 +295,9 @@ class Blast():
         import os
         from Bio import SeqRecord, SeqIO
 
-        print type(query)
+        #print type(query)
 
         if type(query) == list or isinstance(query, SeqRecord.SeqRecord):
-            print 'SeqRecord list!!!!'
-            print query
             import StringIO
             from tempfile import NamedTemporaryFile
             temp_query = NamedTemporaryFile(delete=False)
@@ -314,14 +313,10 @@ class Blast():
             self.query = query
 
         else:
-            print type(query)
-            print query
             raise TypeError('wrong inut format: either SeqRecord or string')
 
 
         if type(database) == list or isinstance(database, SeqRecord.SeqRecord):
-            print 'SeqRecord list database!!!!'
-            print database
             import StringIO
             from tempfile import NamedTemporaryFile
             temp_db = NamedTemporaryFile(delete=False)
@@ -330,15 +325,12 @@ class Blast():
             temp_db.write(fastastrdb.getvalue())
             temp_db.flush()
             self.database = temp_db.name
-            print 'database path:', temp_db.name
             # add content to temporary file
 
         elif type(database) == str or type(database) == unicode:
             self.database = database
 
         else:
-            print database
-            print type(database)
             raise TypeError('wrong inut format: either SeqRecord or string')
 
         self.protein = protein
