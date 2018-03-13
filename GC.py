@@ -452,8 +452,8 @@ if __name__ == '__main__':
 
     if args.conc_gc:
         records = [record for record in SeqIO.parse(handle, "fasta")]
-        print whole_gc(records)
+        print (whole_gc(records))
     
     if args.circos:
         records = [record for record in SeqIO.parse(handle, "fasta")]
-        print circos_gc_skew(records)
+        print (circos_gc_skew(records))
