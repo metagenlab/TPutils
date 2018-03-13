@@ -50,7 +50,7 @@ def circos_gc_var(record, windows=1000, shift=0):
 
             if len(seq) < windows:
                 windows_range = len(seq)
-                print seq
+                print (seq)
             else:
                 windows_range = windows
             if len(seq) == 0:
@@ -126,9 +126,9 @@ def circos_gc_content(record, windows=1000, shift=0):
             contig_name = record.name + "_%s" % (i +1)
             if len(seq) <= windows:
                 window_range = len(seq)
-                print 'small contig!!!!!!!!!!', len(seq)
+                print ('small contig!!!!!!!!!!', len(seq))
             else:
-                print 'len contig', len(seq)
+                print ('len contig', len(seq))
                 window_range = windows
             for i in range(0, len(seq), window_range):
                 start = i
@@ -138,7 +138,7 @@ def circos_gc_content(record, windows=1000, shift=0):
                 if stop > len(seq):
 
                     stop = len(seq)
-                    print "small contig!!", start, stop, gc
+                    print ("small contig!!", start, stop, gc)
                     #if stop - start < 200:
                     #    #break
                 section_start = chr_start + start
@@ -250,7 +250,7 @@ def circos_gc_skew(record, windows=1000, shift=0):
             try:
                 value = row[3]
             except:
-                print 'problem with', row
+                print ('problem with', row)
                 continue
             circos_string += "%s %s %s %s\n" % (contig_name, start, end, value)
 
@@ -385,7 +385,7 @@ def gc_values(handle):
     gc_values = [GC(rec.seq)  for rec in parsed_handle]
     seq_ids = [rec.id  for rec in parsed_handle]
     for i in range(0, len(seq_ids)):
-        print seq_ids[i] +"\t"+ str(gc_values[i])
+        print (seq_ids[i] +"\t"+ str(gc_values[i]))
 
 def whole_gc(records):
     seq = ""
