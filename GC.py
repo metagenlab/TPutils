@@ -308,7 +308,7 @@ def circos_cumul_gc_skew(record, windows=1000, shift=0, initial=0):
             try:
                 values = GC_skew(seq, windows)
             except:
-                print len(seq), seq
+                print len(seq, seq)
             contig_name = record.name + "_%s" % (i + 1)
 
             for i in range(0, len(values)):
