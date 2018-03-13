@@ -13,8 +13,8 @@ def run_prodigal(fasta_seq, output_name='temp.faa'):
     cmd = "prodigal -q -a %s -i %s" % (output_name, fasta_seq)
 
     sdt_out, sdt_err, err = shell_command.shell_command(cmd)
-    print sdt_out
-    print sdt_err
+    print (sdt_out)
+    print (sdt_err)
     shell_command.shell_command('sed -i "s/*//g" %s' % output_name)
     #print sdt_out, sdt_err, err
     #shell_command.shell_command("seqret -sequence %s -feature -fformat gff -fopenfile temp.gff -osformat genbank -auto -outseq temp.gbk" % fasta_seq)
@@ -111,7 +111,7 @@ class Hmm():
                 parsed_data = self._parse_hmmsearch(temp_file.name)
 
                 if len(parsed_data) == 0:
-                    print 'No domains respecting score threshold for %s, continue...' % profile
+                    print ('No domains respecting score threshold for %s, continue...' % profile)
                     continue
 
                 if not isinstance(parsed_data[0], dict):
@@ -250,7 +250,7 @@ def remove_blast_redundancy(blast_file_list, check_overlap=True):
     #print 'raw dico'
     #print blast2data
 
-    print 'preparing blast dico'
+    print ('preparing blast dico')
     if check_overlap:
         for one_blast in blast2data.keys():
             for ref_gene in blast2data[one_blast].keys():
@@ -263,23 +263,23 @@ def remove_blast_redundancy(blast_file_list, check_overlap=True):
                     try:
                         sorted_coordinates = sorted(blast2data[one_blast][ref_gene][1:3])
                         if blast2data[one_blast][query_gene][1] <= sorted_coordinates[1] and blast2data[one_blast][query_gene][1]>= sorted_coordinates[0]:
-                            print 'Overlaping locations!'
-                            print one_blast, ref_gene, blast2data[one_blast][ref_gene]
-                            print one_blast, query_gene, blast2data[one_blast][query_gene]
+                            #print 'Overlaping locations!'
+                            #print one_blast, ref_gene, blast2data[one_blast][ref_gene]
+                            #print one_blast, query_gene, blast2data[one_blast][query_gene]
                             overlap =True
                         sorted_coordinates = sorted(blast2data[one_blast][query_gene][1:3])
                         if blast2data[one_blast][ref_gene][1] <= sorted_coordinates[1] and blast2data[one_blast][ref_gene][1]>= sorted_coordinates[0]:
-                            print 'Overlapping locations!'
-                            print one_blast, ref_gene, blast2data[one_blast][ref_gene]
-                            print one_blast, query_gene, blast2data[one_blast][query_gene]
+                            #print 'Overlapping locations!'
+                            #print one_blast, ref_gene, blast2data[one_blast][ref_gene]
+                            #print one_blast, query_gene, blast2data[one_blast][query_gene]
                             overlap =True
                         if overlap:
                             if float(blast2data[one_blast][ref_gene][0]) > float(blast2data[one_blast][query_gene][0]):
                                 del blast2data[one_blast][query_gene]
-                                print 'removing', query_gene
+                                #print 'removing', query_gene
                             else:
                                 del blast2data[one_blast][ref_gene]
-                                print 'removing', ref_gene
+                                #print 'removing', ref_gene
                                 break
                     except KeyError:
                         # colocation already resolved
@@ -356,15 +356,15 @@ class Blast():
         new_database = self.id_generator(8)
 
         if self.protein:
-            print 'proteins'
+            #print 'proteins'
             #cmd = 'formatdb -i %s -t %s -o T -p T -n /tmp/%s.temp -b T' % (self.database, new_database, new_database)
             cmd = 'formatdb -i %s -p T' % (self.database)
-            print cmd
+            #print cmd
             shell_command.shell_command(cmd )
         else:
-            print 'nucl'
+            #print 'nucl'
             cmd = 'formatdb -i %s -p F' % (self.database)
-            print cmd
+            #print cmd
             shell_command.shell_command(cmd)
 
         self.database_path = '/tmp/%s.temp' % new_database
@@ -383,9 +383,9 @@ class Blast():
                                             outfmt=6,
                                             out=outpath,
                                             num_threads=8)
-        print blastp_cline
+        print (blastp_cline)
         stdout, stderr = blastp_cline()
-        print stderr
+        print (stderr)
 
         with open(outpath, 'r') as result_handle:
 
@@ -418,9 +418,9 @@ class Blast():
                                             max_hsps=1000,
                                              perc_identity=min_identity)
 
-        print blastn_cline
+        print (blastn_cline)
         stdout, stderr = blastn_cline()
-        print stderr
+        print (stderr)
 
         with open(outpath, 'r') as result_handle:
 
@@ -450,9 +450,9 @@ class Blast():
                                             num_threads=8,
                                             max_hsps=1000)
 
-        print blastn_cline
+        print (blastn_cline)
         stdout, stderr = blastn_cline()
-        print stderr
+        print (stderr)
 
         with open(outpath, 'r') as result_handle:
 
