@@ -35,7 +35,7 @@ def execute_promer(fasta1,
             cmd1 = 'nucmer -b 200 -c 65 -g 90 -l 20 -p %s %s %s' % (os.path.basename(one_fasta).split('.')[0],
                                                                          fasta1,
                                                                          one_fasta)
-            print cmd1
+            print (cmd1)
             a, b, c = shell_command.shell_command(cmd1)
             if c != 0:
                 raise Exception("%s" % b)
@@ -96,7 +96,7 @@ def delta_file2start_stop_list(delta_input,
     import re
     import shell_command
 
-    print 'contig add', contigs_add
+    print ('contig add', contigs_add)
 
     out_name = delta_input.split('.')[0]
 
@@ -105,9 +105,9 @@ def delta_file2start_stop_list(delta_input,
                                                                       out_name)
     a, b, c = shell_command.shell_command(cmd2)
     if c != 0:
-        print 'nucmer error!!!'
-        print a,b,c
-        print cmd2
+        print ('nucmer error!!!')
+        print (a,b,c)
+        print (cmd2)
         import sys
         sys.exit()
 
@@ -243,15 +243,15 @@ def get_gaps_from_start_stop_lists(contig2start_stop_lists, contigs_add, min_gap
 
     gap_data = {}
     for contig in contig2start_stop_lists:
-        print contig
+        print (contig)
         #print contig2start_stop_lists[contig]["start"]
         data = pd.DataFrame({'start': contig2start_stop_lists[contig]["start"],
                 'stop': contig2start_stop_lists[contig]["stop"] })
         data.start = data.start.astype(np.int64)
         data.stop = data.stop.astype(np.int64)
         #print 'add', data['start'][0]+1
-        data_sort = data.sort(columns=["start"])
-        print data_sort
+        data_sort = data.sort_values(by=["start"])
+        print (data_sort)
         index_start = 0
         comparison_index = 1
         stop = False
@@ -259,7 +259,7 @@ def get_gaps_from_start_stop_lists(contig2start_stop_lists, contigs_add, min_gap
         while index_start < len(data_sort['start']):
             # deal with unaligned begining of contig
             if index_start == 0 and int(data_sort['start'][0]) != int(contigs_add[contig][0]+1):
-                print 'gap at the begining of the contig!', [int(contigs_add[contig][0]), int(data_sort['start'][0])-1]
+                print ('gap at the begining of the contig!', [int(contigs_add[contig][0]), int(data_sort['start'][0])-1])
                 if (int(data_sort['start'][0]) -1) - int(contigs_add[contig][0]) > min_gap_size:
                     gap_data[contig] = [[int(contigs_add[contig][0]), int(data_sort['start'][0])-1]]
             # deal with unaligned end of contigs
@@ -315,7 +315,7 @@ def get_gaps_from_start_stop_lists(contig2start_stop_lists, contigs_add, min_gap
                 index_start+=comparison_index
                 comparison_index=1
         if max(data_sort['stop']) < contigs_add[contig][1] and (contigs_add[contig][1]- max(data_sort['stop'])) > min_gap_size:
-            print 'end gap???--------------------------'
+            print ('end gap???--------------------------')
             if contig not in gap_data:
                 gap_data[contig] = [[max(data_sort['stop']), contigs_add[contig][1]]]
             else:
@@ -341,7 +341,7 @@ def get_circos_gap_file_from_gap_start_stop(contig2start_stop_lists,
     gap_data = get_gaps_from_start_stop_lists(contig2start_stop_lists, contigs_add, min_gap_size=min_gap_size)
 
     for contig in gap_data:
-        print gap_data[contig]
+        print (gap_data[contig])
         if len(gap_data[contig])>1:
             start_list = []
             stop_list = []
@@ -354,13 +354,13 @@ def get_circos_gap_file_from_gap_start_stop(contig2start_stop_lists,
             data.stop = data.stop.astype(np.int64)
             #print 'add', data['start'][0]+1
             data_sort = data.sort(columns=["start"])
-            print data_sort
+            print (data_sort)
             data_sort.to_csv("%s_alignments.csv" % contig)
             start = data_sort['start'][0]
             stop = data_sort['stop'][0]
 
             for i in range(0, len(data_sort['start'])-1):
-                print i, len(data_sort['start'])
+                print (i, len(data_sort['start']))
                 # if less than 10kb between 2 gaps, merge
                 if data_sort['start'][i+1]-data_sort['stop'][i] < gap_merge_distance:
                     stop = data_sort['stop'][i+1]
