@@ -102,6 +102,7 @@ def clean_description(description):
     description = re.sub(".contig.0_1, whole genome shotgun sequence.", "", description)
     description = re.sub("complete genome, isolate", "", description)
     description = re.sub(" complete", "", description)
+    description = re.sub(" genome assembly.*", "", description)
     #description = re.sub(", : 1.", "", description)
     
     return description

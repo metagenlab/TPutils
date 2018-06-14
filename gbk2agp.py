@@ -19,7 +19,13 @@ def get_assembly_concatenated_length(gbk_file, unaligned_contig_list):
             concatenated_length+=len(record.seq)
     return concatenated_length
 
-def gbk2agp(gbk_file, out_agp="kpge.agp", unaligned_contig_list = [], chromosome=False):
+def gbk2agp(gbk_file,
+            out_agp="kpge.agp",
+            unaligned_contig_list = [],
+            prefix="scaffold",
+            chromosome=False,
+            fasta=False):
+
     from Bio import SeqIO
     from optparse import OptionParser
     import re
@@ -39,28 +45,33 @@ def gbk2agp(gbk_file, out_agp="kpge.agp", unaligned_contig_list = [], chromosome
     '''
 
     header = '''##agp-version	2.0
-# ORGANISM: Klebsiella pneumoniae KpGe
-# TAX_ID: 573
-# ASSEMBLY DATE: March-2017
-# DESCRIPTION: assembly of scaffolds from WGS contigs assembled with SPAdes v3.10.1
-# Scaffolds reordered based on the reference genome: Klebsiella pneumoniae subsp. pneumoniae HS11286 (NC_016845)'''
+            # ORGANISM: Klebsiella pneumoniae KpGe
+            # TAX_ID: 573
+            # ASSEMBLY DATE: March-2017
+            # DESCRIPTION: assembly of scaffolds from WGS contigs assembled with SPAdes v3.10.1
+            # Scaffolds reordered based on the reference genome: Klebsiella pneumoniae subsp. pneumoniae HS11286 (NC_016845)'''
     print header
     if chromosome:
         concat_assembly_length_excluding_unaligned = get_assembly_concatenated_length(gbk_file, unaligned_contig_list)
 
     input_handle = open(gbk_file, "rU")
-    seq_records = list(SeqIO.parse(input_handle, "genbank"))
+    if not fasta:
+        seq_records = list(SeqIO.parse(input_handle, "genbank"))
+    else:
+        print 'fasta'
+        seq_records = list(SeqIO.parse(input_handle, "fasta"))
     scaffold_count = 1
     contig_count = 1
 
-
+    print seq_records
     contig_list = []
     for i, record in enumerate(seq_records):
         if not chromosome:
+            print 'splitting sequence...'
             # split scaffolds into contigs
             seq = str(record.seq)
-            contig_sequences = re.split("N{1,}", seq)
-            gap_list = re.findall("N{1,}", seq)
+            contig_sequences = re.split("N{200,}", seq)
+            gap_list = re.findall("N{200,}", seq)
             #if record.accession not in unaligned_contig_list:
             start = 1
             part_count = 1
@@ -73,10 +84,11 @@ def gbk2agp(gbk_file, out_agp="kpge.agp", unaligned_contig_list = [], chromosome
                                            description=record.description))
 
                 end=start+len(one_contig)-1
-                contig_row='%s\t%s\t%s\t%s\tW\tcontig_%s\t1\t%s\t+' % (record.id,
+                contig_row='%s\t%s\t%s\t%s\tD\t%s_%s\t1\t%s\t+' % ("Chr1",
                                                              start,
                                                              end,
                                                              part_count,
+                                                                   prefix,
                                                              contig_count,
                                                              len(one_contig)
                                                              )
@@ -85,17 +97,17 @@ def gbk2agp(gbk_file, out_agp="kpge.agp", unaligned_contig_list = [], chromosome
                 if len(contig_sequences) > 1 and n < len(contig_sequences)-1:
                     #print 'start, end',start, end
                     gap_start = end+1
-                    gap_end = gap_start + len(gap_list[n-1])-1
-                    gap_row='%s\t%s\t%s\t%s\tN\t%s\t%s\t%s\tpaired-ends' % (record.id,
+                    gap_end = gap_start + 99#len(gap_list[n-1])-1
+                    gap_row='%s\t%s\t%s\t%s\tU\t%s\t%s\t%s\tna' % ("Chr1",
                                                                  gap_start,
                                                                  gap_end,
                                                                  part_count,
-                                                                 len(gap_list[n-1]),
+                                                                 100,
                                                                  "scaffold", #gap_type
-                                                                 "yes" #linkage==> yes
+                                                                 "no" #linkage==> yes
                                                                  )
                     part_count+=1
-                    start = end+len(gap_list[n-1])+1
+                    start = end+101# unkown gap size == 100   len(gap_list[n-1])+1
                     print gap_row
                 #print contig_row
                 contig_count+=1
@@ -118,7 +130,9 @@ def gbk2agp(gbk_file, out_agp="kpge.agp", unaligned_contig_list = [], chromosome
         SeqIO.write(contig_list, out_contig, 'fasta')
 
 
-def gbk2unlocated_file_list(gbk_file, chromosome_file="chromosomes.txt", unlocated="unlocated.txt"):
+def gbk2unlocated_file_list(gbk_file,
+                            chromosome_file="chromosomes.txt",
+                            unlocated="unlocated.txt"):
 
     '''
     create one chromosome file
@@ -127,19 +141,23 @@ def gbk2unlocated_file_list(gbk_file, chromosome_file="chromosomes.txt", unlocat
     :return:
     '''
 
+
+
+
+
+
 if __name__ == '__main__':
     import argparse
     from Bio import SeqIO
     parser = argparse.ArgumentParser()
-    parser.add_argument("-i", '--input_gbk', type=str, help="input gbk file")
+    parser.add_argument("-g", '--input_gbk', type=str, help="input gbk file")
+    parser.add_argument("-f", '--input_fasta', type=str, help="input fasta file")
+    parser.add_argument("-p", '--prefix_accession', type=str, help="prefix for the accession of sub-elements of the agp")
     parser.add_argument("-o", '--outname', type=str, help="putput_name", default=False)
-
 
     args = parser.parse_args()
 
-    if not args.outname:
-        outname = args.input_gbk.split(".")[0]+".embl"
-    else:
-        outname = args.outname
-
-    gbk2agp(args.input_gbk)
+    if args.input_fasta:
+        gbk2agp(args.input_fasta, prefix=args.prefix_accession,fasta=True)
+    elif args.input_gbk:
+        gbk2agp(args.input_gbk, prefix=args.prefix_accession)

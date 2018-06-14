@@ -20,6 +20,10 @@ def get_sequence(file_name, file_format, start=False, stop=False, contig=False, 
 
     contig_name2record =  SeqIO.to_dict(SeqIO.parse(file_name, file_format))
 
+    # account for python count system
+    start = start-1
+    #print 'start, end', start, stop
+
     tag = False
     if not contig:
         #print 'AAA'
@@ -37,8 +41,8 @@ def get_sequence(file_name, file_format, start=False, stop=False, contig=False, 
                         tag = True
                 if tag:
                     out_handle = StringIO()
-                    start = int(feature.location.start) - flanking_region_size_bp
-                    end = int(feature.location.end) + flanking_region_size_bp
+                    start = int(feature.location.start-1) - flanking_region_size_bp
+                    end = int(feature.location.end-1) + flanking_region_size_bp
                     sub_record = record[start:end]
                     if revcomp:
                         sub_record.seq = sub_record.seq.reverse_complement()
@@ -50,11 +54,12 @@ def get_sequence(file_name, file_format, start=False, stop=False, contig=False, 
     else:
 
         if revcomp:
-            if start and stop:
+            if start is not False and stop is not False:
                 if translate:
                     print contig_name2record[contig][start-flanking_region_size_bp:stop+flanking_region_size_bp].reverse_complement().seq.translate()
                     #sys.stdout.write(contig_name2record[contig][start-flanking_region_size_bp:stop+flanking_region_size_bp].reverse_complement().seq.translate())
                 else:
+                    print "start-flanking_region_size_bp:stop+flanking_region_size_bp: %s:%s" % (start-flanking_region_size_bp,stop+flanking_region_size_bp)
                     SeqIO.write(contig_name2record[contig][start-flanking_region_size_bp:stop+flanking_region_size_bp].reverse_complement(), sys.stdout ,"fasta")
             else:
                 if translate:
@@ -62,8 +67,8 @@ def get_sequence(file_name, file_format, start=False, stop=False, contig=False, 
                 else:
                     SeqIO.write(contig_name2record[contig].reverse_complement(), sys.stdout ,"fasta")
         else:
-            if start and stop:
-
+            if start is not False and stop is not False:
+		print "start-flanking_region_size_bp:stop+flanking_region_size_bp: %s:%s" % (start-flanking_region_size_bp,stop+flanking_region_size_bp)
                 SeqIO.write(contig_name2record[contig][start-flanking_region_size_bp:stop+flanking_region_size_bp], sys.stdout ,"fasta")
             else:
                 SeqIO.write(contig_name2record[contig], sys.stdout ,"fasta")

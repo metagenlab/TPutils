@@ -11,8 +11,9 @@ def compare_gbk(file_a, file_b):
     new_record = records_b
     for record in records_a:
         new_record = records_b[0]
-        for ref_feature in record.features:
 
+        for ref_feature in record.features:
+            match_count = 0
             if 'pseudo' in ref_feature.qualifiers:
                continue
             if ref_feature.type=='CDS':
@@ -24,14 +25,17 @@ def compare_gbk(file_a, file_b):
             identical_CDS = 0
             match = False
             # count number of identical features (exact same location)
-            for n, new_feature in enumerate(records_b[0].features):
-                if new_feature.type == 'CDS':
-                    if ref_feature.qualifiers['translation'] == new_feature.qualifiers['translation']:
-                        print "%s\t%s\t%s" % (record.id,ref_locus_tag,new_feature.qualifiers['locus_tag'][0])
-                        identical_CDS +=1
-                        new_record.features[n].qualifiers['locus_tag'] = ref_locus_tag
-                        match = True
-                        break
+            for n_rec, record_b in enumerate(records_b):
+                for n, new_feature in enumerate(record_b.features):
+                    if new_feature.type == 'CDS':
+                        if ref_feature.qualifiers['translation'] == new_feature.qualifiers['translation']:
+                            print "%s\t%s\t%s\t%s" % (record.id,ref_locus_tag,new_feature.qualifiers['locus_tag'][0], match_count)
+                            identical_CDS +=1
+                            match_count+=1
+                            #new_record.features[n].qualifiers['locus_tag'] = ref_locus_tag
+                            match = True
+
+                            break
             if not match:
 		print '%s\t%s\t-' % (record.id, ref_locus_tag)
                         
