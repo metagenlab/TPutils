@@ -43,9 +43,6 @@ def count_missing_locus_tags(gbk_record):
         pass
     return count_no_locus, count_CDS
 
-
-
-
 def rename_source(record):
     print 'ok'
     if 'strain' in record.features[0].qualifiers:
@@ -195,7 +192,7 @@ def check_gbk(gbff_files,
                 annot_check = is_annotated(plasmid)
             else:
                 annot_check = True
-            if is_annotated(chromosome[0]):
+            if annot_check:
                 #print '## %s annotated (file: %s), %s contigs' % (chromosome[0].name, gbff_file, len(chromosome))
                 #print 'number of chromosomes:', len(chromosome)
                 if len(chromosome) > 1:
