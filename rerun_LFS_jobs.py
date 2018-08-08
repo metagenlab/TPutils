@@ -79,7 +79,7 @@ def relaunch_vital_it_job(status, cmd_data):
     elif status == "SUCCESS":
         pass
     elif status == "UNKNOWN":
-        print 'status unknown for %s' % cmd_data
+        print ('status unknown for %s' % cmd_data)
     else:
         raise IOError("Uknwon LFS error status %s\n" % status)
 
