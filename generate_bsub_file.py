@@ -58,8 +58,9 @@ def unique(seq):
 def get_job_status(job_id):
    try:
       merged_text= " ".join(shell_command("bjobs %d" % job_id )[0].split('\n'))
-      stat= re.findall("EXIT|DONE|PEND|RUN",merged_text)
+      stat= re.findall("EXIT|DONE|PEND|RUN", merged_text)
       all_status = unique(stat)
+      print("status:", merged_text)
       print ("id:", job_id, "all status", all_status)
    except:
       raise(Exception("unknown job ID"))
@@ -90,6 +91,7 @@ def is_job_completed(job_id):
        job_status = get_job_status(job_id)
     except:
        print ("Error with jobID", job_id)
+    print("cheking job status:", job_status)
     if job_status == "EXIT":
        #raise(Exception('all jobs with id %s failed with status: EXIT' % job_id))
        return detailed_job_status(job_id)
