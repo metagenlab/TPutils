@@ -237,12 +237,15 @@ class BSUB_script(object):
         # define command line (file.name contain complete path)
         command = 'bsub < ' + file_name # file_name
         # execute command line
+        print('command:', command)
         (stdout, stderr, return_code) = shell_command(command)
         # close temp file
         #file.close()
         #time.sleep(15)
+        print ("out:", stdout, "err:", stderr, "code:", return_code)
         if return_code == 0:
            # return job id
+           print ("Job submitted:", stdout)
            job_id=re.search("\d+", stdout).group(0)
            print (job_id)
            return int(job_id)
