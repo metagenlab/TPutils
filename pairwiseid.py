@@ -294,7 +294,16 @@ def get_identity_matrix_from_multifasta(record):
 
     return identity_matrix
 
-
+def write_three_columns_id_table(record, array, out_name):
+    f = open(out_name, "w")
+    ids = [i.name for i in record]
+    #f.write("\t" + "\t".join(ids) + "\n")
+    for i in range(0,len(array)):
+        for y in range(1,len(array)):
+            name1 = ids[i]
+            name2 = ids[y]
+            identity = str(array[i,y])
+            f.write("%s\t%s\t%s\n" % (name1, name2, identity))    
 
 def write_id_table(record, array, out_name):
     f = open(out_name, "w")
@@ -356,6 +365,7 @@ if __name__ == '__main__':
     parser.add_argument("-a", '--alignment',type=str,help="get identity matrix from msa")
     
     args = parser.parse_args()
+    identity_matrix = False
 
     if args.seq1 and args.seq2:
 
@@ -365,9 +375,19 @@ if __name__ == '__main__':
     if args.alignment is not None:
         align = AlignIO.read(args.alignment, "fasta")
         m = get_identity_matrix_from_multiple_alignment(align)
-        for i, row in enumerate(m):
-            print '\t'.join(row)
-        
+        if identity_matrix:
+            for i, row in enumerate(m):
+                print '\t'.join(row)
+        else:
+            for i in range(1, len(m[0,:])-1):
+                for y in range(i+1, len(m[0,:])):
+                    if i==y:
+                        continue
+		    try:
+                    	print "%s\t%s\t%s" %(m[0,i].split('&&')[1],m[0,y].split('&&')[1],m[i,y])
+                    except:
+                        print "%s\t%s\t%s" %(m[0,i],m[0,y],m[i,y])
+                    
         sys.exit()
     
     if not args.out_name:
@@ -381,8 +401,10 @@ if __name__ == '__main__':
         multifasta = [record for record in SeqIO.parse(handle, "fasta")]
         handle.close()
         id_matrix = get_identity_matrix_from_multifasta(multifasta)
-        write_id_table(multifasta, id_matrix, out_name)
-
+        if id_matrix:
+            write_id_table(multifasta, id_matrix, out_name)
+        else:
+            write_three_columns_id_table(multifasta, id_matrix, out_name)
     #print SubsMat.make_log_odds_matrix(mat)
     #mat.print_full_mat(alphabet=["A", "T", "G", "C", "S", "W", "R","Y", "K", "M", "B", "V", "H", "D", "N"])
     #print matlist.blosum62

@@ -28,7 +28,6 @@ def is_annotated(gbk_record):
     else:
         return True
 
-
 def count_missing_locus_tags(gbk_record):
     count_CDS = 0
     count_no_locus = 0
@@ -43,9 +42,6 @@ def count_missing_locus_tags(gbk_record):
                 count_no_locus += 1
         pass
     return count_no_locus, count_CDS
-
-
-
 
 def rename_source(record):
     print 'ok'
@@ -102,11 +98,15 @@ def clean_description(description):
     description = re.sub(".contig.0_1, whole genome shotgun sequence.", "", description)
     description = re.sub("complete genome, isolate", "", description)
     description = re.sub(" complete", "", description)
+    description = re.sub(" genome assembly.*", "", description)
     #description = re.sub(", : 1.", "", description)
     
     return description
 
-def check_gbk(gbff_files):
+def check_gbk(gbff_files,
+              minimal_contig_length=1000,
+              check_annotation=False):
+
     from Bio import SeqIO
     import reannotate_genomes
     reannotation_list = []
@@ -134,7 +134,12 @@ def check_gbk(gbff_files):
         if len(plasmids) > 0:
             #print '######### plasmid(s) ############'
             for plasmid in plasmids:
-                if is_annotated(plasmid):
+                if check_annotation:
+                    annot_check = is_annotated(plasmid)
+                else:
+                    annot_check = True
+
+                if annot_check:
                     out_name = plasmid.name + '.gbk'
                     plasmid.description = clean_description(plasmid.description)
                     plasmid = remove_record_taxon_id(plasmid)
@@ -171,7 +176,6 @@ def check_gbk(gbff_files):
         if len(chromosome) > 0:
 
             '''
-
             Assume single chromosome bacteria.
             If multiple record founds, consider those as contigs.
             Contigs contatenation with 200 N between each (labelled as assembly_gap feature)
@@ -184,7 +188,11 @@ def check_gbk(gbff_files):
             if chromosome[0].seq == 'N'*len(chromosome[0].seq):
                 #print 'No sequences for %s, skipping! #################' % gbff_file
                 continue
-            if is_annotated(chromosome[0]):
+            if check_annotation:
+                annot_check = is_annotated(plasmid)
+            else:
+                annot_check = True
+            if annot_check:
                 #print '## %s annotated (file: %s), %s contigs' % (chromosome[0].name, gbff_file, len(chromosome))
                 #print 'number of chromosomes:', len(chromosome)
                 if len(chromosome) > 1:
@@ -220,7 +228,8 @@ def check_gbk(gbff_files):
             else:
                 # unannotated record: merge genbank and keep it in memory
                 chromosome_reannot = True
-                merged_record = concat_gbk.merge_gbk(chromosome, filter_size=1000)
+                # by default, filter contigs < 1000bp
+                merged_record = concat_gbk.merge_gbk(chromosome, filter_size=minimal_contig_length)
                 reannotation_list.append(merged_record)
 
             # count the source to identifiy redundant sources
@@ -271,5 +280,10 @@ if __name__ == '__main__':
     import argparse
     parser = argparse.ArgumentParser()
     parser.add_argument("-i", '--gbff_files', type=str, help="input gbff file(s)", nargs="+")
+    parser.add_argument("-a", '--check_annotation', action='store_true', help="Check if gbk are annotated")
+    parser.add_argument("-l", '--minimal_contig_length', type=int, help="input gbff file(s)")
+
     args = parser.parse_args()
-    check_gbk(args.gbff_files)
+    check_gbk(args.gbff_files,
+              args.minimal_contig_length,
+              args.check_annotation)

@@ -32,6 +32,22 @@ def contig_id2contig_length(contigs_file):
     return id2length
 
 
+def median(lst):
+    lst = sorted(lst)
+    if len(lst) < 1:
+        return None
+    if len(lst) % 2 == 1:
+        return lst[((len(lst)+1)/2)-1]
+    else:
+        return float(sum(lst[(len(lst)/2)-1:(len(lst)/2)+1]))/2.0
+
+def contig_id2median_id(id2cov, id2depth):
+    contig2med = {}
+    for id in id2cov:
+        m = median(id2depth[id])
+	contig2med[id] = m
+    return contig2med
+
 
 if __name__ == '__main__':
     import argparse
@@ -45,17 +61,6 @@ if __name__ == '__main__':
 
     id2l = contig_id2contig_length(args.input_contigs)
     id2cov, id2depth = contig_name2contig_coverage(args.input_samtools_depth)
-    def median(lst):
-        lst = sorted(lst)
-        if len(lst) < 1:
-                return None
-        if len(lst) % 2 == 1:
-                return lst[((len(lst)+1)/2)-1]
-        else:
-                return float(sum(lst[(len(lst)/2)-1:(len(lst)/2)+1]))/2.0
-
-    for id in id2cov:
-
-        m = median(id2depth[id])
-
-        print '%s\t%s\t%s\t%s\t%s' % (id, id2cov[id], id2l[id], round(float(id2cov[id])/id2l[id]*100), m)
+    contig2med = contig_id2median_id(id2cov, id2depth)
+    for id in contig2med:
+        print '%s\t%s\t%s\t%s\t%s' % (id, id2cov[id], id2l[id], round(float(id2cov[id])/id2l[id]*100), contig2med[id])

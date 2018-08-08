@@ -84,7 +84,7 @@ def get_peak_associated_genes(genbank_file, peak_file, max_amont=400, max_aval=1
 
             record_peaks = peak_center_positions[record.id]
             peak2scores_dico = peak2scores(peak_file)
-            locus2COG, locus2KEGG = get_annotation(record.name, 'chlamydia_04_16')
+            locus2COG, locus2KEGG = ({}, {}) #get_annotation(record.name, 'chlamydia_04_16')
             print "peak_id\tpeak_max\tlocus_tag\tstart\tend\tstrand\tproduct\tpeak_length\tpeak_shape_score\tpeak_p_value" \
                   "\tCOG\tCOG_description\tCOG_categories\tko\tko_description\tkegg_pathways"
             for peak in record_peaks:
@@ -94,11 +94,16 @@ def get_peak_associated_genes(genbank_file, peak_file, max_amont=400, max_aval=1
                         #print feature.location.start
                         #print feature.location.end
                         if feature.location.strand == 1:
+                            s = int(feature.location.start)
+                            e = int(feature.location.end)
                             amont_position = int(feature.location.start) - max_amont
                             aval_position = int(feature.location.start) + max_aval
                         else:
+                            s = int(feature.location.end)
+                            e = int(feature.location.start)
                             amont_position = int(feature.location.end) + max_amont
                             aval_position = int(feature.location.end) - max_aval
+			print 'start, end, amont, aval',feature.location.strand, s, e, amont_position, aval_position
                         #print peak, max([amont_position, aval_position]), min([amont_position, aval_position])
                         if record_peaks[peak] <= max([amont_position, aval_position]) and record_peaks[peak] >= min([amont_position, aval_position]):
                             #print 'peak!!!!!'

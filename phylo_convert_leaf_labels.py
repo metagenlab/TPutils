@@ -10,7 +10,12 @@
 # ---------------------------------------------------------------------------
 
 
-def convert_leaf_labels(input_tree, biodb_name, accession2taxon=False, taxon2accession=False):
+def convert_leaf_labels(input_tree,
+                        biodb_name,
+                        accession2taxon=False,
+                        taxon2accession=False,
+                        sqlite=False):
+
     import shell_command
     import manipulate_trees
     import os
@@ -33,21 +38,25 @@ def convert_leaf_labels(input_tree, biodb_name, accession2taxon=False, taxon2acc
     print output_file
 
     if accession2taxon:
+        print "sqlite"
         manipulate_trees.convert_tree_accession2taxon_id(biodb_name,
                                                input_file,
-                                               output_file)
+                                               output_file,
+                                               sqlite=sqlite)
 
     elif taxon2accession:
         manipulate_trees.convert_tree_taxon_id2accession(biodb_name,
                                                input_file,
-                                               output_file)
+                                               output_file,
+                                                         sqlite=sqlite)
 
 
 
     else:
         manipulate_trees.convert_tree_taxon2genome(biodb_name,
                                                input_file,
-                                               output_file)
+                                               output_file,
+                                                         sqlite=sqlite)
 
 def convert_leaf_labels_from_genbank(input_tree,
                                      input_gbk_list,
@@ -112,6 +121,7 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument("-i", '--input_tree', type=str, help="input tree (newick)")
     parser.add_argument("-d", '--database_name', type=str, help="corresponding database name")
+    parser.add_argument("-s", '--sqlite_database', type=str, help="SQLITE database")
     parser.add_argument("-g", '--genbank_files', type=str, help="genbank files of all leaf nodes", nargs='+')
     parser.add_argument("-a", '--accession2taxon', action='store_true', help="convert accession to taxon_id used in biosqldb")
     parser.add_argument("-t", '--taxon2accession', action='store_true', help="convert taxon id to accessions used in biosqldb")
@@ -126,7 +136,8 @@ if __name__ == '__main__':
         convert_leaf_labels(args.input_tree,
                             args.database_name,
                             accession2taxon=args.accession2taxon,
-                            taxon2accession=args.taxon2accession)
+                            taxon2accession=args.taxon2accession,
+                            sqlite=args.sqlite_database)
     if args.tab_file:
         import parse_newick_tree
         id2description = {}
