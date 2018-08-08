@@ -57,8 +57,8 @@ def unique(seq):
 
 def get_job_status(job_id):
    try:
-      merged_text= " ".join(str(shell_command("bjobs %d" % job_id )[0]).split('\n'))
-      stat= re.findall("EXIT|DONE|PEND|RUN", merged_text)
+      merged_text= " ".join(shell_command("bjobs %d" % job_id )[0].split('\n'))
+      stat= re.findall("EXIT|DONE|PEND|RUN",merged_text)
       all_status = unique(stat)
       print ("id:", job_id, "all status", all_status)
    except:
@@ -77,7 +77,7 @@ def get_job_status(job_id):
 
 
 def detailed_job_status(job_id):
-   detailed_job_status = str(shell_command("bjobs %d" % job_id )[0]).split('\n')
+   detailed_job_status = shell_command("bjobs %d" % job_id )[0].split('\n')
    detailed_exit_job_status = []
    for i in detailed_job_status:
       if "EXIT" in i:
@@ -106,7 +106,7 @@ def is_job_completed(job_id):
 
 def is_job_running(job_id):
     try:
-       merged_text= " ".join(str(shell_command("bjobs %d" % job_id )[0]).split('\n'))
+       merged_text= " ".join(shell_command("bjobs %d" % job_id )[0].split('\n'))
        stat= re.findall("EXIT|DONE|PEND|RUN",merged_text)
        print (stat)
        all_status = unique(stat)
@@ -245,8 +245,8 @@ class BSUB_script(object):
         print ("out:", stdout, "err:", stderr, "code:", return_code)
         if return_code == 0:
            # return job id
-           print ("Job submitted:", str(stdout))
-           job_id=re.search("\d+", str(stdout)).group(0)
+           print ("Job submitted:", stdout)
+           job_id=re.search("\d+", stdout).group(0)
            print (job_id)
            return int(job_id)
         else:
