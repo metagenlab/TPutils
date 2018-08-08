@@ -60,7 +60,7 @@ def get_job_status(job_id):
       merged_text= " ".join(shell_command("bjobs %d" % job_id )[0].split('\n'))
       stat= re.findall("EXIT|DONE|PEND|RUN",merged_text)
       all_status = unique(stat)
-      print "id:", job_id, "all status", all_status
+      print ("id:", job_id, "all status", all_status)
    except:
       raise(Exception("unknown job ID"))
    # return exit only if all jobs (in case of job array) were exited
@@ -89,7 +89,7 @@ def is_job_completed(job_id):
     try:
        job_status = get_job_status(job_id)
     except:
-       print "Error with jobID", job_id
+       print ("Error with jobID", job_id)
     if job_status == "EXIT":
        #raise(Exception('all jobs with id %s failed with status: EXIT' % job_id))
        return detailed_job_status(job_id)
@@ -98,7 +98,7 @@ def is_job_completed(job_id):
     elif job_status == "DONE":
        return "DONE"
     elif job_status == "partial DONE":
-       print "Partial DONE"
+       print ("Partial DONE")
        return detailed_job_status(job_id)
     else:
        raise(Exception("Problem with job completion for jobID: %s" % job_id))
@@ -108,10 +108,10 @@ def is_job_running(job_id):
     try:
        merged_text= " ".join(shell_command("bjobs %d" % job_id )[0].split('\n'))
        stat= re.findall("EXIT|DONE|PEND|RUN",merged_text)
-       print stat
+       print (stat)
        all_status = unique(stat)
     except:
-       print "unknown job ID"
+       print ("unknown job ID")
        return True
     if "EXIT" in all_status:
        raise(Exception('bsub command failed with status: EXIT'))
@@ -128,13 +128,13 @@ def check_pending_jobs(job_id_list):
         for job_id in job_list:
             if is_job_running(job_id):
                 job_list.remove(job_id)
-                print job_id, "running!"
+                print (job_id, "running!")
         sleep(10)
-        print "wait!"
+        print ("wait!")
 
 def wait_for_job_completion(job_id):
     while(not is_job_completed(job_id)):
-        print "wait!"
+        print ("wait!")
         sleep(10)
 
 
@@ -151,7 +151,7 @@ def run_job(script):
 
 
 def wait_multi_jobs(job_id_list):
-    print 'job list:', job_id_list
+    print ('job list:', job_id_list)
     job_list=list(job_id_list)
     job_exited = []
     while len(job_list) != 0:
@@ -159,14 +159,14 @@ def wait_multi_jobs(job_id_list):
            status = is_job_completed(job_id)
            if status == "DONE":
               job_list.remove(job_id)
-              print job_id, "fertig!"
+              print (job_id, "fertig!")
            elif status == False:
               continue
            else:
               job_exited += status
               job_list.remove(job_id)
         sleep(200)
-        print "Waiting for job completion : %s" % time.ctime()
+        print ("Waiting for job completion : %s" % time.ctime())
     return job_exited
 
 
@@ -244,8 +244,8 @@ class BSUB_script(object):
         if return_code == 0:
            # return job id
            job_id=re.search("\d+", stdout).group(0)
-           print job_id
+           print (job_id)
            return int(job_id)
         else:
-          print command 
+          print (command)
           raise(Exception('bsub submission command failed with exit status: ' + str(return_code)))
