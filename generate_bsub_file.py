@@ -59,7 +59,7 @@ def get_job_status(job_id):
    try:
       merged_text= " ".join(shell_command("bjobs %d" % job_id )[0].split('\n'))
       stat= re.findall("EXIT|DONE|PEND|RUN", merged_text)
-      all_status = unique(stat)
+      all_status = list(set(stat))
       print("status:", merged_text)
       print("matche(s)", stat)
       print ("id:", job_id, "all status", all_status)
