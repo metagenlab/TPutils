@@ -386,7 +386,7 @@ def gc_values(handle):
     for i in range(0, len(seq_ids)):
         print (seq_ids[i] +"\t"+ str(gc_values[i]))
 
-def whole_gc(regit statuscords):
+def whole_gc(records):
     seq = ""
     for record in records:
         seq+= record.seq
