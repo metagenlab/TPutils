@@ -250,7 +250,7 @@ def get_gaps_from_start_stop_lists(contig2start_stop_lists, contigs_add, min_gap
         data.start = data.start.astype(np.int64)
         data.stop = data.stop.astype(np.int64)
         #print 'add', data['start'][0]+1
-        data_sort = data.sort(columns=["start"])
+        data_sort = data.sort_values(by=["start"])
         print data_sort
         index_start = 0
         comparison_index = 1
