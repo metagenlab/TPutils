@@ -47,9 +47,9 @@ if __name__ == '__main__':
         for locus in locus_tag2EC_dico:
             if len(locus_tag2EC_dico[locus]) > 0:
                 i+=1
-        print i
+        print (i)
     else:
         for locus in locus_tag2EC_dico:
             if len(locus_tag2EC_dico[locus]) > 0:
                 for i in locus_tag2EC_dico[locus]:
-                    print '%s\t%s' % (locus, i[0])
+                    print ('%s\t%s' % (locus, i[0]))
