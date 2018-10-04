@@ -16,16 +16,16 @@ def gbk2fna(seq_records, outname=False):
         record_list = [i for i in SeqIO.parse(open(seq_records), 'genbank')]
     elif type(seq_records) == list and type(seq_records[0])==str:
         record_list = []
-	for i in seq_records:
+        for i in seq_records:
             tmp_list = [i for i in SeqIO.parse(open(i), 'genbank')]
-	    record_list+=tmp_list
+            record_list+=tmp_list
 
     elif isinstance(seq_records, SeqRecord):
         record_list = [seq_records]
     elif type(seq_records) == list and isinstance(seq_records[0], SeqRecord):
         record_list = seq_records
     else:
-        print 'wrong inpur reference'
+        print ('wrong inpur reference')
 
     length_records = [len(i.seq) for i in record_list]
     longest_record = length_records.index(max(length_records))
