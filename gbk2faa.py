@@ -25,26 +25,23 @@ def gbk2faa(seq_records,
     all_locus_ids = []
     all_prot_ids = []
 
-    print type(seq_records)
-
     # hangeling of input str or input seqrecord
     if type(seq_records) == str:
         record_list = [i for i in SeqIO.parse(open(seq_records), 'genbank')]
     elif type(seq_records) == list and type(seq_records[0])==str:
         record_list = []
-	for i in seq_records:
+        for i in seq_records:
             tmp_list = [i for i in SeqIO.parse(open(i), 'genbank')]
-	    record_list+=tmp_list
-
+            record_list+=tmp_list
 
     elif isinstance(seq_records, SeqRecord):
-        print '!!!!!!!!!!!!!!!!!!!!!--------seqrecord'
-        print 'feaures', seq_records.features
+        print ('!!!!!!!!!!!!!!!!!!!!!--------seqrecord')
+        print ('feaures', seq_records.features)
         record_list = [seq_records]
     elif type(seq_records) == list and isinstance(seq_records[0], SeqRecord):
         record_list = seq_records
     else:
-        print 'wrong inpur reference'
+        print ('wrong inpur reference')
 
     length_records = [len(i.seq) for i in record_list]
     longest_record = length_records.index(max(length_records))
@@ -84,11 +81,11 @@ def gbk2faa(seq_records,
             if seq_feature.type == "CDS":
                 try:
                     if seq_feature.qualifiers["protein_id"][0] in all_prot_ids:
-                        print '%s (%s), Duplicated protein id: %s' % (record.id,
+                        print ('%s (%s), Duplicated protein id: %s' % (record.id,
                                                                  record.description,
-                                                                 seq_feature.qualifiers["protein_id"][0])
+                                                                 seq_feature.qualifiers["protein_id"][0]))
                         if remove_redundancy:
-                            print 'skipping...'
+                            print ('skipping...')
                             continue
                     else:
                         all_prot_ids.append(seq_feature.qualifiers["protein_id"][0])
@@ -97,12 +94,12 @@ def gbk2faa(seq_records,
                     pass
                 try:
                     if seq_feature.qualifiers["locus_tag"][0] in all_locus_ids:
-                        print '%s (%s), Duplicated locus id: %s, skipping' % (record.id,
+                        print ('%s (%s), Duplicated locus id: %s, skipping' % (record.id,
                                                                  record.description,
-                                                                 seq_feature.qualifiers["locus_tag"][0])
+                                                                 seq_feature.qualifiers["locus_tag"][0]))
                         # if remove redundancy, skip writing
                         if remove_redundancy:
-                            print 'skipping...'
+                            print ('skipping...')
                             continue
                     else:
                         all_locus_ids.append(seq_feature.qualifiers["locus_tag"][0])
@@ -113,18 +110,21 @@ def gbk2faa(seq_records,
                 try:
                     len(seq_feature.qualifiers['translation'])
                 except:
-                    #print seq_feature
+                    print (seq_feature)
+                    print (record.seq)
+                    import sys
+                    sys.exit()
                     #sys.stderr.write(seq_feature.location.start)
                     sys.stderr.write("%s (%s) - %s: no sequence, is it a pseudogene, or genbank without translated CDS?\n" % (record.id,
                                                                  record.description,
-                                                                 seq_feature.qualifiers["locus_tag"][0]))
+                                                                 seq_feature.qualifiers["protein_id"][0]))
                     if get_translation:
                         import re
                         seq = str(seq_feature.extract(record.seq).translate())
                         if seq[-1] == '*':
                              seq = seq[0:-1]
                         seq_feature.qualifiers['translation'] = [seq]
-                        print seq
+                        print (seq)
                     else:
                         continue
 
@@ -175,7 +175,7 @@ def gbk2faa(seq_records,
                                              seq_feature.qualifiers['translation'][0]))
                         count_cds+=1
                     except:
-                        print 'error', feature
+                        print ('error', feature)
                     
                 else:
 
@@ -230,15 +230,18 @@ if __name__ == '__main__':
     parser.add_argument("-o", '--outname', help="outname (optinal)", default=False)
     parser.add_argument("-r", '--remove', action='store_true', help="remove redundancy (protein id or locus tags persent mor than once)", default=False)
     parser.add_argument("-t", '--translate', action='store_true', help="translate from DNA if translation not available (not for pseudo tagged features)", default=False)
-
+    parser.add_argument("-s", '--seqio', action='store_true',
+                        help="simple SeqIO conversion",
+                        default=False)
     args = parser.parse_args()
 
-
-
-
-
-
-    if args.lformat:
+    if args.seqio:
+        record_list = []
+        for record in args.input_gbk:
+            record_list += [i for i in SeqIO.parse(open(record), 'genbank')]
+        with open(args.outname, 'w') as f:
+            SeqIO.write(record_list, f, 'fasta')
+    elif args.lformat:
         gbk2faa(args.input_gbk, lformat=args.lformat, remove_redundancy=args.remove, get_translation=args.translate, outname=args.outname)
     elif args.pformat:
         gbk2faa(args.input_gbk, pformat=args.pformat, remove_redundancy=args.remove, get_translation=args.translate, outname=args.outname)

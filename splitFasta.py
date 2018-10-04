@@ -24,7 +24,7 @@ def batch_iterator(iterator, batch_size) :
         batch = []
         while len(batch) < batch_size :
             try :
-                entry = iterator.next()
+                entry = iterator.__next__()
             except StopIteration :
                 entry = None
             if entry is None :
@@ -36,7 +36,7 @@ def batch_iterator(iterator, batch_size) :
 
 
 def split_fasta(fasta_file, number_per_file=1000, out_directory="", accession=False):
-    print accession
+    print (accession)
     from Bio import SeqIO
     import os
     record_iter = SeqIO.parse(open(fasta_file), "fasta")
@@ -45,14 +45,14 @@ def split_fasta(fasta_file, number_per_file=1000, out_directory="", accession=Fa
             filename = os.path.join(out_directory, "group_%i.fasta" % (i+1))
          else:
              if number_per_file==1:
-                 print batch
+                 print (batch)
                  filename = batch[0].id+'.fasta'
              else:
                  filename = os.path.join(out_directory, "group_%i.fasta" % (i+1))
          handle = open(filename, "w")
          count = SeqIO.write(batch, handle, "fasta")
          handle.close()
-         print "Wrote %i records to %s" % (count, filename)
+         print ("Wrote %i records to %s" % (count, filename))
     return i+1
 
 

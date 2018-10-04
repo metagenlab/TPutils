@@ -10,6 +10,7 @@
 # ---------------------------------------------------------------------------
 
 
+
 def convert_leaf_labels(input_tree,
                         biodb_name,
                         accession2taxon=False,
@@ -20,25 +21,25 @@ def convert_leaf_labels(input_tree,
     import manipulate_trees
     import os
 
-    print accession2taxon, taxon2accession
+    print (accession2taxon, taxon2accession)
 
     cmd = 'newick2phyloxml.pl -i %s' % input_tree
 
     file_name = input_tree.split('.')[0]
     
     a,b,c = shell_command.shell_command(cmd)
-    print a, b, c
+    print (a, b, c)
     
     dirpath = os.getcwd()
 
     input_file = os.path.join(dirpath, file_name + '.phyloxml')
     output_file = os.path.join(dirpath, file_name + '_renamed.tree')
 
-    print input_file
-    print output_file
+    print (input_file)
+    print (output_file)
 
     if accession2taxon:
-        print "sqlite"
+        print ("sqlite")
         manipulate_trees.convert_tree_accession2taxon_id(biodb_name,
                                                input_file,
                                                output_file,
@@ -61,25 +62,29 @@ def convert_leaf_labels(input_tree,
 def convert_leaf_labels_from_genbank(input_tree,
                                      input_gbk_list,
                                      show_rank=False,
-                                     use_gbk_file_names=False):
+                                     use_gbk_file_names=False,
+                                     use_source_organism=False):
     import gbk2accessiontodefinition
     import parse_newick_tree
 
+    if not use_source_organism:
+        id2description = gbk2accessiontodefinition.get_coressp(input_gbk_list, use_gbk_file_names=use_gbk_file_names)
+    else:
+        id2description = gbk2accessiontodefinition.get_corresp_organism(input_gbk_list)
 
-    id2description = gbk2accessiontodefinition.get_coressp(input_gbk_list, use_gbk_file_names=use_gbk_file_names)
     if show_rank:
         for id in id2description:
-            print 'searching rank for %s...' % id
+            print ('searching rank for %s...' % id)
             try:
 
                 id2description[id] = id2description[id] + ' (%s)' % accession2taxon_rank(id, 'phylum')
             except:
-                print 'no phylum for %s' % id
+                print ('no phylum for %s' % id)
                 try:
 
                     id2description[id] = id2description[id] + ' (order: %s)' % accession2taxon_rank(id, 'order')
                 except:
-                    print 'no order for %s' % id
+                    print ('no order for %s' % id)
                     id2description[id] = id2description[id] + ' (?)'
 
     new_tree = parse_newick_tree.convert_terminal_node_names(input_tree, id2description, 1)
@@ -107,8 +112,8 @@ def accession2taxon_rank(accession, rank='phylum'):
     try:
         data = taxo_data[id][rank]
     except:
-        print accession, ncbi_id,taxo_data[id]
-        return False
+        print (accession, ncbi_id,taxo_data[id])
+        return (False)
     return data
 
 
@@ -117,7 +122,7 @@ if __name__ == '__main__':
     from Bio import SeqIO
     from Bio import Phylo
     import os
-    import ete2
+    import ete3
     parser = argparse.ArgumentParser()
     parser.add_argument("-i", '--input_tree', type=str, help="input tree (newick)")
     parser.add_argument("-d", '--database_name', type=str, help="corresponding database name")
@@ -127,12 +132,13 @@ if __name__ == '__main__':
     parser.add_argument("-t", '--taxon2accession', action='store_true', help="convert taxon id to accessions used in biosqldb")
     parser.add_argument("-r", '--show_rank', action='store_true', help="show rank (phylum)")
     parser.add_argument("-f", '--tab_file', type=str, help="tabulated table with accession\tdescription", default=False)
+    parser.add_argument("-so", '--source_organism', action='store_true', help="use source/organism")
     parser.add_argument("-gp", '--gbk_prefix', action='store_true', help="gbk file name were used as label for the newick tree")
 
     args = parser.parse_args()
 
     if args.database_name:
-        print args.accession2taxon, args.taxon2accession
+        print (args.accession2taxon, args.taxon2accession)
         convert_leaf_labels(args.input_tree,
                             args.database_name,
                             accession2taxon=args.accession2taxon,
@@ -157,7 +163,8 @@ if __name__ == '__main__':
         new_tree = convert_leaf_labels_from_genbank(args.input_tree,
                                                     args.genbank_files,
                                                     show_rank = args.show_rank,
-                                                    use_gbk_file_names=args.gbk_prefix)
+                                                    use_gbk_file_names=args.gbk_prefix,
+                                                    use_source_organism=args.source_organism)
         file_name = args.input_tree.split('.')[0]
         output_file = file_name + '_renamed.tree'
 
