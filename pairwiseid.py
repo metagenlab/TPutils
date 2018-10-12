@@ -170,11 +170,11 @@ def global_align(seq_record1, seq_record2):
     seq1.alphabet = IUPAC.ambiguous_dna
     seq2.alphabet = IUPAC.ambiguous_dna
 
-    print 'test nt1', _verify_alphabet(seq1)
-    print 'test nt1', _verify_alphabet(seq2)
+    print ('test nt1', _verify_alphabet(seq1))
+    print ('test nt1', _verify_alphabet(seq2))
 
     if _verify_alphabet(seq1) and _verify_alphabet(seq2):
-        print "dna"
+        print ("dna")
     #    alns = pairwise2.align.globalds(seq1, seq2, DNA_matrix, gap_open, gap_extend)
     #    print ">"+noms[id_seq1]
     #    print alns[0][0]
@@ -196,9 +196,9 @@ def global_align(seq_record1, seq_record2):
     #print _verify_alphabet(seq1)
 
     if _verify_alphabet(seq1) and _verify_alphabet(seq2):
-        print 'aa'
-        print _verify_alphabet(seq1)
-        print _verify_alphabet(seq2)
+        print ('aa')
+        print (_verify_alphabet(seq1))
+        print (_verify_alphabet(seq2))
 
         #print "AA!"
     #    alns = pairwise2.align.globalds(seq1, seq2, matlist.blosum62, gap_open, gap_extend)
@@ -212,10 +212,10 @@ def global_align(seq_record1, seq_record2):
 
 
     else:
-        print 'test seq1', _verify_alphabet(seq1)
-        print seq1.alphabet
-        print 'test seq2', _verify_alphabet(seq2)
-        raise "unkown alphabet!"
+        print ('test seq1', _verify_alphabet(seq1))
+        print (seq1.alphabet)
+        print ('test seq2', _verify_alphabet(seq2))
+        raise ("unkown alphabet!")
 
 
         
@@ -377,16 +377,16 @@ if __name__ == '__main__':
         m = get_identity_matrix_from_multiple_alignment(align)
         if identity_matrix:
             for i, row in enumerate(m):
-                print '\t'.join(row)
+                print ('\t'.join(row))
         else:
             for i in range(1, len(m[0,:])-1):
                 for y in range(i+1, len(m[0,:])):
                     if i==y:
                         continue
 		    try:
-                    	print "%s\t%s\t%s" %(m[0,i].split('&&')[1],m[0,y].split('&&')[1],m[i,y])
+                    	print ("%s\t%s\t%s" %(m[0,i].split('&&')[1],m[0,y].split('&&')[1],m[i,y]))
                     except:
-                        print "%s\t%s\t%s" %(m[0,i],m[0,y],m[i,y])
+                        print ("%s\t%s\t%s" %(m[0,i],m[0,y],m[i,y]))
                     
         sys.exit()
     
@@ -396,7 +396,7 @@ if __name__ == '__main__':
         out_name = args.out_name
 
     if args.multifasta:
-        print 'multifasta'
+        print ('multifasta')
         handle = open(args.multifasta, "rU")
         multifasta = [record for record in SeqIO.parse(handle, "fasta")]
         handle.close()
