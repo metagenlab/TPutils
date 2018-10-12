@@ -41,8 +41,8 @@ def plot_scores_distribution(file_list, outname):
 
     #pairwiseid_plots.density_plot([max_mem_list], label_list=['mem'], output_path=outname)
     print ('%s\t%s\t%s\t%s' % (outname.split('.')[0],
-                           min(max_mem_list),
-                           max(max_mem_list),
+                               min(max_mem_list),
+                               max(max_mem_list),
                                numpy.median(max_mem_list)))
 
 if __name__ == '__main__':
