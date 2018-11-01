@@ -22,11 +22,9 @@ def edit_svg(svg_string, locus_list, biodb_name):
     for element in tree.iter():
 
         if element.tag.split("}")[1] == 'polygon':
-            #print(element.get("points"))
             if len(element.get("points").split(",")) == 7 or len(element.get("points").split(",")) == 5:
                 #print element.get("points")
                 # window.location.href
-                print (i)
                 try:
                     # , "theFrame"
                     add = 'window.open("/chlamdb/locusx/%s/True", "_top");' % (locus_list[i])
