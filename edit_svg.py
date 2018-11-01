@@ -8,7 +8,7 @@
 # ---------------------------------------------------------------------------
 
 def edit_svg(svg_string, locus_list, biodb_name):
-    print(locus_list)
+    print(len(locus_list))
     from xml.dom import minidom
     from xml.etree import ElementTree
     tree = ElementTree.ElementTree(ElementTree.fromstring(svg_string))
@@ -25,7 +25,7 @@ def edit_svg(svg_string, locus_list, biodb_name):
             if len(element.get("points").split(","))==7:
                 #print element.get("points")
                 # window.location.href
-                print(locus_list[i])
+                print (i)
                 try:
                     # , "theFrame"
                     add = 'window.open("/chlamdb/locusx/%s/True", "_top");' % (locus_list[i])
