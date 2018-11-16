@@ -210,7 +210,7 @@ class BSUB_script(object):
             script.append('#BSUB -J %s' % self.name)
         if self.n_cores:
            script.append('#BSUB -n %s' % self.n_cores)
-           script.append('#BSUB span[hosts=1]')
+           script.append('#BSUB -R span[hosts=1]')
         if self.mem_in_GB:
             script.append('#BSUB -R rusage[mem=%d]' % (self.mem_in_GB*1000))
             script.append('#BSUB -M %d' % (self.mem_in_GB*1000000))
