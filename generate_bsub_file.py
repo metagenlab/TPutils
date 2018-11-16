@@ -15,7 +15,7 @@ Example of submission script:
 #BSUB -J array[41-96:4]
 #BSUB -o %I_output.txt
 #BSUB -e %I_error.txt
-
+#BSUB -n 4 -R span[ptile=4]
 ./my_script.py
 
 Author: Trestan Pillonel (trestan.pillonel[]gmail.com)
@@ -171,7 +171,17 @@ def wait_multi_jobs(job_id_list):
 
 
 class BSUB_script(object):
-    def __init__(self, command, name=None, mem_in_GB=2, queue='normal', module_list=None, log_file="log.txt",error_file="error.txt",array_start=None,array_stop=None,array_step=None):
+    def __init__(self, command,
+                 name=None,
+                 mem_in_GB=2,
+                 queue='normal',
+                 module_list=None,
+                 log_file="log.txt",
+                 error_file="error.txt",
+                 array_start=None,
+                 array_stop=None,
+                 array_step=None,
+                 n_cores=None):
         self.command = command
         if queue in ['normal', 'long']:
             self.queue = queue
@@ -185,6 +195,7 @@ class BSUB_script(object):
         self.array_start = array_start
         self.array_stop = array_stop
         self.array_step = array_step
+        self.n_cores = n_cores
 
     # lsf file for job submission 
     def __str__(self):
@@ -197,6 +208,9 @@ class BSUB_script(object):
 
         if self.name:
             script.append('#BSUB -J %s' % self.name)
+        if self.n_cores:
+           script.append('#BSUB -n %s' % self.n_cores)
+           script.append('#BSUB span[hosts=1]'
         if self.mem_in_GB:
             script.append('#BSUB -R rusage[mem=%d]' % (self.mem_in_GB*1000))
             script.append('#BSUB -M %d' % (self.mem_in_GB*1000000))
