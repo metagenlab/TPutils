@@ -18,7 +18,7 @@ from Bio.Seq import Seq
 import sys
 import math
 from Bio import AlignIO
-import StringIO
+from io import StringIO
 from shell_command import shell_command
 from tempfile import NamedTemporaryFile
 from Bio.Emboss.Applications import StretcherCommandline
@@ -183,7 +183,7 @@ def global_align(seq_record1, seq_record2):
     #    return  alns[0]
         stretcher_cline=StretcherCommandline(asequence=seq1_file.name, bsequence=seq2_file.name, stdout=True, gapopen=16, gapextend=4, auto=True, aformat="srspair")
         stdout,stderr=stretcher_cline()
-        align = AlignIO.read(StringIO.StringIO(stdout), "emboss")
+        align = AlignIO.read(StringIO(stdout), "emboss")
         return align
 
  
@@ -206,7 +206,7 @@ def global_align(seq_record1, seq_record2):
 
         stretcher_cline=StretcherCommandline(asequence=seq1_file.name, bsequence=seq2_file.name, stdout=True, gapopen=12, gapextend=2, auto=True, aformat="srspair")
         stdout,stderr=stretcher_cline()
-        align = AlignIO.read(StringIO.StringIO(stdout), "emboss")
+        align = AlignIO.read(StringIO(stdout), "emboss")
         return align
 
 
@@ -383,10 +383,12 @@ if __name__ == '__main__':
                 for y in range(i+1, len(m[0,:])):
                     if i==y:
                         continue
-		    try:
-                    	print ("%s\t%s\t%s" %(m[0,i].split('&&')[1],m[0,y].split('&&')[1],m[i,y]))
+                    try:
+                        print ("%s\t%s\t%s" %(m[0,i].split('&&')[1],m[0,y].split('&&')[1],m[i,y]))
                     except:
-                        print ("%s\t%s\t%s" %(m[0,i],m[0,y],m[i,y]))
+                        print ("%s\t%s\t%s" %(m[0,i].decode("utf-8"),
+                                              m[0,y].decode("utf-8"),
+                                              m[i,y].decode("utf-8")))
                     
         sys.exit()
     

@@ -43,7 +43,7 @@ if __name__ == '__main__':
                 try:
                     while record.features[y].type != "gene":
                         print 'y', y
-                        #if record.features[i+1].type == "CDS" or "RNA" in record.features[i+1].type:
+                        # if record.features[i+1].type == "CDS" or "RNA" in record.features[i+1].type:
                         record.features[y].qualifiers["locus_tag"] = ["%s_%s" % (args.locus,x)]
                         x+=1
                         y+=1
@@ -65,7 +65,7 @@ if __name__ == '__main__':
                     count_CDS += 1
                     try:
                         test = feature.qualifiers['locus_tag']
-                        #print 'locus ok'
+                        # print 'locus ok'
                     except:
                         print '############## no locus:', feature.qualifiers['gene']
                         feature.qualifiers["locus_tag"] = feature.qualifiers['gene']
