@@ -6,17 +6,36 @@ import re
 import parse_newick_tree
 from Bio import Phylo
 
-
-def get_coressp(gbk_file_list, molis_table=None, use_gbk_file_names=False):
+def get_corresp_organism(gbk_file_list):
     name2description = {}
     import os
-    print gbk_file_list
+    print (gbk_file_list)
 
     for file in gbk_file_list:
 
         records = [i for i in SeqIO.parse(file, "genbank")]
         for i, record in enumerate(records):
-            print i, record.name, record.description
+            print (i, record.name, record.description)
+            name = record.name
+            try:
+                name2description[name] = "%s | %s (%s)" % (record.id,
+                                                           record.annotations['organism'],
+                                                           record.annotations['taxonomy'][1])
+            except:
+                name2description[name] = "%s | -" % (record.id)
+
+    return name2description
+
+def get_coressp(gbk_file_list, molis_table=None, use_gbk_file_names=False):
+    name2description = {}
+    import os
+    print (gbk_file_list)
+
+    for file in gbk_file_list:
+
+        records = [i for i in SeqIO.parse(file, "genbank")]
+        for i, record in enumerate(records):
+            print (i, record.name, record.description)
             if not use_gbk_file_names:
                 name = record.name
             else:
@@ -95,7 +114,7 @@ if __name__ == '__main__':
     args = parser.parse_args()
     id2description = get_coressp(args.input_gbk, args.molis_table)
     new_tree = parse_newick_tree.convert_terminal_node_names(args.tree, id2description)
-    print "writing converted tree..."
+    print ("writing converted tree...")
 
     with open("parsnp_renames.nwk",'w') as output_tree:
         Phylo.write(new_tree, output_tree, 'newick')

@@ -259,7 +259,7 @@ def circos_gc_skew(record, windows=1000, shift=0):
         try:
             values = GC_skew(record.seq, windows)
         except:
-            values = GC_skew(record.seq, 2000)
+            values = GC_skew(record.seq, 2001)
         # skip last value
         for i in range(0, len(values)-1):
 
@@ -322,7 +322,12 @@ def circos_cumul_gc_skew(record, windows=1000, shift=0, initial=0):
         try:
             values = GC_skew(record.seq, windows)
         except:
-            values = GC_skew(record.seq, 2000)
+            try:
+                values = GC_skew(record.seq, 2001)
+            except:
+                print(record.seq)
+                import sys
+                sys.exit()
         # skip last value
         acc = initial
         for i in range(0, len(values)-1):
