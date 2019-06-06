@@ -26,7 +26,7 @@ def __main__():
     tmp_size = 0 #-1
     tmp_buf = ''
     at_least_one = 0
-    for line in file(input_filename):
+    for line in open(input_filename, 'r'):
         if not line or line.startswith('#'):
             continue
         if line[0] == '>':
@@ -44,7 +44,7 @@ def __main__():
         sys.stdout.write(tmp_buf.rstrip('\r\n'))
         at_least_one = 1
     if at_least_one == 0:
-        print "There is no sequence that falls within your range."
+        print ("There is no sequence that falls within your range.")
 
 if __name__ == "__main__" : __main__()
 

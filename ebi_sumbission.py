@@ -18,12 +18,12 @@ def taxon_id2taxonomy(taxon_id):
     handle = Entrez.esearch(db="nucleotide", term="txid%s[Organism:exp]" % taxon_id, retmax=1)
     search_record = Entrez.read(handle)
     match_id = search_record['IdList'][0]
-    print 'match!', match_id
+    print ('match!', match_id)
     handle_record = Entrez.efetch(db="nucleotide", id=match_id, rettype="gb", retmode="text")
-    print handle_record
+    print (handle_record)
     records = [i for i in SeqIO.parse(handle_record, "genbank")]
-    print dir(records[0])
-    print records[0].annotations
+    print (dir(records[0]))
+    print (records[0].annotations)
     return [records[0].annotations['source'], records[0].annotations['taxonomy'], records[0].annotations['organism']]
 
 def reformat_gbk(gbk_file, study,
@@ -53,6 +53,11 @@ def reformat_gbk(gbk_file, study,
 
     source, taxonomy, organism = taxon_id2taxonomy(taxon_id)
 
+    print(source)
+    print()
+    print(taxonomy)
+    print()
+
     new_records = []
     from Bio import SeqIO
     import copy
@@ -72,7 +77,7 @@ def reformat_gbk(gbk_file, study,
         for new_record in records:
             start = 0
             end = len(new_record.seq)
-            print dir(new_record)
+            print (dir(new_record))
             for feature in new_record.features:
                 '''
                 if feature.type == 'assembly_gap':
@@ -104,6 +109,12 @@ def reformat_gbk(gbk_file, study,
             ref.journal = publication_journal
             ref.title = publication_title
 
+            '''
+            ref_seq = Refserence()
+            ref.authors = "Trestan Pillonel"
+            ref.journal = "RL   Submitted (09-APRIL-2019) to the INSDC."
+            '''
+            
             #print record
             #print dir(record)
             #print "id", record.id
@@ -121,13 +132,13 @@ def reformat_gbk(gbk_file, study,
 
             if record.features[0].type != 'source':
 
-                print 'NOT SOURCE-------------------'
+                print ('NOT SOURCE-------------------')
                 record.features = [copy.copy(record.features[0])] + record.features
                 record.features[0].qualifiers = {}
                 record.features[0].type = 'source'
                 record.features[0].location = FeatureLocation(0, len(record.seq))
             else:
-                print 'SOURCE!!!!!!!!!!!!!!!!'
+                print ('SOURCE!!!!!!!!!!!!!!!!')
             record.features[0].qualifiers['db_xref'] = ["taxon:%s" % taxon_id]
             record.features[0].qualifiers['mol_type'] = ["genomic DNA"]
             record.features[0].qualifiers['organism'] = ["%s" % organism]
@@ -208,10 +219,10 @@ if __name__ == '__main__':
                              locus_count_start=args.count_start)
 
 
-    print
-    print
+    print()
+    print()
     for record in new_record:
-        print record.annotations['references'][0].location
+        print (record.annotations['references'][0].location)
     out = args.input_gbk.split('.')[0] + '_edit.embl'
     h = open(out, 'w')
     out2 = args.input_gbk.split('.')[0] + '_edit.gbk'

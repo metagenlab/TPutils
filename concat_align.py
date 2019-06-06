@@ -37,14 +37,14 @@ def multiple_alignments2concatenated_alignments(fasta_files, out_name):
 
     for one_fasta in fasta_files:
         start = stop + 1
-        stop = start + len(all_seq_data[one_fasta][all_seq_data[one_fasta].keys()[0]]) - 1
+        stop = start + len(all_seq_data[one_fasta][list(all_seq_data[one_fasta].keys())[0]]) - 1
         start_stop_list.append([start, stop])
         for taxon in taxons:
 
             # check if the considered taxon is present in the record
             if taxon not in all_seq_data[one_fasta]:
                 # if taxon absent, create SeqRecord object "-"*len(alignments): gap of the size of the alignment
-                seq = Seq("-"*len(all_seq_data[one_fasta][all_seq_data[one_fasta].keys()[0]]))
+                seq = Seq("-"*len(all_seq_data[one_fasta][list(all_seq_data[one_fasta].keys())[0]]))
                 all_seq_data[one_fasta][taxon] = SeqRecord(seq, id=taxon)
             if taxon not in concat_data:
                 concat_data[taxon] = all_seq_data[one_fasta][taxon]

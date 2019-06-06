@@ -57,7 +57,11 @@ if __name__ == '__main__':
 
 
     args = parser.parse_args()
-    input_handle = open(args.input_gbk, "rU")
+    if args.input_gbk.endswith('gz'):
+        import gzip
+        input_handle = gzip.open(args.input_gbk, "rt")
+    else:
+        input_handle = open(args.input_gbk, "rU")
     seq_records = list(SeqIO.parse(input_handle, "genbank"))
 
     gbk2fna(seq_records, args.outname)

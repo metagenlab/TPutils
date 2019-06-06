@@ -137,9 +137,9 @@ def pairewise_identity(seq1, seq2):
 
     if aligned_sites == 0:
         # return false if align length = 0
-        return False
+        return False, False
     else:
-        return 100*(identical_sites/float(aligned_sites))
+        return 100*(identical_sites/float(aligned_sites)), aligned_sites
 
     
 def global_align(seq_record1, seq_record2):
@@ -228,7 +228,7 @@ def get_identity_from_2_seqrecord(record, seq1, seq2):
     """
 
     align = global_align(record[seq1], record[seq2])
-    identity = pairewise_identity(align[0].seq, align[1].seq)
+    identity, n_aligned_sites  = pairewise_identity(align[0].seq, align[1].seq)
 
 
 def get_identity_from_combination_list(record, combinations, out_q):
@@ -340,6 +340,7 @@ def pairewise_identity(seq1, seq2):
 def get_identity_matrix_from_multiple_alignment(alignment):
     # [len(alignment)+1, len(alignment)]
     identity_matrix = np.chararray((len(alignment)+1, len(alignment)+1), itemsize=30)
+    matrix_aligned_sites = np.chararray((len(alignment)+1, len(alignment)+1), itemsize=30)
     identity_matrix[0,0] = "-"
     # first column = locus tags
     for x in range(0,len(alignment)):
@@ -347,12 +348,14 @@ def get_identity_matrix_from_multiple_alignment(alignment):
         identity_matrix[0, x+1] = alignment[x].name
 
         for y in range(x, len(alignment)):
-            identity = pairewise_identity(alignment[x], alignment[y])
+            identity, n_aligned_sites = pairewise_identity(alignment[x], alignment[y])
             #print "identity", identity
             identity_matrix[y+1, x+1] = round(identity, 2)
             identity_matrix[x+1, y+1] = round(identity, 2)
+            matrix_aligned_sites[x+1, y+1] = n_aligned_sites
+            matrix_aligned_sites[x+1, y+1] = n_aligned_sites
     #print identity_matrix
-    return identity_matrix
+    return identity_matrix, matrix_aligned_sites
 
 if __name__ == '__main__':
 
@@ -374,7 +377,7 @@ if __name__ == '__main__':
         #print format_alignment(*alns[0])
     if args.alignment is not None:
         align = AlignIO.read(args.alignment, "fasta")
-        m = get_identity_matrix_from_multiple_alignment(align)
+        m, aligned_sites = get_identity_matrix_from_multiple_alignment(align)
         if identity_matrix:
             for i, row in enumerate(m):
                 print ('\t'.join(row))
@@ -386,9 +389,10 @@ if __name__ == '__main__':
                     try:
                         print ("%s\t%s\t%s" %(m[0,i].split('&&')[1],m[0,y].split('&&')[1],m[i,y]))
                     except:
-                        print ("%s\t%s\t%s" %(m[0,i].decode("utf-8"),
-                                              m[0,y].decode("utf-8"),
-                                              m[i,y].decode("utf-8")))
+                        print ("%s\t%s\t%s\t%s" %(m[0,i].decode("utf-8"),
+                                                  m[0,y].decode("utf-8"),
+                                                  m[i,y].decode("utf-8"),
+                                                  aligned_sites[i,y].decode("utf-8") ))
                     
         sys.exit()
     
