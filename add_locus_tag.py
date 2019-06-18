@@ -20,29 +20,29 @@ if __name__ == '__main__':
         for record in  gbk_records:
             x = 1
             for i in range(0, len(record.features)):
-                print "x", x
+                print ("x", x)
 
                 if record.features[i].type == "gene":
-                    print record.features[i].type, record.features[i+1].type
+                    print (record.features[i].type, record.features[i+1].type)
                     #xprint record.features[i].qualifiers
                     record.features[i].qualifiers["locus_tag"]= ["%s_%s" % (args.locus,x)]
                     y = 1
                     try:
                         while record.features[i+y].type != "gene":
-                            print 'y', y
+                            print ('y', y)
                             #if record.features[i+1].type == "CDS" or "RNA" in record.features[i+1].type:
                             record.features[i+y].qualifiers["locus_tag"] = ["%s_%s" % (args.locus,x)]
                             x+=1
                             y+=1
                     except:
-                        print 'n locus', x
+                        print ('n locus', x)
 
                     y = 1
             if x == 1:
                 y = 0
                 try:
                     while record.features[y].type != "gene":
-                        print 'y', y
+                        print ('y', y)
                         # if record.features[i+1].type == "CDS" or "RNA" in record.features[i+1].type:
                         record.features[y].qualifiers["locus_tag"] = ["%s_%s" % (args.locus,x)]
                         x+=1
@@ -67,13 +67,13 @@ if __name__ == '__main__':
                         test = feature.qualifiers['locus_tag']
                         # print 'locus ok'
                     except:
-                        print '############## no locus:', feature.qualifiers['gene']
+                        print ('############## no locus:', feature.qualifiers['gene'])
                         feature.qualifiers["locus_tag"] = feature.qualifiers['gene']
                         count_no_locus += 1
                     #sys.exit()
 
-            print 'Features with updated locus:', count_no_locus
-            print 'Total number of CDS:', count_CDS
+            print ('Features with updated locus:', count_no_locus)
+            print ('Total number of CDS:', count_CDS)
             out_name = args.input.split(".")[0] + "_locus.gbk"
             handle2 = open(out_name, "w")
             SeqIO.write(record, handle2, "genbank")
@@ -82,5 +82,5 @@ if __name__ == '__main__':
         import gbk_check
         for record in gbk_records:
             count_no_locus, count_CDS = gbk_check.count_missing_locus_tags(record)
-            print 'Features without locus:', count_no_locus
-            print 'Total number of CDS:', count_CDS
+            print ('Features without locus:', count_no_locus)
+            print ('Total number of CDS:', count_CDS)
