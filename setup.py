@@ -177,14 +177,12 @@ setup(
     #
     # For example, the following would provide a command called `sample` which
     # executes the function `main` from this package when invoked:
-    entry_points={  # Optional
-        'scripts': [
+    scripts = [
             'bin/gbk2faa.py',
             'bin/gbk2fna.py',
             'bin/gbk2ffn.py',
             'bin/gbk2table.py',
-        ],
-    },
+        ]
 
     # List additional URLs that are relevant to your project as a dict.
     #
