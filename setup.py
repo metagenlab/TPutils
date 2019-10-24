@@ -180,7 +180,7 @@ setup(
     scripts = ['bin/gbk2faa.py',
                'bin/gbk2fna.py',
                'bin/gbk2ffn.py',
-               'bin/gbk2table.py']
+               'bin/gbk2table.py'],
 
     # List additional URLs that are relevant to your project as a dict.
     #
