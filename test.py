@@ -1,4 +1,0 @@
-
-import gbk2faa
-
-
