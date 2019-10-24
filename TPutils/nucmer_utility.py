@@ -22,7 +22,7 @@ def execute_promer(fasta1,
     :return: coords file list, delta file list
     '''
 
-    import shell_command
+    from TPutils import shell_command
     import os
 
     #cmd1 = 'promer --mum -l 5 %s %s' % (fasta1, fasta2)
@@ -94,7 +94,7 @@ def delta_file2start_stop_list(delta_input,
 
 
     import re
-    import shell_command
+    from TPutils import shell_command
 
     print ('contig add', contigs_add)
 
