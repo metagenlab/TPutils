@@ -98,17 +98,13 @@ def delta_file2start_stop_list(delta_input,
     import re
     from TPutils import shell_command
 
-    coords_file_list = []
-
-    print ('contig add', contigs_add)
-
     out_name = delta_input.split('.')[0]
 
     coords_file = 'gaps_%s.coords' % out_name
 
     cmd2 = 'show-coords -T -r -c -L 100 -I %s %s > %s' % (minimum_identity,
                                                           delta_input,
-                                                          delta_file)
+                                                          coords_file)
     print(cmd2)
     a, b, c = shell_command.shell_command(cmd2)
     if c != 0:
