@@ -45,6 +45,7 @@ def execute_promer(fasta1,
                                                                                   minimum_identity,
                                                                                   os.path.basename(one_fasta).split('.')[0],
                                                                                   os.path.basename(one_fasta).split('.')[0])
+                print (cmd2)
                 a, b, c = shell_command.shell_command(cmd2)
                 if c != 0:
                     raise Exception("%s" % b)
@@ -66,7 +67,7 @@ def execute_promer(fasta1,
                                                                                   minimum_identity,
                                                                                   os.path.basename(one_fasta).split('.')[0],
                                                                                   os.path.basename(one_fasta).split('.')[0])
-
+                print (cmd2)
                 a, b, c = shell_command.shell_command(cmd2)
                 if c != 0:
                     raise Exception("%s" % b)
@@ -78,6 +79,7 @@ def execute_promer(fasta1,
             coord_files.append('%s.coords' % os.path.basename(one_fasta).split('.')[0])
 
     return coord_files, delta_files
+
 
 def delta_file2start_stop_list(delta_input,
                                contigs_add,
@@ -96,13 +98,18 @@ def delta_file2start_stop_list(delta_input,
     import re
     from TPutils import shell_command
 
+    coords_file_list = []
+
     print ('contig add', contigs_add)
 
     out_name = delta_input.split('.')[0]
 
-    cmd2 = 'show-coords -T -r -c -L 100 -I %s %s > gaps_%s.coords' % (minimum_identity,
-                                                                      delta_input,
-                                                                      out_name)
+    coords_file = 'gaps_%s.coords' % out_name
+
+    cmd2 = 'show-coords -T -r -c -L 100 -I %s %s > %s' % (minimum_identity,
+                                                          delta_input,
+                                                          delta_file)
+    print(cmd2)
     a, b, c = shell_command.shell_command(cmd2)
     if c != 0:
         print ('nucmer error!!!')
@@ -143,7 +150,7 @@ def delta_file2start_stop_list(delta_input,
             contig2start_stop_list[contig_ref]["stop"].append(stop)
 
 
-    return contig2start_stop_list
+    return contig2start_stop_list, coords_file
 
 
 
