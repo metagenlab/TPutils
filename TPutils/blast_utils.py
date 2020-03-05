@@ -376,7 +376,7 @@ class Blast():
 
         blast_id = self.id_generator(8)
 
-        outpath = os.path.join(self.working_dir, '%s.tab' % blast_id)
+        outpath = os.path.join('/tmp/%s.tab' % blast_id)
         
         blastp_cline = NcbiblastpCommandline(query= self.query,
                                             db=self.database,
