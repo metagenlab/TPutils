@@ -298,10 +298,10 @@ class Blast():
         #print type(query)
 
         if type(query) == list or isinstance(query, SeqRecord.SeqRecord):
-            import StringIO
+            from io import StringIO
             from tempfile import NamedTemporaryFile
-            temp_query = NamedTemporaryFile(delete=False)
-            fastastr = StringIO.StringIO()
+            temp_query = NamedTemporaryFile(delete=False, mode='w')
+            fastastr = StringIO()
             SeqIO.write(query, fastastr, 'fasta')
             temp_query.write(fastastr.getvalue())
             temp_query.flush()
@@ -317,10 +317,10 @@ class Blast():
 
 
         if type(database) == list or isinstance(database, SeqRecord.SeqRecord):
-            import StringIO
+            from io import StringIO
             from tempfile import NamedTemporaryFile
-            temp_db = NamedTemporaryFile(delete=False)
-            fastastrdb = StringIO.StringIO()
+            temp_db = NamedTemporaryFile(delete=False, mode='w')
+            fastastrdb = StringIO()
             SeqIO.write(database, fastastrdb, 'fasta')
             temp_db.write(fastastrdb.getvalue())
             temp_db.flush()
@@ -377,6 +377,7 @@ class Blast():
         blast_id = self.id_generator(8)
 
         outpath = os.path.join(self.working_dir, '%s.tab' % blast_id)
+        
         blastp_cline = NcbiblastpCommandline(query= self.query,
                                             db=self.database,
                                             evalue=0.005,
@@ -407,7 +408,8 @@ class Blast():
 
         blast_id = self.id_generator(8)
 
-        outpath = os.path.join(self.working_dir, '%s.tab' % blast_id)
+        outpath = os.path.join('/tmp/%s.tab' % blast_id)
+        
         blastn_cline = NcbiblastnCommandline(query= self.query,
                                              task="dc-megablast",
                                             db=self.database,
@@ -441,7 +443,8 @@ class Blast():
 
         blast_id = self.id_generator(8)
 
-        outpath = os.path.join(self.working_dir, '%s.tab' % blast_id)
+        outpath = os.path.join('/tmp/%s.tab' % blast_id)
+        
         blastn_cline = NcbitblastxCommandline(query= self.query,
                                             db=self.database,
                                             evalue=evalue,
