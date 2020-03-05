@@ -38,8 +38,8 @@ def get_annotation(accession, biodb):
     locus2COG = {}
     locus2KEGG = {}
 
-    sql1 = 'select locus_tag,t1.COG_id,functon,name from COG.locus_tag2gi_hit_%s t1 ' \
-           ' inner join COG.cog_names_2014 t2 on t1.COG_id=t2.COG_id where accession="%s";' % (biodb, accession)
+    sql1 = 'select locus_tag,t1.COG_id,functon,name from COG_locus_tag2gi_hit t1 ' \
+           ' inner join COG_cog_names_2014 t2 on t1.COG_id=t2.COG_id where accession="%s";' % (biodb, accession)
 
     for row in server.adaptor.execute_and_fetchall(sql1,):
         if row[0] not in locus2COG:
@@ -47,10 +47,10 @@ def get_annotation(accession, biodb):
         else:
             locus2COG[row[0]].append(row[1:])
 
-    sql2 = 'select t1.locus_tag, t3.ko_id,t6.definition,t5.pathway_name,t5.description from biosqldb.orthology_detail_%s t1 ' \
-           ' inner join enzyme.locus2ko_%s t3 on t1.locus_tag=t3.locus_tag ' \
-           ' inner join enzyme.pathway2ko t4 on t3.ko_id=t4.ko_id ' \
-           ' inner join enzyme.kegg_pathway t5 on t4.pathway_id=t5.pathway_id inner join enzyme.ko_annotation t6 on t3.ko_id=t6.ko_id' \
+    sql2 = 'select t1.locus_tag, t3.ko_id,t6.definition,t5.pathway_name,t5.description from orthology_detail t1 ' \
+           ' inner join enzyme_locus2ko t3 on t1.locus_tag=t3.locus_tag ' \
+           ' inner join enzyme_pathway2ko t4 on t3.ko_id=t4.ko_id ' \
+           ' inner join enzyme_kegg_pathway t5 on t4.pathway_id=t5.pathway_id inner join enzyme_ko_annotation t6 on t3.ko_id=t6.ko_id' \
            ' where t1.accession="%s";' % (biodb,
                                                                                                     biodb,
                                                                                                     accession)
