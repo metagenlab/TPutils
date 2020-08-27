@@ -15,7 +15,11 @@ def run_prodigal(fasta_seq, output_name='temp.faa'):
     sdt_out, sdt_err, err = shell_command.shell_command(cmd)
     print (sdt_out)
     print (sdt_err)
-    shell_command.shell_command('sed -i "s/*//g" %s' % output_name)
+    stdout_str, stderr_str, err_code = shell_command.shell_command('sed -i "s/*//g" %s' % output_name)
+    
+    if err_code != 0:
+        raise IOError("Problem formating BLAST database:", stderr_str)
+    
     #print sdt_out, sdt_err, err
     #shell_command.shell_command("seqret -sequence %s -feature -fformat gff -fopenfile temp.gff -osformat genbank -auto -outseq temp.gbk" % fasta_seq)
     #print sdt_out
@@ -104,9 +108,10 @@ class Hmm():
                 #print cmd
                 stout, sterr, code = shell_command.shell_command(cmd) # self.hmmer_score_cutoff,
                 if code != 0:
-                    import sys
-                    sys.stdout.write("\n%s\n%s\n" % (stout, sterr))
-                    sys.exit()
+                    raise IOError("Error", sterr)
+                    #import sys
+                    #sys.stdout.write("\n%s\n%s\n" % (stout, sterr))
+                    #sys.exit()
 
                 parsed_data = self._parse_hmmsearch(temp_file.name)
 
@@ -128,9 +133,10 @@ class Hmm():
                 for database in self.database:
                     stout, sterr, code = shell_command.shell_command(self.hmmer_cmd % (self.hmmer_score_cutoff, temp_file.name, profile, self.database))
                     if code != 0:
-                        import sys
-                        sys.stdout.write("\n%s\n%s\n" % (stout, sterr))
-                        sys.exit()
+                        raise IOError("Error", sterr)
+                        #import sys
+                        #sys.stdout.write("\n%s\n%s\n" % (stout, sterr))
+                        #sys.exit()
 
                     parsed_data = self._parse_hmmsearch(temp_file.name)
 
@@ -339,7 +345,9 @@ class Blast():
         self.working_dir = os.getcwd()
         self.blast_path_var= 'export BLASTDB=/tmp/'
         from TPutils import shell_command
-        shell_command.shell_command(self.blast_path_var)
+        stdout_str, stderr_str, err_code = shell_command.shell_command(self.blast_path_var)
+        if err_code != 0:
+            raise IOError("Error", stderr_str)
 
 
     def id_generator(self, size=6, chars=False): # + string.digits
@@ -358,14 +366,17 @@ class Blast():
         if self.protein:
             #print 'proteins'
             #cmd = 'formatdb -i %s -t %s -o T -p T -n /tmp/%s.temp -b T' % (self.database, new_database, new_database)
-            cmd = 'formatdb -i %s -p T' % (self.database)
+            cmd = 'makeblastdb -in %s -dbtype prot' % (self.database)
             #print cmd
-            shell_command.shell_command(cmd )
+            stdout_str, stderr_str, err_code = shell_command.shell_command(cmd )
         else:
             #print 'nucl'
-            cmd = 'formatdb -i %s -p F' % (self.database)
+            cmd = 'makeblastdb -in %s -dbtype nucl' % (self.database)
             #print cmd
-            shell_command.shell_command(cmd)
+            stdout_str, stderr_str, err_code = shell_command.shell_command(cmd)
+
+        if err_code != 0:
+            raise IOError("Problem formating BLAST database:", stderr_str)
 
         self.database_path = '/tmp/%s.temp' % new_database
 
