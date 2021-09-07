@@ -3,8 +3,8 @@
 
 def run_prodigal(fasta_seq, output_name='temp.faa'):
     from Bio import SeqIO
-    import shell_command
-    import StringIO
+    from TPutils import shell_command
+    from io import StringIO
     from tempfile import NamedTemporaryFile
     # -q quiet
     # -a Write protein translations to the selected file
@@ -15,7 +15,11 @@ def run_prodigal(fasta_seq, output_name='temp.faa'):
     sdt_out, sdt_err, err = shell_command.shell_command(cmd)
     print (sdt_out)
     print (sdt_err)
-    shell_command.shell_command('sed -i "s/*//g" %s' % output_name)
+    stdout_str, stderr_str, err_code = shell_command.shell_command('sed -i "s/*//g" %s' % output_name)
+    
+    if err_code != 0:
+        raise IOError("Problem formating BLAST database:", stderr_str)
+    
     #print sdt_out, sdt_err, err
     #shell_command.shell_command("seqret -sequence %s -feature -fformat gff -fopenfile temp.gff -osformat genbank -auto -outseq temp.gbk" % fasta_seq)
     #print sdt_out
@@ -78,7 +82,7 @@ class Hmm():
 
     def run_hmmer(self, profiles=False):
         from tempfile import NamedTemporaryFile
-        import shell_command
+        from TPutils import shell_command
 
 
         if not profiles:
@@ -104,9 +108,10 @@ class Hmm():
                 #print cmd
                 stout, sterr, code = shell_command.shell_command(cmd) # self.hmmer_score_cutoff,
                 if code != 0:
-                    import sys
-                    sys.stdout.write("\n%s\n%s\n" % (stout, sterr))
-                    sys.exit()
+                    raise IOError("Error", sterr)
+                    #import sys
+                    #sys.stdout.write("\n%s\n%s\n" % (stout, sterr))
+                    #sys.exit()
 
                 parsed_data = self._parse_hmmsearch(temp_file.name)
 
@@ -128,9 +133,10 @@ class Hmm():
                 for database in self.database:
                     stout, sterr, code = shell_command.shell_command(self.hmmer_cmd % (self.hmmer_score_cutoff, temp_file.name, profile, self.database))
                     if code != 0:
-                        import sys
-                        sys.stdout.write("\n%s\n%s\n" % (stout, sterr))
-                        sys.exit()
+                        raise IOError("Error", sterr)
+                        #import sys
+                        #sys.stdout.write("\n%s\n%s\n" % (stout, sterr))
+                        #sys.exit()
 
                     parsed_data = self._parse_hmmsearch(temp_file.name)
 
@@ -298,10 +304,10 @@ class Blast():
         #print type(query)
 
         if type(query) == list or isinstance(query, SeqRecord.SeqRecord):
-            import StringIO
+            from io import StringIO
             from tempfile import NamedTemporaryFile
-            temp_query = NamedTemporaryFile(delete=False)
-            fastastr = StringIO.StringIO()
+            temp_query = NamedTemporaryFile(delete=False, mode='w')
+            fastastr = StringIO()
             SeqIO.write(query, fastastr, 'fasta')
             temp_query.write(fastastr.getvalue())
             temp_query.flush()
@@ -317,10 +323,10 @@ class Blast():
 
 
         if type(database) == list or isinstance(database, SeqRecord.SeqRecord):
-            import StringIO
+            from io import StringIO
             from tempfile import NamedTemporaryFile
-            temp_db = NamedTemporaryFile(delete=False)
-            fastastrdb = StringIO.StringIO()
+            temp_db = NamedTemporaryFile(delete=False, mode='w')
+            fastastrdb = StringIO()
             SeqIO.write(database, fastastrdb, 'fasta')
             temp_db.write(fastastrdb.getvalue())
             temp_db.flush()
@@ -338,8 +344,10 @@ class Blast():
         self.formatdb = formatdb
         self.working_dir = os.getcwd()
         self.blast_path_var= 'export BLASTDB=/tmp/'
-        import shell_command
-        shell_command.shell_command(self.blast_path_var)
+        from TPutils import shell_command
+        stdout_str, stderr_str, err_code = shell_command.shell_command(self.blast_path_var)
+        if err_code != 0:
+            raise IOError("Error", stderr_str)
 
 
     def id_generator(self, size=6, chars=False): # + string.digits
@@ -351,21 +359,24 @@ class Blast():
         return ''.join(random.choice(chars) for _ in range(size))
 
     def format_database(self):
-        import shell_command
+        from TPutils import shell_command
 
         new_database = self.id_generator(8)
 
         if self.protein:
             #print 'proteins'
             #cmd = 'formatdb -i %s -t %s -o T -p T -n /tmp/%s.temp -b T' % (self.database, new_database, new_database)
-            cmd = 'formatdb -i %s -p T' % (self.database)
+            cmd = 'makeblastdb -in %s -dbtype prot' % (self.database)
             #print cmd
-            shell_command.shell_command(cmd )
+            stdout_str, stderr_str, err_code = shell_command.shell_command(cmd )
         else:
             #print 'nucl'
-            cmd = 'formatdb -i %s -p F' % (self.database)
+            cmd = 'makeblastdb -in %s -dbtype nucl' % (self.database)
             #print cmd
-            shell_command.shell_command(cmd)
+            stdout_str, stderr_str, err_code = shell_command.shell_command(cmd)
+
+        if err_code != 0:
+            raise IOError("Problem formating BLAST database:", stderr_str)
 
         self.database_path = '/tmp/%s.temp' % new_database
 
@@ -376,7 +387,8 @@ class Blast():
 
         blast_id = self.id_generator(8)
 
-        outpath = os.path.join(self.working_dir, '%s.tab' % blast_id)
+        outpath = os.path.join('/tmp/%s.tab' % blast_id)
+        
         blastp_cline = NcbiblastpCommandline(query= self.query,
                                             db=self.database,
                                             evalue=0.005,
@@ -407,7 +419,8 @@ class Blast():
 
         blast_id = self.id_generator(8)
 
-        outpath = os.path.join(self.working_dir, '%s.tab' % blast_id)
+        outpath = os.path.join('/tmp/%s.tab' % blast_id)
+        
         blastn_cline = NcbiblastnCommandline(query= self.query,
                                              task="dc-megablast",
                                             db=self.database,
@@ -441,7 +454,8 @@ class Blast():
 
         blast_id = self.id_generator(8)
 
-        outpath = os.path.join(self.working_dir, '%s.tab' % blast_id)
+        outpath = os.path.join('/tmp/%s.tab' % blast_id)
+        
         blastn_cline = NcbitblastxCommandline(query= self.query,
                                             db=self.database,
                                             evalue=evalue,
