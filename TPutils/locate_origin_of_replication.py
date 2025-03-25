@@ -29,8 +29,8 @@ def locate_origin(contig_file, reference_dnaa=False, base_add=517):
     '''
 
     import sys
+    import glob
     from Bio import SeqIO, Seq, SeqRecord
-    from Bio.Alphabet import generic_dna, generic_protein
     from Bio.Blast.Applications import NcbitblastnCommandline
     import shell_command
     from Bio.Blast import NCBIXML
@@ -44,7 +44,7 @@ def locate_origin(contig_file, reference_dnaa=False, base_add=517):
                       'FIQNKVQTQEEFFYTFNELHQNNKQIVISSDRPPKEIAQLEDRLRSRFEWGLIVDITPP'
                       'DYETRMAILQKKIEEEKLDIPPEALNYIANQIQSNIRELEGALTRLLAYSQLLGKPITT'
                       'ELTAEALKDIIQAPKSKKITIQDIQKIVGQYYNVRIEDFSAKKRTKSIAYPRQIAMYLS'
-                      'RELTDFSLPKIGEEFGGRDHTTVIHAHEKISKDLKEDPIFKQEVENLEKEIRNV', generic_protein)
+                      'RELTDFSLPKIGEEFGGRDHTTVIHAHEKISKDLKEDPIFKQEVENLEKEIRNV')
 
         reference_dnaa = SeqRecord.SeqRecord(seq,
                                  id="ADC36215.1",
@@ -53,7 +53,7 @@ def locate_origin(contig_file, reference_dnaa=False, base_add=517):
 
     cmd = 'formatdb -i %s -p F' % contig_file
     out, err, code = shell_command.shell_command(cmd)
-    print out, err, code
+    print (out, err, code)
     if code != 0:
         sys.stdout.write('problem with command: \n %s' % cmd)
     #path = os.path.abspath(contig_file)
@@ -123,9 +123,9 @@ def split_origin(fasta_contigs, contig_name, split_position, base_add=517):
 def reorder_contigs_with_mauve(reference, contigs, output_folder="mauve_ordering"):
     import shell_command
 
-    cmd = 'link=$(readlink -f `which Mauve.jar`); java -Xmx500m -cp $link org.gel.mauve.contigs.ContigOrderer -output %s -ref %s -draft %s' % (output_folder,
-                                                                                                                                               reference,
-                                                                                                                                               contigs)
+    cmd = 'MauveCM org.gel.mauve.contigs.ContigOrderer -output %s -ref %s -draft %s' % (output_folder,
+                                                                                        reference,
+                                                                                        contigs)
     out, err, code = shell_command.shell_command(cmd)
 
     if code != 0:
@@ -138,52 +138,54 @@ if __name__ == '__main__':
     from Bio import SeqIO, SeqRecord, Seq
     import os
     import sys
-    from Bio.Alphabet import generic_dna, generic_protein
+    import glob
 
     parser = argparse.ArgumentParser()
-    parser.add_argument("-i", '--input_contigs', type=str, help="input contig file")
-    parser.add_argument("-g", '--reference_genbank', type=str, help="reference genbank file")
+    parser.add_argument("-i", '--input_contigs', type=str, help="draft contig file (.gbk)")
+    parser.add_argument("-g", '--reference_genbank', type=str, help="reference genbank file (.gbk)")
     parser.add_argument("-r", '--only_reorder', action='store_true', help="only reorder (do not cut any contig)")
 
     args = parser.parse_args()
 
-    genbank_handle = open(args.reference_genbank)
 
-    genbank_record = SeqIO.read(genbank_handle, 'genbank')
-
-    for feature in genbank_record.features:
-        if feature.type == 'CDS':
-
-            try:
-                name=feature.qualifiers['gene'][0]
-            except:
-                name= ''
-            try:
-                description=feature.qualifiers['product'][0]
-            except:
-                description='unknown product'
-            try:
-                id=feature.qualifiers['protein_id'][0]
-
-            except:
-                id='nooid'
-            try:
-                seq = Seq.Seq(feature.qualifiers['translation'][0], generic_protein)
-            except:
-                if 'pseudo' in feature.qualifiers:
-                    print 'first orf is a pseudogene'
-                    continue
-                else:
-                    import sys
-                    print 'no translation for firt orf of the reference, please provide reference with translated sequences'
-                    sys.exit(255)
-
-
-            reference = SeqRecord.SeqRecord(seq, id=id, name=name, description=description)
-
-            reference_start = int(feature.location.start)
-            break
     if not args.only_reorder:
+        genbank_handle = open(args.reference_genbank)
+
+        genbank_record = SeqIO.read(genbank_handle, 'genbank')
+
+        for feature in genbank_record.features:
+            if feature.type == 'CDS':
+
+                try:
+                    name=feature.qualifiers['gene'][0]
+                except:
+                    name= ''
+                try:
+                    description=feature.qualifiers['product'][0]
+                except:
+                    description='unknown product'
+                try:
+                    id=feature.qualifiers['protein_id'][0]
+
+                except:
+                    id='nooid'
+                try:
+                    seq = Seq.Seq(feature.qualifiers['translation'][0])
+                except:
+                    if 'pseudo' in feature.qualifiers:
+                        print ('first orf is a pseudogene')
+                        continue
+                    else:
+                        import sys
+                        print ('no translation for firt orf of the reference, please provide reference with translated sequences')
+                        sys.exit(255)
+
+
+                reference = SeqRecord.SeqRecord(seq, id=id, name=name, description=description)
+
+                reference_start = int(feature.location.start)
+                break
+
         contig, position = locate_origin(args.input_contigs, reference, reference_start)
 
         sys.stdout.write('Spliting fasta using reference %s ...\n' % args.reference_genbank)
@@ -205,3 +207,22 @@ if __name__ == '__main__':
         out_folder = 'mauve_%s' % (args.input_contigs.split('.')[0])
         reorder_contigs_with_mauve(args.reference_genbank, args.input_contigs,output_folder=out_folder)
         sys.stdout.write('Reordered contigs can be found in the folder "mauve_reorder"\n')
+        working_dir = os.getcwd()
+        mauve_dir = os.path.join(working_dir, out_folder)
+
+        mauve_dir_list = glob.glob(mauve_dir+'/*')
+        print (mauve_dir_list)
+        ndir= len(mauve_dir_list)
+
+
+        accession2record = SeqIO.to_dict(SeqIO.parse(open(args.input_contigs), 'genbank'))
+
+        fasta = os.path.join(mauve_dir, f'alignment{ndir}/None.fas') #args.input_contigs
+        with open(fasta, 'r') as f:
+            for n, record in enumerate(SeqIO.parse(f, 'fasta')):
+                if n == 0:
+                    ordered_rtecord = [accession2record[record.id]]
+                else:
+                    ordered_rtecord.append(accession2record[record.id])
+        with open(args.input_contigs.split('.')[0]+'_reordered.gbk', 'w') as f:
+            SeqIO.write(ordered_rtecord, f,'genbank')
