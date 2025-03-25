@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 
 def compare_gbk(file_a, file_b):
 
@@ -15,7 +15,9 @@ def compare_gbk(file_a, file_b):
         for ref_feature in record.features:
             match_count = 0
             if 'pseudo' in ref_feature.qualifiers:
-               continue
+                continue
+            if 'pseudogene' in ref_feature.qualifiers:
+                continue
             if ref_feature.type=='CDS':
                 ref_locus_tag = ref_feature.qualifiers['locus_tag'][0]
                 #print ref_locus_tag
@@ -27,9 +29,15 @@ def compare_gbk(file_a, file_b):
             # count number of identical features (exact same location)
             for n_rec, record_b in enumerate(records_b):
                 for n, new_feature in enumerate(record_b.features):
+                    if 'pseudo' in new_feature.qualifiers:
+                        continue
+                    if 'pseudogene' in new_feature.qualifiers:
+                        continue
                     if new_feature.type == 'CDS':
+                        #print(ref_feature)
+                        #print(new_feature)
                         if ref_feature.qualifiers['translation'] == new_feature.qualifiers['translation']:
-                            print "%s\t%s\t%s\t%s" % (record.id,ref_locus_tag,new_feature.qualifiers['locus_tag'][0], match_count)
+                            print ("%s\t%s\t%s\t%s" % (record.id,ref_locus_tag,new_feature.qualifiers['locus_tag'][0], match_count))
                             identical_CDS +=1
                             match_count+=1
                             #new_record.features[n].qualifiers['locus_tag'] = ref_locus_tag
@@ -37,7 +45,7 @@ def compare_gbk(file_a, file_b):
 
                             break
             if not match:
-		print '%s\t%s\t-' % (record.id, ref_locus_tag)
+                print ('%s\t%s\tNOMATCH' % (record.id, ref_locus_tag))
                         
     with open('corresp.gbk', 'w') as tt:
         SeqIO.write(new_record,tt,'genbank')
@@ -51,4 +59,3 @@ if __name__ == '__main__':
 
 	args = parser.parse_args()	
 	compare_gbk(args.gbk1, args.gbk2)
-

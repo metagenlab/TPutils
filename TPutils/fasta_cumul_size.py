@@ -12,6 +12,7 @@ def get_size(records, size_cutoff=0):
 if __name__ == '__main__':
     import argparse
     from Bio import SeqIO
+    import os
     parser = argparse.ArgumentParser()
     parser.add_argument("-f", '--input_fna', type=str, help="input fna file")
     parser.add_argument("-n", '--contig_size_limit', type=int, help="Min contig size to consider", default=0)
@@ -22,4 +23,5 @@ if __name__ == '__main__':
     fasta_records = list(SeqIO.parse(args.input_fna, "fasta"))
     cumul_size = get_size(fasta_records, args.contig_size_limit)
 
-    print(cumul_size)
+    #print(os.path.basename(args.input_fna), "\t",cumul_size)
+    print(os.path.basename(args.input_fna), "\t",cumul_size)
