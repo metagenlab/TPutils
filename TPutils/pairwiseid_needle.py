@@ -13,10 +13,10 @@
 
 
 from Bio import pairwise2
-from Bio.SubsMat import MatrixInfo as matlist
+#from Bio.SubsMat import MatrixInfo as matlist
 import re
-from Bio.SubsMat import read_text_matrix
-from Bio import SubsMat
+#from Bio.SubsMat import read_text_matrix
+#from Bio import SubsMat
 from Bio.pairwise2 import format_alignment
 import scipy
 import numpy.ma as ma
@@ -29,7 +29,7 @@ from Bio.Seq import Seq
 import sys
 import math
 from Bio import AlignIO
-import StringIO
+from io import StringIO
 from shell_command import shell_command
 from tempfile import NamedTemporaryFile
 from Bio.Emboss.Applications import NeedleCommandline
@@ -64,7 +64,7 @@ from Bio.Emboss.Applications import NeedleCommandline
 def check_alphabet(seq):
     for base in seq:
         if base not in ["A", "T", "G", "C", "a", "t", "g", "c"]:
-            print "strange base:", base 
+            print ("strange base:", base )
 
 
 
@@ -151,9 +151,9 @@ def global_align(seq_record1, seq_record2):
     Check if sequences are nucleotide or amino acids using the _verify_alphabet function from the Bio.Alphabet module.
     """
 
-    from Bio.Alphabet import IUPAC
+    #from Bio.Alphabet import IUPAC
     from Bio.Seq import Seq
-    from Bio.Alphabet import _verify_alphabet
+    #from Bio.Alphabet import _verify_alphabet
     
     #gap_open = -10
     #gap_extend = -0.5
@@ -163,19 +163,35 @@ def global_align(seq_record1, seq_record2):
     seq_record1.seq = seq_record1.seq.upper()
     seq_record2.seq = seq_record2.seq.upper()
    
+    '''
+        temp_ref = NamedTemporaryFile(delete=False, mode='w')
+        fastastr = StringIO()
+
+        SeqIO.write(self.ref_locus_seqrecord, fastastr, 'fasta')
+
+        temp_ref.write(fastastr.getvalue())
+        temp_ref.flush()
+    
+    '''
+   
+   
     seq1_file = NamedTemporaryFile()
-    SeqIO.write(seq_record1, seq1_file, "fasta")
+    fastastr = StringIO()
+    SeqIO.write(seq_record1, fastastr, "fasta")
+    seq1_file.write(fastastr.getvalue())
     seq1_file.flush()        
     seq2_file = NamedTemporaryFile()
-    SeqIO.write(seq_record2, seq2_file, "fasta")
+    fastastr2 = StringIO()
+    SeqIO.write(seq_record2, fastastr2, "fasta")
+    seq2_file.write(fastastr2.getvalue())
     seq2_file.flush()
 
     #print seq_record1.seq.alphabet
     #print seq_record1.seq.alphabet
     
     
-    seq_record1.seq.alphabet = IUPAC.ambiguous_dna
-    seq_record2.seq.alphabet = IUPAC.ambiguous_dna
+    #seq_record1.seq.alphabet = IUPAC.ambiguous_dna
+    #seq_record2.seq.alphabet = IUPAC.ambiguous_dna
 
 
     #print "1", _verify_alphabet(seq_record1.seq)
@@ -198,7 +214,7 @@ def global_align(seq_record1, seq_record2):
                                        aformat="srspair")
         stdout,stderr=needle_cline()
         #print stdout
-        print needle_cline
+        print (needle_cline)
         align = AlignIO.read(StringIO.StringIO(stdout), "emboss")
         return align
 
@@ -206,8 +222,8 @@ def global_align(seq_record1, seq_record2):
  
         
 
-    seq_record1.seq.alphabet = IUPAC.extended_protein
-    seq_record2.seq.alphabet = IUPAC.extended_protein
+    #seq_record1.seq.alphabet = IUPAC.extended_protein
+    #seq_record2.seq.alphabet = IUPAC.extended_protein
     #print seq1
     #print _verify_alphabet(seq1)
 
@@ -222,9 +238,9 @@ def global_align(seq_record1, seq_record2):
         return align
 
     else:
-        print seq_record1.seq
+        print (seq_record1.seq)
         check_alphabet(seq_record1.seq)
-        print seq_record2.seq
+        print (seq_record2.seq)
         check_alphabet(seq_record2.seq)
         raise "unkown alphabet!"
 
@@ -358,8 +374,8 @@ if __name__ == '__main__':
         out_name = args.out_name
 
     if args.multifasta: 
-        handle = open(args.multifasta, "rU")
-        multifasta = [record for record in SeqIO.parse(handle, "fasta")]
+        #handle = open(args.multifasta, "rU")
+        multifasta = [record for record in SeqIO.parse(args.multifasta, "fasta")]
         id_matrix = get_identity_matrix_from_multifasta(multifasta)
         write_id_table(multifasta, id_matrix, out_name)
 
