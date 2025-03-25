@@ -21,12 +21,12 @@ def run_ublast(nb_hit, input, udb_list, evalue, output, out_q):
         '-dbmatched %s_matched.fa'
 
     for udb in udb_list:
-        print udb
+        print (udb)
         one_cmd = cmd % (nb_hit, input, udb, evalue, output, output, output)
-        print one_cmd
+        print (one_cmd)
         out, err, code = shell_command.shell_command(one_cmd)
-        print "ok!"
-        print out
+        print ("ok!")
+        print (out)
         out_q.put(out)
 
 
@@ -66,7 +66,7 @@ def run_multiple_ublast(input, output, udb_list, evalue, nb_hit):
     ublast_result = []
     for i in range(n_cpu):
         ublast_result+=out_q.get()
-    print "join proc"
+    print ("join proc")
     time.sleep(5)
 
 
@@ -85,6 +85,6 @@ if __name__ == '__main__':
 
     args = parser.parse_args()
 
-    print "Performing ublast..."
+    print ("Performing ublast...")
     run_multiple_ublast(args.input, args.output, args.udbs, args.evalue, args.nb_hit)
-    print "UBLAST result now available"
+    print ("UBLAST result now available")

@@ -25,7 +25,6 @@ for seq_record in SeqIO.parse(options.input_file, "fasta"):
        locus=seq_record.id 
     
     out_name= locus.split(".")[0]+".fna"
-    print locus
-    #print repr(seq_record.seq)
-    print len(seq_record)
+    print (locus)
+    print (len(seq_record))
     SeqIO.write(seq_record, out_name, "fasta")

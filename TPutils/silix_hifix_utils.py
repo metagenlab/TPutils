@@ -8,12 +8,12 @@ def blast_all_vs_all(input_fasta):
     cmd1 = 'formatdb -i %s -n seq.db' % input_fasta
 
     a,b,c = shell_command.shell_command(cmd1)
-    print a,b,c
+    print (a,b,c)
 
     cmd2 = 'blastp -db seq.db -query %s -outfmt 6 -num_threads 6 -out blastall.out' % input_fasta
 
     a,b,c = shell_command.shell_command(cmd2)
-    print a,b,c
+    print (a,b,c)
 
     return "blastall.out"
 
@@ -37,7 +37,7 @@ def run_hifix(fasta_file,  silix_nodes, silix_net):
                                                 silix_nodes)
 
     a,b,c = shell_command.shell_command(cmd1)
-    print a,b,c
+    print (a,b,c)
 
 
 def main(fasta_file):

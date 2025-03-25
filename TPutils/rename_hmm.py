@@ -16,10 +16,10 @@ def rename_hmm(hmm_list):
                 if name_r.match(line):
                     try:
                         name = line.rstrip().split(' ')[2]
-                        print 'name', name
+                        print ('name', name)
                         new = 'NAME  %s\n' % hmm.split('.')[0]
                     except:
-                        print 'ECHEC---------------', line
+                        print ('ECHEC---------------', line)
                     o.write(new)
                 else:
                     o.write(line)
@@ -39,7 +39,7 @@ def rename_hmm2(hmm_list):
         for line in data:
             if name_r.match(line):
                 name = line.rstrip().split('|')[1]
-                print 'name', name
+                print ('name', name)
                 new = 'NAME  %s\n' % name #hmm.split('.')[0]
                 o.write(new)
             else:

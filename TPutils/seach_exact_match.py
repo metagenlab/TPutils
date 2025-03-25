@@ -33,11 +33,11 @@ if __name__ == '__main__':
             #print subseq
             #print args.kmer
             if str(subseq) == str(target_seq):
-                print "MATCH:", i, i + len(target_seq), str(target_seq)
+                print ("MATCH:", i, i + len(target_seq), str(target_seq))
             elif str(subseq) ==  str(target_seq.reverse_complement()):
-                print "MATCH:", i, i + len(target_seq), str(target_seq), "(rev. complement)"
+                print ("MATCH:", i, i + len(target_seq), str(target_seq), "(rev. complement)")
             elif str(subseq) ==  str(target_seq.complement()):
-                print "MATCH:", i, i + len(target_seq), str(target_seq), "(complement)"
+                print ("MATCH:", i, i + len(target_seq), str(target_seq), "(complement)")
             else:
                 pass
         

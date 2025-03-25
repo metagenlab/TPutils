@@ -30,19 +30,18 @@ def prokka_reannotation(seq_record_list, compare=False):
     l.write('reference_name\tnew_name\taccession\tref_locus_tag\tnew_locus_tag\tref_n_CDS\tnew_n_CDS\tn_CDS_identical\n')
     #print 'reference_name\tnew_name\taccession\tref_locus_tag\tnew_locus_tag\tref_n_CDS\tnew_n_CDS\tn_CDS_identical'
 
-    print 'reannotation:'
+    print ('reannotation:')
     for i, record in enumerate(seq_record_list):
-        print i, record
+        print (i, record)
 
     reanotated_gbk_list = []
 
     for record in seq_record_list:
-        print '####### one record #########'
-        print record
-        print
-        print '####### features ###########'
-        print record.features
-        print '########## length ##########', len(record)
+        print ('####### one record #########')
+        print (record)
+        print ('####### features ###########')
+        print (record.features)
+        print ('########## length ##########', len(record))
         import shell_command
         assert type(record) == SeqRecord
         #    raise IOError('Wrong input, only scaffolded genomes should be reannotated with this script')
@@ -66,7 +65,7 @@ def prokka_reannotation(seq_record_list, compare=False):
         elif len(organism) == 2:
             locus_tag = "P%s%s" % (organism[0][0:2], organism[1][0])
         else:
-            print record
+            print (record)
 
         # check if the new locus_tag is unique, otherwise add a count
         i = 2
@@ -102,7 +101,7 @@ def prokka_reannotation(seq_record_list, compare=False):
 
 
         out, err, n = shell_command.shell_command(cmd)
-        print out
+        print (out)
 
         reanotated_gbk = SeqIO.read(prokka_genbank, "genbank")
 
@@ -149,7 +148,7 @@ def prokka_annotation_transfer(genbank_file, new_fna_file):
     all_locus = []
     l = open('reannotation_prokka_log.txt', 'w')
     l.write('reference_name\tnew_name\taccession\tref_locus_tag\tnew_locus_tag\tref_n_CDS\tnew_n_CDS\tn_CDS_identical\n')
-    print 'reference_name\tnew_name\taccession\tref_locus_tag\tnew_locus_tag\tref_n_CDS\tnew_n_CDS\tn_CDS_identical'
+    print ('reference_name\tnew_name\taccession\tref_locus_tag\tnew_locus_tag\tref_n_CDS\tnew_n_CDS\tn_CDS_identical')
 
 
     from Bio import SeqIO

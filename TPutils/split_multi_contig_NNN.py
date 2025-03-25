@@ -14,7 +14,7 @@ parser.add_option("-i", "--input",dest="input_file",action="store", type="string
 
 (options, args) = parser.parse_args()
 
-print options.input_file
+print (options.input_file)
 
 
 out_name = options.input_file.split('.')[0] + '_NNN.fna'
@@ -25,7 +25,7 @@ for seq_record in SeqIO.parse(options.input_file, "fasta"):
 
     contigs = str(seq_record.seq).split('N'*200)
 
-    print 'n contigs', len(contigs)
+    print ('n contigs', len(contigs))
     
     for i, contig in enumerate(contigs):
         new.append(SeqRecord(Seq(contig,

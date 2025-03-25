@@ -58,7 +58,7 @@ def parse_blast_outfmt6(*blast_result_files):
 def blast_dico2n_blast_hits(blast_dico):
     accession2n_blast_hits = {}
     for n, accession in enumerate(blast_dico.keys()):
-        print accession, n
+        print (accession, n)
         accession2n_blast_hits[accession] = len(blast_dico[accession])
     return accession2n_blast_hits
 
@@ -105,7 +105,7 @@ def blast_dico2taxonomy_info(blast_dico):
 
     accession2hits_classification = {}
     for n, accession in enumerate(blast_dico.keys()):
-        print n, accession
+        print (n, accession)
         accession2hits_classification[accession] = {}
         all_taxon_ids = []
         for n, one_hit_accession in enumerate(blast_dico[accession].keys()):
@@ -113,7 +113,7 @@ def blast_dico2taxonomy_info(blast_dico):
             all_taxon_ids+=taxon_ids
 
 
-        print "ids:", all_taxon_ids
+        print ("ids:", all_taxon_ids)
 
         taxon_id2classification = sequence_id2scientific_classification.taxon_id2scientific_classification(all_taxon_ids)
 
@@ -171,12 +171,12 @@ def get_complete_classification(taxon, id2parent, taxid2rank, id2scientific, tar
     for one_taxon in taxons:
 
         rank = taxid2rank[one_taxon]
-        print n, "Taxon rank:", rank
-        print n, "Name", id2scientific[one_taxon]
+        print (n, "Taxon rank:", rank)
+        print (n, "Name", id2scientific[one_taxon])
 
 
         target_ids = parseTaxonomy.find_rank_recursive(one_taxon, target_rank, id2parent, taxid2rank)
-        print n, "target IDs", target_ids
+        print (n, "target IDs", target_ids)
         n+=1
 
 
@@ -236,7 +236,7 @@ def investigate_classification(blast_dico, classification_dico):
                         else:
                             order_count[accession]['no rank'] += 1
                     except TypeError:
-                        print "NA"
+                        print ("NA")
             # si superkingdom pas disponible, ajouter no rank
             except:
 
@@ -282,8 +282,8 @@ if __name__ == '__main__':
 
     classif, sum_order_count, chlamydiales_count, non_chlamydiales_count = investigate_classification(all_blast_results, taxid2classification)
 
-    print chlamydiales_count
-    print non_chlamydiales_count
+    print (chlamydiales_count)
+    print (non_chlamydiales_count)
     '''
     for accession in classif:
         for hit in classif[accession]:
@@ -293,7 +293,7 @@ if __name__ == '__main__':
 
     if args.get_all_hit_order_classif:
         for n, order in enumerate(sum_order_count):
-            print '%s\t%s\t%s' %(n, order, sum_order_count[order])
+            print ('%s\t%s\t%s' %(n, order, sum_order_count[order]))
 
 
 

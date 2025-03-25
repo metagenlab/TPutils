@@ -20,7 +20,7 @@ def get_phast(accession):
             if re.search(pattern, page):
                 ready = True
             else:
-                print "not ready"
+                print ("not ready")
                 time.sleep(2)
 
     except urllib2.HTTPError:
@@ -35,7 +35,7 @@ def get_phast(accession):
             if re.search(pattern, page):
                 ready = True
             else:
-                print "not ready"
+                print ("not ready")
                 time.sleep(2)
 
     file_1 = 'http://phast.wishartlab.com/tmp/%s/summary.txt' % accession
@@ -102,9 +102,9 @@ def format_phast_summary(dico):
              'SPECIFIC_KEYWORD\t' \
              'TOTAL_PROTEIN_NUM\t' \
              'ATT_SITE_SHOWUP\t'
-    print header
+    print (header)
     for accession in dico:
-        print accession
+        print (accession)
         for n_phage in dico[accession]:
             #print n_phage
             phage_data = dico[accession][n_phage]
@@ -132,7 +132,7 @@ def format_phast_summary(dico):
                 phage_data['SPECIFIC_KEYWORD'],
                 phage_data['TOTAL_PROTEIN_NUM'],
                 phage_data['ATT_SITE_SHOWUP'])
-                print data
+                print (data)
             except:
                 #print "fai!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
                 data = '%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t' % (phage_data['genome'],
@@ -155,7 +155,7 @@ def format_phast_summary(dico):
                 phage_data['SPECIFIC_KEYWORD'],
                 phage_data['TOTAL_PROTEIN_NUM'],
                 phage_data['ATT_SITE_SHOWUP'])
-                print data
+                print (data)
 
 
 '''

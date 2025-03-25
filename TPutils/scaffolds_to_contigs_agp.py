@@ -82,11 +82,11 @@ def contigs_to_list (input_file) :
 		for i in range (len(l_tmp)) :
 			L0.append(len(l_tmp[i]) + 1)	#+1 to ajust position
 		
-		print "Scaffold "+str(scaf_iterator)+ " : split in "+ str(len(cont)) + " contigs"
+		print ("Scaffold "+str(scaf_iterator)+ " : split in "+ str(len(cont)) + " contigs")
 
 		scaf_iterator += 1
 		
-	print "------------\nNumber of contigs (>1xN):", len(L0)+1, "+", scaf_iterator-2,"contigs-scaffolds"
+	print ("------------\nNumber of contigs (>1xN):", len(L0)+1, "+", scaf_iterator-2,"contigs-scaffolds")
 		
 	return L, L0
 	
@@ -210,7 +210,7 @@ def fasta_contigs_to_embl_format (input_file, output_embl):
 	
 	for record in SeqIO.parse(open(input_file), "fasta") :
 		
-		 print record
+		 print (record)
 		 
 		 
 	'''	 
@@ -223,7 +223,7 @@ def fasta_contigs_to_embl_format (input_file, output_embl):
 def gb_to_embl (gb_file, embl_file):
 	
 	count = SeqIO.convert(gb_file, "genbank", embl_file, "embl")
-	print "Converted %i records" % count
+	print ("Converted %i records" % count)
 
 #gb_to_embl(path+"/Klebsiella.gbk", path+"/Klebsiella.embl")
 

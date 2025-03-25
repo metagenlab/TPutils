@@ -8,7 +8,7 @@ def multi_delete(index_list, list_):
     indexes = sorted(index_list, reverse=True)
     for i, index in enumerate(indexes):
         if i%10000 == 0:
-            print "%s%%, %s" % (round((float(i)/len(indexes))*100,2), str(datetime.now()))
+            print ("%s%%, %s" % (round((float(i)/len(indexes))*100,2), str(datetime.now())))
         del list_[i]
     return list_
 '''
@@ -17,7 +17,7 @@ def multi_delete(indexes, list_):
     indexes = sorted(indexes, reverse=True)
     for i, index in enumerate(indexes):
         if i%10000 == 0:
-            print "%s%%, %s" % (round((float(i)/len(indexes))*100,2), str(datetime.now()))
+            print ("%s%%, %s" % (round((float(i)/len(indexes))*100,2), str(datetime.now())))
         del list_[index]
     return list_
 
@@ -30,7 +30,7 @@ def compare_sequences(seq_list, threshold=0):
     remove_list = []
     for i in range(0, align_length):
         if i%10000 == 0:
-            print "%s %%" % round((float(i)/align_length)*100,2) 
+            print ("%s %%" % round((float(i)/align_length)*100,2) )
         missing_count = 0
         for seq in seq_list:
             if seq[i].lower() == 'n':
@@ -49,11 +49,11 @@ def clean_align(input_records):
     from Bio.Alphabet import IUPAC    
     sequences = [list(i.seq) for i in input_records]
     columns_to_remove = compare_sequences(sequences, 3)
-    print 'removing %s columns from alignment of length %s (%s%%)' % (len(columns_to_remove),
+    print ('removing %s columns from alignment of length %s (%s%%)' % (len(columns_to_remove),
                                                                       len(sequences[0]),
-                                                                      round(float(len(columns_to_remove))/len(sequences[0])*100, 2))
+                                                                      round(float(len(columns_to_remove))/len(sequences[0])*100, 2)))
     for i, record in enumerate(input_records):
-        print i
+        print (i)
         new_seq = Seq(''.join(multi_delete(columns_to_remove, sequences[i])), IUPAC.ambiguous_dna)
         input_records[i].seq = new_seq
     output_handle = open("test.fa", "w")    
